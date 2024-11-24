@@ -7,7 +7,7 @@
 
 import SwiftUI
 import CoreData
-
+ 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -19,10 +19,28 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Image(systemName: "globe")
+            Image(systemName: "apple.terminal")
                 .imageScale(.large)
                 .foregroundColor(.gray)
+            
+            HStack {
+                Image(systemName: "character.book.closed.fill.ja")
+                    .imageScale(.large)
+                    .foregroundColor(.green)
+                    
+                Text("Inside the HStack!")
+                    .font(.headline)
+                    .foregroundColor(.blue)
+                
+            }
+            
             Text("My Dad is Awesome")
+                .font(.headline)
+                .foregroundColor(.red)
+        
+            Image(systemName: "apple.terminal.fill")
+                .imageScale(.large)
+                .foregroundColor(.gray)
         }
         
     }

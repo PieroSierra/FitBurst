@@ -1,9 +1,9 @@
-//
-//  FitBurstApp.swift
-//  FitBurst
-//
-//  Created by Nikola Sierra on 24/11/2024.
-//
+///
+///  FitBurstApp.swift
+///  FitBurst
+///
+///  Created by Nikola Sierra on 24/11/2024.
+///
 
 import SwiftUI
 
