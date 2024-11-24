@@ -22,6 +22,7 @@ struct ContentView: View {
             Image(systemName: "apple.terminal")
                 .imageScale(.large)
                 .foregroundColor(.gray)
+                .padding()
             
             HStack {
                 Image(systemName: "character.book.closed.fill.ja")
@@ -32,16 +33,20 @@ struct ContentView: View {
                     .font(.headline)
                     .foregroundColor(.blue)
                 
-            }
+            }.padding()
             
             Text("My Dad is Awesome")
                 .font(.headline)
                 .foregroundColor(.red)
+                .padding()
         
             Image(systemName: "apple.terminal.fill")
                 .imageScale(.large)
                 .foregroundColor(.gray)
+                .padding()
         }
+        .background(Color.blue.opacity(0.4))
+        .clipShape(RoundedRectangle(cornerRadius:15))
         
     }
 }
