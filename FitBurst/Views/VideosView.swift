@@ -13,6 +13,8 @@ struct VideosView: View {
             Image(systemName: "video")
             Text("Videos")            
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.pinkBrandColor)
     }
 }
 
