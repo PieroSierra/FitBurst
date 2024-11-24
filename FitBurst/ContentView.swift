@@ -18,37 +18,62 @@ struct ContentView: View {
     private var items: FetchedResults<Item>*/
 
     var body: some View {
-        VStack {
-            Image(systemName: "apple.terminal")
-                .imageScale(.large)
-                .foregroundColor(.gray)
-                .padding()
-            
-            HStack {
-                Image(systemName: "character.book.closed.fill.ja")
-                    .imageScale(.large)
-                    .foregroundColor(.green)
-                    
-                Text("Inside the HStack!")
-                    .font(.headline)
-                    .foregroundColor(.blue)
-                
-            }.padding()
-            
-            Text("My Dad is Awesome")
-                .font(.headline)
-                .foregroundColor(.red)
-                .padding()
-        
-            Image(systemName: "apple.terminal.fill")
-                .imageScale(.large)
-                .foregroundColor(.gray)
-                .padding()
-        }
-        .background(Color.blue.opacity(0.4))
-        .clipShape(RoundedRectangle(cornerRadius:15))
-        
+        MainTabView()
     }
+}
+
+struct MainTabView: View {
+    @State private var selectedTab: Tab = Tab.home
+    @State private var previousTab: Tab = Tab.home
+    
+    enum Tab: String, CaseIterable {
+        case home = "Home"
+        case workouts = "Workouts"
+        case videos = "Videos"
+        case trophies = "Trophies"
+        case settings = "Settings"
+    }
+    
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            HomeView()
+                .tag(Tab.home)
+                .tabItem{
+                    Label("Home", systemImage: "house")
+                }
+            WorkoutsView()
+                .tag(Tab.workouts)
+                .tabItem{
+                    Label("Workouts", systemImage: "dumbbell.fill")
+                }
+            VideosView()
+                .tag(Tab.videos)
+                .tabItem{
+                    Label("Videos", systemImage: "play.rectangle.fill")
+                }
+            TrophyView()
+                .tag(Tab.trophies)
+                .tabItem{
+                    Label("Trophy", systemImage: "medal.fill")
+                }
+            SettingsView()
+                .tag(Tab.settings)
+                .tabItem{
+                    Label("Settings", systemImage: "person.crop.circle.fill")
+                }
+            
+        }
+        .onChange(of: selectedTab) {
+            if selectedTab == previousTab {
+                NotificationCenter.default.post(name: .scrollToTop, object: nil)
+            }
+            previousTab = selectedTab
+        }
+    }
+}
+
+extension Notification.Name {
+    static let scrollToTop = Notification.Name("scrollToTop")
 }
 
 
