@@ -2,7 +2,7 @@
 //  FitBurstApp.swift
 //  FitBurst
 //
-//  Created by Piero Sierra on 24/11/2024.
+//  Created by Nikola Sierra on 24/11/2024.
 //
 
 import SwiftUI
