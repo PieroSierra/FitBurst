@@ -22,7 +22,7 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundColor(.gray)
-            Text("Hello World")
+            Text("My Dad is Awesome")
         }
         
     }
