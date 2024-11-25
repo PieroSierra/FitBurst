@@ -12,23 +12,21 @@ struct HomeView: View {
     
     var body: some View {
         VStack {
-            Text("FitBurst")
-            
-            Image("LogoSqClear")
-                .resizable()
-                .frame(width:200, height:200)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-
-            Button (action: {
-                // insert action here
-            }) {
-                HStack {
-                    Image(systemName: "dumbbell")
-                    Text("Record Workout")
-                }
-            }.buttonStyle(GrowingButtonStyle())
-            
-           // GlowGradientButton(buttonText: "Record Workout")
+            Text("FitBurst").font(.title)
+                Image("LogoSqClear")
+                    .resizable()
+                    .frame(width:200, height:200)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                
+                Button (action: {
+                    // insert action here
+                }) {
+                    HStack {
+                        Image(systemName: "dumbbell")
+                        Text("Record Workout")
+                    }
+                }.buttonStyle(GrowingButtonStyle())
+                
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.greenBrandColor)

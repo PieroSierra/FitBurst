@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import WebKit
 
 /// Define custom colors
 extension Color {
@@ -110,58 +111,16 @@ struct GrowingButtonStyle: ButtonStyle {
 }
 
 
-
-struct GlowGradientButton: View {
-    // Define gradient colors for the button
-    let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
-    var buttonText: String
+struct VideoView: UIViewRepresentable {
+    let videoID: String
     
-    // State variables to control animation and press state
-    @State var isAnimating = false
-    @State var isPressed = false
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
     
-    var body: some View {
-        ZStack{
-            // Background of the button with stroke, blur, and offset effects
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(AngularGradient(gradient: gradientColors, center: .center, angle: .degrees(isAnimating ? 360 : 0)), lineWidth: 14)
-                .blur(radius: 20)
-                .offset(y: 10)
-                .frame(width: 220, height: 50)
-            
-            // Text label for the button
-            Text(buttonText)
-                .font(.system(size: 18))
-                .frame(width: 220, height: 50)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 30))
-                .foregroundStyle(.blue)
-                .overlay(
-                    // Overlay to create glow effect
-                    
-                    RoundedRectangle(cornerRadius: 30)
-                        .stroke(AngularGradient(gradient: gradientColors, center: .center, angle: .degrees(isAnimating ? 360 : 0)), lineWidth: 4)
-                        .overlay(
-                            // Inner glow effect
-                            RoundedRectangle(cornerRadius: 30)
-                                .stroke(lineWidth: 4)
-                                .foregroundStyle(LinearGradient(gradient: Gradient(colors: [.greenBrandColor, .greenBrandColor, .clear]), startPoint: .top, endPoint: .bottom))
-                        )
-                )
-        }
-        // Scale effect when pressed
-        .scaleEffect(isPressed ? 0.95 : 1)
-        .animation(.easeInOut(duration: 0.2), value: isPressed)
-        .onAppear() {
-            // Animation to rotate gradient colors infinitely
-            withAnimation(.linear(duration: 5).repeatForever(autoreverses: true)) {
-                isAnimating = true
-            }
-        }
-        // Gesture to detect button press
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged({_ in isPressed = true})
-                .onEnded({_ in isPressed = false})
-        )
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        guard let youtubeURL = URL(string: "https://www.youtube.com/embed/\(videoID)") else { return }
+        uiView.scrollView.isScrollEnabled = false
+        uiView.load(URLRequest(url: youtubeURL))
     }
 }

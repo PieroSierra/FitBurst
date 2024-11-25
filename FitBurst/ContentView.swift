@@ -55,7 +55,7 @@ struct MainTabView: View {
                 TrophyView()
                     .tag(Tab.trophies)
                     .tabItem{
-                        Label("Trophy", systemImage: "medal.fill")
+                        Label("Trophies", systemImage: "medal.fill")
                     }
                 SettingsView()
                     .tag(Tab.settings)
@@ -64,9 +64,9 @@ struct MainTabView: View {
                     }
             }
             .toolbarBackground(.visible, for: .tabBar)
-            .toolbarBackground(Color.darkGreenBrandColor.mix(with: .black, by: 0.1), for: .tabBar)
+            .toolbarBackground(Color.darkGreenBrandColor.mix(with: .black, by: 0.1).opacity(0.5), for: .tabBar)
             .toolbarColorScheme(.dark, for: .tabBar)
-            .background(.thinMaterial)
+         //  .background(.ultraThinMaterial)
         }
         .onChange(of: selectedTab) {
             if selectedTab == previousTab {
