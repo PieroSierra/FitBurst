@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct HomeView: View {
+    let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
+    
     var body: some View {
         VStack {
             Text("FitBurst")
-                .font(.system(size: 28))
-                .bold()
-            Image("LogoSq")
+            
+            Image("LogoSqClear")
                 .resizable()
                 .frame(width:200, height:200)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -25,12 +26,9 @@ struct HomeView: View {
                     Image(systemName: "dumbbell")
                     Text("Record Workout")
                 }
-                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                .background(Color.white.opacity(0.6))
-                .foregroundStyle(.blue)
-                .clipShape(Capsule())
-            }
-
+            }.buttonStyle(GrowingButtonStyle())
+            
+           // GlowGradientButton(buttonText: "Record Workout")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.greenBrandColor)

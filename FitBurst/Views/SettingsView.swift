@@ -13,7 +13,7 @@ struct SettingsView: View {
             Text("Settings")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.blueBrandColor)
+        .background(Color.greenBrandColor)
     }
 }
 

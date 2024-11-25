@@ -14,7 +14,7 @@ struct VideosView: View {
             Text("Videos")            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.pinkBrandColor)
+        .background(Color.greenBrandColor)
     }
 }
 

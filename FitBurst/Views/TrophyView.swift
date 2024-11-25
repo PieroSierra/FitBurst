@@ -13,7 +13,7 @@ struct TrophyView: View {
             Text("Trophies")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.purpleBrandColor)
+        .background(Color.greenBrandColor)
     }
 }
 

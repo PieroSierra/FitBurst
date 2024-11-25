@@ -29,7 +29,7 @@ struct WorkoutsView: View {
             .padding(.vertical, 100)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.orangeBrandColor)
+        .background(Color.greenBrandColor)
     }
 }
 

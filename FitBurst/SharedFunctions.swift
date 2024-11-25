@@ -16,10 +16,11 @@ extension Color {
     static let pinkAccentColor: Color = Color(hex: 0xff41ff)
     static let blueAccentColor: Color = Color(hex: 0x01b3f7)
     static let greenBrandColor: Color = Color(hex: 0xa6d1b9)
-    static let purpleBrandColor: Color = Color(hex: 0xbec5e2)
+    static let blueBrandColor: Color = Color(hex: 0xbec5e2)
     static let pinkBrandColor: Color = Color(hex: 0xd2bee2)
     static let orangeBrandColor: Color = Color(hex: 0xe2d3be)
-    static let blueBrandColor: Color = Color(hex: 0x95cadf)
+    static let purpleBrandColor: Color = Color(hex: 0x95cadf)
+    static let darkGreenBrandColor: Color = Color(hex: 0x6ba584)
 }
 
 /// HEX color code extension
@@ -84,15 +85,83 @@ enum SortOrder {
     case ascending, descending
 }
 
+
 /// Growing button style (grows when pressed)
-struct GrowingButton: ButtonStyle {
+struct GrowingButtonStyle: ButtonStyle {
+    @State private var scale: CGFloat = 0.6  // Start with a smaller scale for pop-in effect
+    
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-            .background(Color.white.opacity(0.2))
+            .font(.headline)
+            .fontWeight(.semibold)
+            .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
+            .background(Color.white)
             .foregroundStyle(.blue)
-            .scaleEffect(configuration.isPressed ? 1.2 : 1)
-            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
             .clipShape(Capsule())
+            .scaleEffect(configuration.isPressed ? 0.9 : scale)
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+            .animation(.easeInOut, value: configuration.isPressed)
+            .onAppear {
+                scale = 0.6
+                withAnimation(.bouncy) { scale = 1.15 }
+                withAnimation(.bouncy.delay(0.25)) { scale = 1 }
+            }
+    }
+}
+
+
+
+struct GlowGradientButton: View {
+    // Define gradient colors for the button
+    let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
+    var buttonText: String
+    
+    // State variables to control animation and press state
+    @State var isAnimating = false
+    @State var isPressed = false
+    
+    var body: some View {
+        ZStack{
+            // Background of the button with stroke, blur, and offset effects
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(AngularGradient(gradient: gradientColors, center: .center, angle: .degrees(isAnimating ? 360 : 0)), lineWidth: 14)
+                .blur(radius: 20)
+                .offset(y: 10)
+                .frame(width: 220, height: 50)
+            
+            // Text label for the button
+            Text(buttonText)
+                .font(.system(size: 18))
+                .frame(width: 220, height: 50)
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 30))
+                .foregroundStyle(.blue)
+                .overlay(
+                    // Overlay to create glow effect
+                    
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(AngularGradient(gradient: gradientColors, center: .center, angle: .degrees(isAnimating ? 360 : 0)), lineWidth: 4)
+                        .overlay(
+                            // Inner glow effect
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(lineWidth: 4)
+                                .foregroundStyle(LinearGradient(gradient: Gradient(colors: [.greenBrandColor, .greenBrandColor, .clear]), startPoint: .top, endPoint: .bottom))
+                        )
+                )
+        }
+        // Scale effect when pressed
+        .scaleEffect(isPressed ? 0.95 : 1)
+        .animation(.easeInOut(duration: 0.2), value: isPressed)
+        .onAppear() {
+            // Animation to rotate gradient colors infinitely
+            withAnimation(.linear(duration: 5).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
+        // Gesture to detect button press
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged({_ in isPressed = true})
+                .onEnded({_ in isPressed = false})
+        )
     }
 }
