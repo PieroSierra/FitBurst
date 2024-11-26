@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
+		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */,
+				C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			name = FitBurst;
 			packageProductDependencies = (
 				C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */,
+				C49FC39C2CF638FF00F4006B /* FSCalendar */,
 			);
 			productName = FitBurst;
 			productReference = 4386609A2CF322B300CA5D62 /* FitBurst.app */;
@@ -102,6 +105,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
+				C49FC39B2CF638FF00F4006B /* XCRemoteSwiftPackageReference "FSCalendar" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4386609B2CF322B300CA5D62 /* Products */;
@@ -347,6 +351,14 @@
 				minimumVersion = 1.9.0;
 			};
 		};
+		C49FC39B2CF638FF00F4006B /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WenchaoD/FSCalendar";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -354,6 +366,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
 			productName = YouTubePlayerKit;
+		};
+		C49FC39C2CF638FF00F4006B /* FSCalendar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C49FC39B2CF638FF00F4006B /* XCRemoteSwiftPackageReference "FSCalendar" */;
+			productName = FSCalendar;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
