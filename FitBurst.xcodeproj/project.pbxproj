@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		4386609A2CF322B300CA5D62 /* FitBurst.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBurst.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = FitBurst;
 			packageProductDependencies = (
+				C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */,
 			);
 			productName = FitBurst;
 			productReference = 4386609A2CF322B300CA5D62 /* FitBurst.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 438660912CF322B300CA5D62;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4386609B2CF322B300CA5D62 /* Products */;
 			projectDirPath = "";
@@ -324,6 +333,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
+			productName = YouTubePlayerKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 438660922CF322B300CA5D62 /* Project object */;
 }
