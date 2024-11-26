@@ -9,7 +9,11 @@ import SwiftUI
 
 struct TrophyView: View {
     var body: some View {
-        Text("Trophies")
+        VStack {
+            Text("Trophies")
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.greenBrandColor)
     }
 }
 

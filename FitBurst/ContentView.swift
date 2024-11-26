@@ -36,32 +36,37 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView()
-                .tag(Tab.home)
-                .tabItem{
-                    Label("Home", systemImage: "house")
-                }
-            WorkoutsView()
-                .tag(Tab.workouts)
-                .tabItem{
-                    Label("Workouts", systemImage: "dumbbell.fill")
-                }
-            VideosView()
-                .tag(Tab.videos)
-                .tabItem{
-                    Label("Videos", systemImage: "play.rectangle.fill")
-                }
-            TrophyView()
-                .tag(Tab.trophies)
-                .tabItem{
-                    Label("Trophy", systemImage: "medal.fill")
-                }
-            SettingsView()
-                .tag(Tab.settings)
-                .tabItem{
-                    Label("Settings", systemImage: "person.crop.circle.fill")
-                }
-            
+            Group {
+                HomeView()
+                    .tag(Tab.home)
+                    .tabItem{
+                        Label("Home", systemImage: "house")
+                    }
+                WorkoutsView()
+                    .tag(Tab.workouts)
+                    .tabItem{
+                        Label("Workouts", systemImage: "dumbbell.fill")
+                    }
+                VideosView()
+                    .tag(Tab.videos)
+                    .tabItem{
+                        Label("Videos", systemImage: "play.rectangle.fill")
+                    }
+                TrophyView()
+                    .tag(Tab.trophies)
+                    .tabItem{
+                        Label("Trophies", systemImage: "medal.fill")
+                    }
+                SettingsView()
+                    .tag(Tab.settings)
+                    .tabItem{
+                        Label("Settings", systemImage: "person.crop.circle.fill")
+                    }
+            }
+            .toolbarBackground(.visible, for: .tabBar)
+            .toolbarBackground(Color.darkGreenBrandColor.mix(with: .black, by: 0.1).opacity(0.5), for: .tabBar)
+            .toolbarColorScheme(.dark, for: .tabBar)
+         //  .background(.ultraThinMaterial)
         }
         .onChange(of: selectedTab) {
             if selectedTab == previousTab {

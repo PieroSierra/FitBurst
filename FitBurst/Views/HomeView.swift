@@ -8,8 +8,28 @@
 import SwiftUI
 
 struct HomeView: View {
+    let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
+    
     var body: some View {
-        Text("Home")
+        VStack {
+            Text("FitBurst").font(.title)
+                Image("LogoSqClear")
+                    .resizable()
+                    .frame(width:200, height:200)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                
+                Button (action: {
+                    // insert action here
+                }) {
+                    HStack {
+                        Image(systemName: "dumbbell")
+                        Text("Record Workout")
+                    }
+                }.buttonStyle(GrowingButtonStyle())
+                
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.greenBrandColor)
     }
 }
 
