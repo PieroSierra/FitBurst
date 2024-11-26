@@ -67,6 +67,7 @@ struct MainTabView: View {
             .toolbarBackground(Color.darkGreenBrandColor.mix(with: .black, by: 0.1).opacity(0.5), for: .tabBar)
             .toolbarColorScheme(.dark, for: .tabBar)
          //  .background(.ultraThinMaterial)
+            
         }
         .onChange(of: selectedTab) {
             if selectedTab == previousTab {
