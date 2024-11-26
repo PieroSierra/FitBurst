@@ -9,7 +9,7 @@ import SwiftUI
 
 struct FirstRunView: View {
     var body: some View {
-        Text("First Run")
+        Text("First Run!")
     }
 }
 
