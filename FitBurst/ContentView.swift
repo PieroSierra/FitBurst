@@ -52,7 +52,7 @@ struct MainTabView: View {
                     .tabItem{
                         Label("Videos", systemImage: "play.rectangle.fill")
                     }
-                TrophyView()
+                TrophyPageView()
                     .tag(Tab.trophies)
                     .tabItem{
                         Label("Trophies", systemImage: "medal.fill")

@@ -15,8 +15,10 @@ struct VideosView: View {
             HStack {
                 Image(systemName: "video")
                     .imageScale(.large)
+                
                 Text("Videos")
                     .font(.title)
+                    .bold()
             }
             Picker("Select Category", selection: $selectedSegment) {
                 Text("🏋🏿‍♀️ Weights").tag(0)
