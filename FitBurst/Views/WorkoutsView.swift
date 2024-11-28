@@ -26,7 +26,7 @@ struct WorkoutsView: View {
             CalendarView(selectedDate: $selectedDate)
                 .frame(height:400)
                 .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .clipShape(RoundedRectangle(cornerRadius: 40))
                 .padding()
             
             Divider()
@@ -115,7 +115,7 @@ struct CalendarViewRepresentable: UIViewRepresentable {
                 // Get the custom image
                 if let originalImage = UIImage(named: "LogoSqClear") {
                     // Resize the image to appropriate size for calendar (e.g., 20x20)
-                    let size = CGSize(width: 20, height: 20)
+                    let size = CGSize(width: 50, height: 50)
                     UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
                     originalImage.draw(in: CGRect(origin: .zero, size: size))
                     let resizedImage = UIGraphicsGetImageFromCurrentImageContext()

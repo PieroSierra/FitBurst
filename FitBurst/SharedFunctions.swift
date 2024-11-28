@@ -101,7 +101,7 @@ struct GrowingButtonStyle: ButtonStyle {
             .clipShape(Capsule())
             .scaleEffect(configuration.isPressed ? 0.9 : scale)
             .opacity(configuration.isPressed ? 0.6 : 1.0)
-            .animation(.easeInOut, value: configuration.isPressed)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
             .onAppear {
                 scale = 0.6
                 withAnimation(.bouncy) { scale = 1.15 }
@@ -110,8 +110,13 @@ struct GrowingButtonStyle: ButtonStyle {
     }
 }
 
+/// Calculates the shorter segment of a line divided by the golden ratio
+func goldenRatio(_ length: CGFloat) -> CGFloat {
+    return length / 1.618
+}
 
-struct VideoView: UIViewRepresentable {
+
+struct SingleVideoView: UIViewRepresentable {
     let videoID: String
     
     func makeUIView(context: Context) -> WKWebView {

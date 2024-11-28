@@ -2,13 +2,37 @@
 //  VideosView.swift
 //  FitBurst
 //
-//  Created by Olga Uskova-Sierra on 24/11/2024.
-//
 
 import SwiftUI
+import YouTubePlayerKit
+import UIKit
+
+struct Video: Identifiable {
+    let id: String  // This will be your YouTube video ID
+    // Add other properties as needed
+}
 
 struct VideosView: View {
     @State private var selectedSegment = 0
+    let videoWidth = UIScreen.main.bounds.width-40
+    @State private var workoutVideos: [[Video]] = [
+        // Weights videos (index 0)
+        [
+            Video(id: "QsYre__-aro"),
+            Video(id: "4Y2ZdHCOXok"),
+            Video(id: "3YvfRx31xDE"),
+            Video(id: "0A3EgOztptQ")
+        ],
+        // Running videos (index 1)
+        [
+            Video(id: "_kGESn8ArrU"),
+            Video(id: "brFHyOtTwH4")
+        ],
+        // Yoga videos (index 2)
+        [],
+        // Sport videos (index 3)
+        []
+    ]
     
     var body: some View {
         VStack {
@@ -32,50 +56,50 @@ struct VideosView: View {
             .padding(.trailing, 15)
             .padding(.bottom, -7)
             
-            
-            if (selectedSegment == 0) {
-                ScrollView() {
-                    VideoView(videoID: "QsYre__-aro")
-                  //      .scaledToFill()
-                        .frame(width: 320, height: 198) // Golden Ratio
-                        .clipShape(RoundedRectangle(cornerRadius: 25))
-                        .padding()
-                    VideoView(videoID: "4Y2ZdHCOXok")
-                       // .scaledToFill()
-                        .frame(width: 320, height: 198) // Golden Ratio
-                        .clipShape(RoundedRectangle(cornerRadius: 25))
-                        .padding()
-                    VideoView(videoID: "3YvfRx31xDE")
-               //         .scaledToFill()
-                        .frame(width: 320, height: 198) // Golden Ratio
-                        .clipShape(RoundedRectangle(cornerRadius: 25))
-                        .padding()
-                    VideoView(videoID: "0A3EgOztptQ")
-               //         .scaledToFill()
-                        .frame(width: 320, height: 198) // Golden Ratio
-                        .clipShape(RoundedRectangle(cornerRadius: 25))
-                        .padding()
-                    Spacer()
-                }
-                
-            }
-            else if (selectedSegment == 1) {
-                ScrollView() {
-                    VideoView(videoID: "_kGESn8ArrU")
-                     //   .scaledToFill()
-                        .frame(width: 320, height: 198) // Golden Ratio
-                        .clipShape(RoundedRectangle(cornerRadius: 25))
-                        .padding()
-                    Spacer()
+            ScrollView {
+                LazyVStack {
+                    ForEach(workoutVideos[selectedSegment]) { video in
+                        YouTubeVideoView(videoID: video.id)
+                            .background(Color.darkGreenBrandColor)
+                            .frame(width: videoWidth, height: goldenRatio(videoWidth))
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .padding()
+                    }
                 }
             }
-            else {
-                Spacer()
-            }
+
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.greenBrandColor)
     }
+    
+    struct YouTubeVideoView: View {
+        let videoID: String
+        
+        @StateObject
+        private var youTubePlayer: YouTubePlayer
+        
+        init(videoID: String) {
+            self.videoID = videoID
+            _youTubePlayer = StateObject(wrappedValue: YouTubePlayer(
+                source: .video(id: videoID)
+            ))
+        }
+        
+        var body: some View {
+            YouTubePlayerView(self.youTubePlayer) { state in
+                switch state {
+                case .idle:
+                    ProgressView()
+                case .ready:
+                    EmptyView()
+                case .error(_):
+                    Text(verbatim: "YouTube player couldn't be loaded")
+                }
+            }
+        }
+    }
+
 }
 
 #Preview {

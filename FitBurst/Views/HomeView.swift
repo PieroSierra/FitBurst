@@ -37,7 +37,7 @@ struct HomeView: View {
                 Spacer()
             }.padding()
             
-            TrophyBox(height: 160, scrollHorizontally: true)
+            TrophyBox(height: 150, scrollHorizontally: true)
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
             
