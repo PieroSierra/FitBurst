@@ -22,22 +22,23 @@ struct ContentView: View {
     }
 }
 
+enum Tab: String, CaseIterable {
+    case home = "Home"
+    case workouts = "Workouts"
+    case videos = "Videos"
+    case trophies = "Trophies"
+    case settings = "Settings"
+}
+
 struct MainTabView: View {
     @State private var selectedTab: Tab = Tab.home
     @State private var previousTab: Tab = Tab.home
     
-    enum Tab: String, CaseIterable {
-        case home = "Home"
-        case workouts = "Workouts"
-        case videos = "Videos"
-        case trophies = "Trophies"
-        case settings = "Settings"
-    }
-    
+
     var body: some View {
         TabView(selection: $selectedTab) {
             Group {
-                HomeView()
+                HomeView(selectedTab: $selectedTab)
                     .tag(Tab.home)
                     .tabItem{
                         Label("Home", systemImage: "house")
@@ -66,8 +67,6 @@ struct MainTabView: View {
             .toolbarBackground(.visible, for: .tabBar)
             .toolbarBackground(Color.darkGreenBrandColor.mix(with: .black, by: 0.1).opacity(0.5), for: .tabBar)
             .toolbarColorScheme(.dark, for: .tabBar)
-         //  .background(.ultraThinMaterial)
-            
         }
         .onChange(of: selectedTab) {
             if selectedTab == previousTab {

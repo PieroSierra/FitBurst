@@ -89,19 +89,34 @@ enum SortOrder {
 
 /// Growing button style (grows when pressed)
 struct GrowingButtonStyle: ButtonStyle {
-    @State private var scale: CGFloat = 0.6  // Start with a smaller scale for pop-in effect
+    @State private var scale: CGFloat = 0.6
+    @State private var wasPressed: Bool = false
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
             .fontWeight(.semibold)
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
-            .background(Color.white)
+            .background(
+                Color.white.mix(with: .darkGreenBrandColor, by: wasPressed ? 0.9 : 0.0)
+            )
             .foregroundStyle(.blue)
             .clipShape(Capsule())
-            .scaleEffect(configuration.isPressed ? 0.9 : scale)
-            .opacity(configuration.isPressed ? 0.6 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            .scaleEffect(wasPressed ? 0.9 : scale)
+            .animation(.spring(response: 0.2), value: wasPressed)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        wasPressed = true
+                    }
+                    .onEnded { _ in
+                        wasPressed = true
+                        // Schedule wasPressed to be reset after 200ms
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            wasPressed = false
+                        }
+                    }
+            )
             .onAppear {
                 scale = 0.6
                 withAnimation(.bouncy) { scale = 1.15 }

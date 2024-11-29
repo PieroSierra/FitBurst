@@ -67,6 +67,7 @@ struct TrophyBox: View {
         .clipShape(RoundedRectangle(cornerRadius: 40))
         .onAppear {
             // Animate items appearing one by one
+            // appearingItems = []
             for index in 0..<numberOfTrophies {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.1) {
                     appearingItems.insert(index)
@@ -77,14 +78,50 @@ struct TrophyBox: View {
     }
     
     struct SingleTrophyView: View {
+        @State private var wasPressed: Bool = false
+        @State private var scale: CGFloat = 1.0
+        
         var body: some View {
-            VStack {
-                Image("LogoSq")
-                    .resizable()
-                    .frame(width:75, height:75)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                Text("5 day\nstreak!").font(.caption2)
+            
+            /*
+             Image("LogoSq")
+             .resizable()
+             .frame(width:75, height:75)
+             .clipShape(RoundedRectangle(cornerRadius: 20))
+             Text("5 day\nstreak!").font(.caption2) */
+            
+            Button (action: {
+                
+            }) {
+                VStack {
+                    Image("LogoSq")
+                        .resizable()
+                        .frame(width:75, height:75)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                    Text("5 day\nstreak!").font(.caption2)
+                }
+                
             }
+            .foregroundStyle(.blue)
+      //      .background(
+                //Color.white.mix(with: .darkGreenBrandColor, by: wasPressed ? 0.9 : 0.0).cornerRadius(20)
+              //  Color.darkGreenBrandColor.opacity(wasPressed ? 0.9 : 0.0).cornerRadius(20)
+       //     )
+            .scaleEffect(wasPressed ? 0.9 : scale)
+            .animation(.spring(response: 0.2), value: wasPressed)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        wasPressed = true
+                    }
+                    .onEnded { _ in
+                        wasPressed = true
+                        // Schedule wasPressed to be reset after 200ms
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            wasPressed = false
+                        }
+                    }
+            )
         }
     }
 }

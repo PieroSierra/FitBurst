@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var selectedTab: Tab
+    
     let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
     
     var body: some View {
@@ -44,7 +46,7 @@ struct HomeView: View {
             HStack {
                 Spacer()
                 Button (action: {
-                    // insert action here
+                    selectedTab = Tab.trophies
                 }) {
                     HStack {
                         Image(systemName: "medal")
@@ -62,5 +64,5 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(selectedTab: .constant(.home))
 }

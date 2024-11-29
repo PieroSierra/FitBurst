@@ -14,6 +14,7 @@ struct Video: Identifiable {
 
 struct VideosView: View {
     @State private var selectedSegment = 0
+    @State private var appearingItems: Set<Int> = []
     let videoWidth = UIScreen.main.bounds.width-40
     @State private var workoutVideos: [[Video]] = [
         // Weights videos (index 0)
@@ -58,12 +59,14 @@ struct VideosView: View {
             
             ScrollView {
                 LazyVStack {
-                    ForEach(workoutVideos[selectedSegment]) { video in
+                    ForEach(Array(workoutVideos[selectedSegment].enumerated()), id: \.element.id) { index, video in
                         YouTubeVideoView(videoID: video.id)
                             .background(Color.darkGreenBrandColor)
                             .frame(width: videoWidth, height: goldenRatio(videoWidth))
                             .clipShape(RoundedRectangle(cornerRadius: 40))
                             .padding()
+                            .scaleEffect(appearingItems.contains(index) ? 1 : 0)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.6), value: appearingItems.contains(index))
                     }
                 }
             }
@@ -71,6 +74,24 @@ struct VideosView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.greenBrandColor)
+        .onChange(of: selectedSegment) { _ in
+            // Reset animations when category changes
+            appearingItems.removeAll()
+            // Animate new items
+            for index in 0..<workoutVideos[selectedSegment].count {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.1) {
+                    appearingItems.insert(index)
+                }
+            }
+        }
+        .onAppear {
+            // Initial animation
+            for index in 0..<workoutVideos[selectedSegment].count {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.1) {
+                    appearingItems.insert(index)
+                }
+            }
+        }
     }
     
     struct YouTubeVideoView: View {

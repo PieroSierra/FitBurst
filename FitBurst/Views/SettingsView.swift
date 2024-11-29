@@ -28,10 +28,10 @@ struct SettingsView: View {
                     Text("Enter your name: ")
                     Spacer()
                     TextField("Your name", text: $userName)
-                        .frame(width: 200, height:30)
+                        .frame(width: 150, height:30)
                         .multilineTextAlignment(.trailing)
-                        .overlay(RoundedRectangle(cornerRadius: 2)
-                            .stroke(.gray))
+                        .background(.white)
+                        //.overlay(RoundedRectangle(cornerRadius: 2).stroke(.gray))
                 }
                 
                 Toggle("Example setting 1", isOn: $settingOne)
