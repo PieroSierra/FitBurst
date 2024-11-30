@@ -33,7 +33,6 @@ enum Tab: String, CaseIterable {
 struct MainTabView: View {
     @State private var selectedTab: Tab = Tab.home
     @State private var previousTab: Tab = Tab.home
-    
 
     var body: some View {
         TabView(selection: $selectedTab) {
