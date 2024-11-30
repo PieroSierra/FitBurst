@@ -14,13 +14,32 @@ struct HomeView: View {
     
     var body: some View {
         ScrollView {
-            Text("FitBurst").font(.title)
-            Image("LogoSqClear")
-                .resizable()
-                .frame(width:200, height:200)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-            
-            Text("18 workouts complete!").font(.body)
+            Text("FitBurst")
+                .font(.title)
+            HStack {
+                Image("LogoSqClear")
+                    .resizable()
+                    .frame(width:200, height:200)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                
+                VStack (alignment: .center) {
+                    Text("18")
+                        .font(.custom("Noteworthy", size: 60))
+                        .multilineTextAlignment(.center)
+                        .fontWeight(.bold)
+                        .lineLimit(1)
+                        .foregroundColor(.white.opacity(0.9))
+                        .padding(0)
+                        .padding(.top, -10)
+                    Text ("workouts done")
+                        .font(.custom("Noteworthy", size: 14))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .frame(minWidth: 140, minHeight: 130)
+                .background(Image("Blackboard").resizable().scaledToFill()).clipShape(RoundedRectangle(cornerRadius: 10))
+                .shadow(radius: 10)
+            }
             Spacer().frame(height: 20)
             Button (action: {
                 // insert action here
