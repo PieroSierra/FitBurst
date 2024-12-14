@@ -7,6 +7,14 @@
 
 import SwiftUI
 import CoreData
+
+enum Tab: String, CaseIterable {
+    case home = "Home"
+    case calendar = "Calendar"
+    case videos = "Videos"
+    case trophies = "Trophies"
+    //  case settings = "Settings"
+}
  
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -17,62 +25,43 @@ struct ContentView: View {
         animation: .default)
     private var items: FetchedResults<Item>*/
 
-    var body: some View {
-        MainTabView()
+    @State private var selectedTab: Tab = .home
+    
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        
+        let blurEffect = UIBlurEffect(style: .systemThinMaterialDark)
+        appearance.backgroundEffect = blurEffect
+        
+        appearance.backgroundColor = .clear
+        
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = nil
+        
+        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color.white.opacity(0.5))
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(Color.white.opacity(0.5))]
     }
-}
-
-enum Tab: String, CaseIterable {
-    case home = "Home"
-    case workouts = "Workouts"
-    case videos = "Videos"
-    case trophies = "Trophies"
-    case settings = "Settings"
-}
-
-struct MainTabView: View {
-    @State private var selectedTab: Tab = Tab.home
-    @State private var previousTab: Tab = Tab.home
-
+    
     var body: some View {
         TabView(selection: $selectedTab) {
-            Group {
-                HomeView(selectedTab: $selectedTab)
-                    .tag(Tab.home)
-                    .tabItem{
-                        Label("Home", systemImage: "house")
-                    }
-                WorkoutsView()
-                    .tag(Tab.workouts)
-                    .tabItem{
-                        Label("Workouts", systemImage: "dumbbell.fill")
-                    }
-                VideosView()
-                    .tag(Tab.videos)
-                    .tabItem{
-                        Label("Videos", systemImage: "play.rectangle.fill")
-                    }
-                TrophyPageView()
-                    .tag(Tab.trophies)
-                    .tabItem{
-                        Label("Trophies", systemImage: "medal.fill")
-                    }
-                SettingsView()
-                    .tag(Tab.settings)
-                    .tabItem{
-                        Label("Settings", systemImage: "person.crop.circle.fill")
-                    }
-            }
-            .toolbarBackground(.visible, for: .tabBar)
-            .toolbarBackground(Color.darkGreenBrandColor.mix(with: .black, by: 0.1).opacity(0.5), for: .tabBar)
-            .toolbarColorScheme(.dark, for: .tabBar)
+            HomeView(selectedTab: $selectedTab)
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
+                }
+                .tag(Tab.home)
+            CalendarView()
+                .tag(Tab.calendar)
+                .tabItem { Label("Calendar", systemImage: "calendar") }
+            VideosView()
+                .tag(Tab.videos)
+                .tabItem { Label("Videos", systemImage: "play.rectangle.fill") }
+            TrophyPageView()
+                .tag(Tab.trophies)
+                .tabItem { Label("Trophies", systemImage: "trophy.fill") }
         }
-        .onChange(of: selectedTab) {
-            if selectedTab == previousTab {
-                NotificationCenter.default.post(name: .scrollToTop, object: nil)
-            }
-            previousTab = selectedTab
-        }
+        .tint(.limeAccentColor)
     }
 }
 
@@ -84,6 +73,45 @@ extension Notification.Name {
 #Preview {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
+
+/*
+struct MainTabView: View {
+    @State private var selectedTab: Tab = Tab.home
+    @State private var previousTab: Tab = Tab.home
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            Group {
+                HomeView(selectedTab: $selectedTab)
+                    .tag(Tab.home)
+                    .tabItem { Label("Home", systemImage: "house") }
+                CalendarView()
+                    .tag(Tab.workouts)
+                    .tabItem { Label("Calendar", systemImage: "calendar") }
+                VideosView()
+                    .tag(Tab.videos)
+                    .tabItem { Label("Videos", systemImage: "play.rectangle.fill") }
+                TrophyPageView()
+                    .tag(Tab.trophies)
+                    .tabItem { Label("Trophies", systemImage: "medal.fill") }
+                    /*    SettingsView()
+                    .tag(Tab.settings)
+                    .tabItem { Label("Settings", systemImage: "person.crop.circle.fill") } */
+            }
+            .toolbarBackground(.visible, for: .tabBar)
+            .toolbarBackground(Color.black.opacity(0.4), for: .tabBar)
+            .toolbarColorScheme(.dark, for: .tabBar)
+        }
+        .onChange(of: selectedTab) {
+            if selectedTab == previousTab {
+                NotificationCenter.default.post(name: .scrollToTop, object: nil)
+            }
+            previousTab = selectedTab
+        }
+    }
+}
+*/
+
 
 
 
@@ -145,6 +173,7 @@ extension Notification.Name {
  // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
  let nsError = error as NSError
  fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+ }
  }
  }
  }

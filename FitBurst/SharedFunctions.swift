@@ -11,6 +11,9 @@ import WebKit
 
 /// Define custom colors
 extension Color {
+    static let grayBackground: Color = Color(hex: 0xaaaaaa)
+    static let limeAccentColor: Color = Color(hex: 0x86fc1e)
+    /// --------------------------------------------------------------------------------
     static let lightShadow = Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255)
     static let darkShadow = Color(red: 163 / 255, green: 177 / 255, blue: 198 / 255)
     static let background = Color(red: 224 / 255, green: 229 / 255, blue: 236 / 255)
@@ -98,9 +101,9 @@ struct GrowingButtonStyle: ButtonStyle {
             .fontWeight(.semibold)
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
             .background(
-                Color.white.mix(with: .darkGreenBrandColor, by: wasPressed ? 0.9 : 0.0)
+                Color.limeAccentColor.mix(with: .white, by: wasPressed ? 0.5 : 0.0)
             )
-            .foregroundStyle(.blue)
+            .foregroundStyle(.black)
             .clipShape(Capsule())
             .scaleEffect(wasPressed ? 0.9 : scale)
             .animation(.spring(response: 0.2), value: wasPressed)

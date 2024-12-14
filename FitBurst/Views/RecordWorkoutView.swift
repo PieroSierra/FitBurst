@@ -9,40 +9,53 @@ import SwiftUI
 
 struct RecordWorkoutView: View {
     @Binding var showWorkoutView: Bool
+    @Binding var selectedDate: Date
     @State private var scale: CGFloat = 0.6
+
     
     var body: some View {
         ZStack {
-            Color.black.opacity(0.2).ignoresSafeArea()
+            Color.black.opacity(0.4).ignoresSafeArea()
             
             VStack {
                 Spacer()
-                Text("Record your workout")
+
+                HStack {
+                    Text("Worked out:")
+                        .foregroundColor(.white)
+                    DatePicker("",
+                             selection: $selectedDate,
+                             displayedComponents: [.date])
+                        .labelsHidden()
+                        .accentColor(.limeAccentColor)
+                        .colorScheme(.dark)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal)
+                
                 Spacer()
                 HStack {
-                    Button (action: {
-                    })
+                    Button (action: {  })
                     {
                         HStack {
                             Image(systemName: "dumbbell.fill").imageScale(.large)
-                            Text("Weights")
+                            Text("Strength")
                         }
                     }
                     .buttonStyle(GrowingButtonStyle())
                     
-                    Button (action: {
-                    })
+                    Button (action: {  })
                     {
                         HStack {
                             Image(systemName: "figure.run.circle.fill").imageScale(.large)
-                            Text("Running")
+                            Text("Run")
                         }
                     }
                     .buttonStyle(GrowingButtonStyle())
                 }
                 HStack {
-                    Button (action: {
-                    })
+                    Button (action: {  })
                     {
                         HStack {
                             Image(systemName: "soccerball").imageScale(.large)
@@ -51,8 +64,7 @@ struct RecordWorkoutView: View {
                     }
                     .buttonStyle(GrowingButtonStyle())
                     
-                    Button (action: {
-                    })
+                    Button (action: {  })
                     {
                         HStack {
                             Image(systemName: "figure.run.treadmill.circle.fill").imageScale(.large)
@@ -62,8 +74,7 @@ struct RecordWorkoutView: View {
                     .buttonStyle(GrowingButtonStyle())
                 }
                 HStack {
-                    Button (action: {
-                    })
+                    Button (action: {  })
                     {
                         HStack {
                             Image(systemName: "figure.yoga.circle.fill").imageScale(.large)
@@ -72,8 +83,7 @@ struct RecordWorkoutView: View {
                     }
                     .buttonStyle(GrowingButtonStyle())
                     
-                    Button (action: {
-                    })
+                    Button (action: {  })
                     {
                         HStack {
                             Image(systemName: "figure.martial.arts.circle.fill").imageScale(.large)
@@ -85,8 +95,8 @@ struct RecordWorkoutView: View {
             }
             .frame(width:350,height:250)
             .padding(.bottom, 40)
-            .background(Color.greenBrandColor.clipShape(RoundedRectangle(cornerRadius: 40))
-                .shadow(radius: 10))
+            .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+                .shadow(color: .limeAccentColor, radius: 10))
             .overlay(dismissButton, alignment: .topTrailing)
             .scaleEffect(scale)
             .onAppear {
@@ -94,6 +104,7 @@ struct RecordWorkoutView: View {
                 withAnimation(.bouncy) { scale = 1.15 }
                 withAnimation(.bouncy.delay(0.25)) { scale = 1 }
             }
+        
         }
         .onTapGesture {
             showWorkoutView = false
@@ -114,5 +125,5 @@ struct RecordWorkoutView: View {
 }
 
 #Preview {
-    RecordWorkoutView(showWorkoutView: .constant(true))
+    RecordWorkoutView(showWorkoutView: .constant(true), selectedDate: .constant(Date()))
 }
