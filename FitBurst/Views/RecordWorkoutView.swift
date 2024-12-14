@@ -18,23 +18,13 @@ struct RecordWorkoutView: View {
             Color.black.opacity(0.4).ignoresSafeArea()
             
             VStack {
-                Spacer()
+                Spacer().frame(height: 50)
 
-                HStack {
-                    Text("Worked out:")
-                        .foregroundColor(.white)
-                    DatePicker("",
-                             selection: $selectedDate,
-                             displayedComponents: [.date])
-                        .labelsHidden()
-                        .accentColor(.limeAccentColor)
-                        .colorScheme(.dark)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(8)
-                }
-                .padding(.horizontal)
-                
-                Spacer()
+                Text("**Press & hold** to record workout:")
+                    .foregroundColor(.white)
+
+                Spacer().frame(height: 30)
+
                 HStack {
                     Button (action: {  })
                     {
@@ -43,7 +33,7 @@ struct RecordWorkoutView: View {
                             Text("Strength")
                         }
                     }
-                    .buttonStyle(GrowingButtonStyle())
+                    .buttonStyle(FillUpButtonStyle())
                     
                     Button (action: {  })
                     {
@@ -52,7 +42,7 @@ struct RecordWorkoutView: View {
                             Text("Run")
                         }
                     }
-                    .buttonStyle(GrowingButtonStyle())
+                    .buttonStyle(FillUpButtonStyle())
                 }
                 HStack {
                     Button (action: {  })
@@ -62,7 +52,7 @@ struct RecordWorkoutView: View {
                             Text("Team Sport")
                         }
                     }
-                    .buttonStyle(GrowingButtonStyle())
+                    .buttonStyle(FillUpButtonStyle())
                     
                     Button (action: {  })
                     {
@@ -71,7 +61,8 @@ struct RecordWorkoutView: View {
                             Text("Cardio")
                         }
                     }
-                    .buttonStyle(GrowingButtonStyle())
+                    .buttonStyle(FillUpButtonStyle())
+                    
                 }
                 HStack {
                     Button (action: {  })
@@ -81,7 +72,7 @@ struct RecordWorkoutView: View {
                             Text("Yoga")
                         }
                     }
-                    .buttonStyle(GrowingButtonStyle())
+                    .buttonStyle(FillUpButtonStyle())
                     
                     Button (action: {  })
                     {
@@ -90,10 +81,30 @@ struct RecordWorkoutView: View {
                             Text("Martial Arts")
                         }
                     }
-                    .buttonStyle(GrowingButtonStyle())
+                    .buttonStyle(FillUpButtonStyle())
+                    
+                   
                 }
+                
+                Spacer().frame(height: 30)
+                
+                HStack {
+                    Text("Workout date:")
+                        .foregroundColor(.white)
+                    DatePicker("",
+                               selection: $selectedDate,
+                               displayedComponents: [.date])
+                    .labelsHidden()
+                    .accentColor(.limeAccentColor)
+                    .colorScheme(.dark)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .padding(.horizontal)
+            
+                
             }
-            .frame(width:350,height:250)
+            .frame(width:350,height:330)
             .padding(.bottom, 40)
             .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))

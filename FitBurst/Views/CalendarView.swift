@@ -180,8 +180,9 @@ struct CalendarView: View {
             Image("GradientWaves").resizable().ignoresSafeArea()
             
             VStack {
-            //    Text("Workout Calendar")
-              //      .font(.custom("Chalkduster", size: 35))
+                Text("Calendar")
+                    .font(.custom("Futura Bold", size: 40))
+                    .foregroundColor(.white)
                 
                 ScrollView {
                     // CalendarViewMonth(selectedDate: $selectedDate).scaleEffect(scale)

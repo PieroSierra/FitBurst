@@ -128,6 +128,161 @@ struct GrowingButtonStyle: ButtonStyle {
     }
 }
 
+/// FillUpButton style (fills up when held, with haptic feedback)
+struct FillUpButtonStyle: ButtonStyle {
+    @State private var fillAmount: CGFloat = 0
+    @State private var scale: CGFloat = 1.0
+    @State private var isPressed: Bool = false
+    @State private var shakeOffset: CGFloat = 0
+    @State private var isCompleted: Bool = false
+    @State private var currentTimer: Timer?
+    @State private var scheduledTasks: [DispatchWorkItem] = []
+    @State private var completionTask: DispatchWorkItem?
+    private let fillDuration: Double = 2.0
+    private let maxScale: CGFloat = 1.2
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .fontWeight(.semibold)
+            .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
+            .background(
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Base color
+                        Color.white
+                        
+                        // Fill color that animates
+                        Color.limeAccentColor
+                            .frame(width: geometry.size.width * fillAmount)
+                    }
+                }
+            )
+            .foregroundStyle(.black)
+            .clipShape(Capsule())
+            .scaleEffect(scale)
+            .offset(x: shakeOffset)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed && !isCompleted {
+                            startFillAnimation()
+                        }
+                    }
+                    .onEnded { _ in
+                        if !isCompleted {
+                            cancelFillAnimation()
+                        }
+                    }
+            )
+    }
+    
+    private func startFillAnimation() {
+        // Cancel any existing tasks first
+        cancelAllTasks()
+        
+        isPressed = true
+        
+        // Start with smaller scale
+        withAnimation(.easeOut(duration: 0.2)) {
+            scale = 0.8
+        }
+        
+        // Gradually increase scale during fill
+        withAnimation(.linear(duration: fillDuration)) {
+            fillAmount = 1.0
+            scale = 1.1
+        }
+        
+        // Start shake animation
+        withAnimation(.linear(duration: 0.05).repeatForever()) {
+            shakeOffset = 2
+        }
+        
+        // Alternate shake direction
+        currentTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { timer in
+            if !isPressed || isCompleted {
+                timer.invalidate()
+                return
+            }
+            withAnimation(.linear(duration: 0.05)) {
+                shakeOffset = shakeOffset == 2 ? -2 : 2
+            }
+        }
+        
+        // Schedule haptic feedback
+        let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+        
+        // Schedule multiple haptic pulses
+        scheduledTasks = []
+        for i in 0...30 {
+            let task = DispatchWorkItem {
+                if isPressed && !isCompleted {
+                    let intensity = min(1.0, Double(i) / 20.0)
+                    feedbackGenerator.impactOccurred(intensity: intensity)
+                }
+            }
+            scheduledTasks.append(task)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * (fillDuration/30), execute: task)
+        }
+        
+        // Schedule completion events
+        completionTask = DispatchWorkItem {
+            if isPressed {
+                finishButton()
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + fillDuration, execute: completionTask!)
+    }
+    
+    private func cancelAllTasks() {
+        // Cancel timer
+        currentTimer?.invalidate()
+        currentTimer = nil
+        
+        // Cancel all scheduled haptic tasks
+        scheduledTasks.forEach { $0.cancel() }
+        scheduledTasks.removeAll()
+        
+        // Cancel completion task
+        completionTask?.cancel()
+        completionTask = nil
+    }
+    
+    private func cancelFillAnimation() {
+        isPressed = false
+        cancelAllTasks()
+        
+        withAnimation(.spring(response: 0.3)) {
+            fillAmount = 0
+            scale = 1.0
+            shakeOffset = 0
+        }
+    }
+    
+    private func finishButton() {
+        isCompleted = true
+        isPressed = false
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            scale = maxScale
+            shakeOffset = 0
+            fillAmount = 1.0
+        }
+        
+        // Final success haptic
+        let notificationGenerator = UINotificationFeedbackGenerator()
+        notificationGenerator.notificationOccurred(.success)
+        
+        // Set final state
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.spring(response: 0.3)) {
+                scale = 1.0
+            }
+        }
+    }
+}
+
 /// Calculates the shorter segment of a line divided by the golden ratio
 func goldenRatio(_ length: CGFloat) -> CGFloat {
     return length / 1.618

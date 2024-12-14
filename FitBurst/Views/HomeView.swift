@@ -21,45 +21,41 @@ struct HomeView: View {
                 Text("FitBurst")
                     .font(.custom("Futura Bold", size: 40))
                     .foregroundColor(.white)
-                    
-                // Blackboard
-                ZStack {
-                    VStack (alignment: .center) {
-                        Text("18")
-                            .font(.custom("Futura Bold", size: 80))
-                            .multilineTextAlignment(.center)
-                            .fontWeight(.bold)
-                            .lineLimit(1)
-                            .foregroundColor(.limeAccentColor)
-                            .padding(0)
-                            .padding(.top, -10)
-                        Text ("WORKOUTS")
-                            .font(.custom("Futura Bold", size: 16))
-                            .fontWeight(.bold)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.white)
-                    }
-                    .frame(minWidth: 190, minHeight: 130)
-                  /*  .background(
-                        Image("Blackboard")
-                            .resizable()
-                            .scaledToFill()
-                    )
-                    .clipShape(
-                        RoundedRectangle(cornerRadius: 10)
-                    )
-                    .shadow(radius: 10)
-                    .scaleEffect(0.9)*/
-                    .onTapGesture { selectedTab = Tab.calendar }
-
-                    
-                  /*  MascotView()
-                        .offset(CGSize(width: -70, height: 0))*/
+                    .padding(.bottom, 0)
+        
+                /// Workouts Counter
+                VStack (alignment: .center) {
+                    Text("18")
+                        .font(.custom("Futura Bold", size: 80))
+                        .multilineTextAlignment(.center)
+                        .fontWeight(.bold)
+                        .lineLimit(1)
+                        .foregroundColor(.limeAccentColor)
+                        .padding(0)
+                        .padding(.top, -10)
+                    Text ("WORKOUTS")
+                        .font(.custom("Futura Bold", size: 16))
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
                 }
+                .frame(minWidth: 190, minHeight: 130)
+                .onTapGesture { selectedTab = Tab.calendar }
                 
                 Spacer().frame(height: 20)
+
+                /// Week view with optional headers
+                CalendarViewWeek(
+                    selectedDate: $selectedDate,
+                    showMonthHeader: false,     /// show Month
+                    showWeekdayHeader: false    /// show Days
+                )
+                .frame(height: 50)
+                .offset(y: 130)
                 
                 
+                Spacer().frame(height: 30)
+
                 Button (action: {
                     showWorkoutView.toggle()
                 }) {
@@ -69,7 +65,7 @@ struct HomeView: View {
                     }
                 }.buttonStyle(GrowingButtonStyle())
                 
-                Spacer().frame(height: 20)
+                Spacer().frame(height: 40)
                 
                 /*
                  HStack {
@@ -80,20 +76,7 @@ struct HomeView: View {
                 TrophyBox(height: 200, scrollHorizontally: true)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
-                
-                HStack {
-                    Spacer()
-                    Button (action: {
-                        selectedTab = Tab.trophies
-                    }) {
-                        HStack {
-                            //                            Image(systemName: "medal.fill").imageScale(.large)
-                            Text("See all")
-                        }
-                    }.buttonStyle(GrowingButtonStyle())
-                        .padding(0)
-                        .padding(.trailing, 20)
-                }
+                    .onTapGesture { selectedTab = Tab.trophies }
                 
             }
             //     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -101,12 +84,7 @@ struct HomeView: View {
             if showWorkoutView == true {
                 RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
             }
-            // Week view with optional headers
-            CalendarViewWeek(
-                selectedDate: $selectedDate,
-                showMonthHeader: false,     // These will now properly hide the headers
-                showWeekdayHeader: false
-            ).offset(y: 450)
+            
         }.onAppear {showWorkoutView = false }
     }
 }

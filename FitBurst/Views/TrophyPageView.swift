@@ -88,44 +88,44 @@ struct TrophyBox: View {
         Spacer()
     }
     
-    struct SingleTrophyView: View {
-        @State private var wasPressed: Bool = false
-        @State private var scale: CGFloat = 1.0
-        
-        var body: some View {
-            Button (action: {
-               // insert action here
-            }) {
-                VStack {
-                    Image(systemName: "trophy.circle.fill")
-                        .resizable()
-                        .foregroundStyle(Color.white)
-                        .frame(width:75, height:75)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                    Text("5 day\nstreak!").font(.caption2).foregroundStyle(Color.white)
-                }
-                
-            }
-            .foregroundStyle(.blue)
-            .scaleEffect(wasPressed ? 0.9 : scale)
-            .animation(.spring(response: 0.2), value: wasPressed)
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        wasPressed = true
-                    }
-                    .onEnded { _ in
-                        wasPressed = true
-                        // Schedule wasPressed to be reset after 200ms
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            wasPressed = false
-                        }
-                    }
-            )
-        }
-    }
 }
 
+struct SingleTrophyView: View {
+    @State private var wasPressed: Bool = false
+    @State private var scale: CGFloat = 1.0
+    
+    var body: some View {
+        Button (action: {
+            // insert action here
+        }) {
+            VStack {
+                Image(systemName: "trophy.circle.fill")
+                    .resizable()
+                    .foregroundStyle(Color.white)
+                    .frame(width:75, height:75)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                Text("5 day\nstreak!").font(.caption2).foregroundStyle(Color.white)
+            }
+            
+        }
+        .foregroundStyle(.blue)
+        .scaleEffect(wasPressed ? 0.9 : scale)
+        .animation(.spring(response: 0.2), value: wasPressed)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    wasPressed = true
+                }
+                .onEnded { _ in
+                    wasPressed = true
+                    // Schedule wasPressed to be reset after 200ms
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        wasPressed = false
+                    }
+                }
+        )
+    }
+}
 
 #Preview {
     TrophyPageView()
