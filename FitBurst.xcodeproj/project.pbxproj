@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */ = {isa = PBXBuildFile; productRef = 43FBA29D2D0F27F2005CBFA3 /* Model3DView */; };
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
 		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
 /* End PBXBuildFile section */
@@ -28,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */,
 				C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */,
 				C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */,
 			);
@@ -40,6 +42,7 @@
 			isa = PBXGroup;
 			children = (
 				4386609C2CF322B300CA5D62 /* FitBurst */,
+				43FBA29C2D0F27F2005CBFA3 /* Frameworks */,
 				4386609B2CF322B300CA5D62 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +53,13 @@
 				4386609A2CF322B300CA5D62 /* FitBurst.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		43FBA29C2D0F27F2005CBFA3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -74,6 +84,7 @@
 			packageProductDependencies = (
 				C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */,
 				C49FC39C2CF638FF00F4006B /* FSCalendar */,
+				43FBA29D2D0F27F2005CBFA3 /* Model3DView */,
 			);
 			productName = FitBurst;
 			productReference = 4386609A2CF322B300CA5D62 /* FitBurst.app */;
@@ -106,6 +117,7 @@
 			packageReferences = (
 				C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
 				C49FC39B2CF638FF00F4006B /* XCRemoteSwiftPackageReference "FSCalendar" */,
+				430941C02D0F20230091D8D3 /* XCRemoteSwiftPackageReference "Model3DView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4386609B2CF322B300CA5D62 /* Products */;
@@ -343,6 +355,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		430941C02D0F20230091D8D3 /* XCRemoteSwiftPackageReference "Model3DView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/frzi/Model3DView.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.1;
+			};
+		};
 		C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit";
@@ -362,6 +382,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		43FBA29D2D0F27F2005CBFA3 /* Model3DView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 430941C02D0F20230091D8D3 /* XCRemoteSwiftPackageReference "Model3DView" */;
+			productName = Model3DView;
+		};
 		C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C49FC3792CF6328A00F4006B /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;

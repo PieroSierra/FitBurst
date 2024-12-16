@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import WebKit
+import AVFoundation
 
 /// Define custom colors
 extension Color {
@@ -128,8 +129,16 @@ struct GrowingButtonStyle: ButtonStyle {
     }
 }
 
+struct ViewPositionKey: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
+    }
+}
+
 /// FillUpButton style (fills up when held, with haptic feedback)
 struct FillUpButtonStyle: ButtonStyle {
+    var onComplete: ((CGPoint) -> Void)? = nil
     @State private var fillAmount: CGFloat = 0
     @State private var scale: CGFloat = 1.0
     @State private var isPressed: Bool = false
@@ -138,8 +147,9 @@ struct FillUpButtonStyle: ButtonStyle {
     @State private var currentTimer: Timer?
     @State private var scheduledTasks: [DispatchWorkItem] = []
     @State private var completionTask: DispatchWorkItem?
-    private let fillDuration: Double = 2.0
+    private let fillDuration: Double = 1.2
     private let maxScale: CGFloat = 1.2
+    @State private var buttonPosition: CGPoint = .zero
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -162,14 +172,26 @@ struct FillUpButtonStyle: ButtonStyle {
             .clipShape(Capsule())
             .scaleEffect(scale)
             .offset(x: shakeOffset)
+            .background(
+                GeometryReader { geometry in
+                    Color.clear // Using clear color to not affect visuals
+                        .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global))
+                        .onPreferenceChange(ViewPositionKey.self) { frame in
+                            buttonPosition = CGPoint(
+                                x: frame.midX,
+                                y: frame.midY
+                            )
+                        }
+                }
+            )
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
+                    .onChanged { value in
                         if !isPressed && !isCompleted {
                             startFillAnimation()
                         }
                     }
-                    .onEnded { _ in
+                    .onEnded { value in
                         if !isCompleted {
                             cancelFillAnimation()
                         }
@@ -182,6 +204,9 @@ struct FillUpButtonStyle: ButtonStyle {
         cancelAllTasks()
         
         isPressed = true
+        
+        /// Play completion sound
+        playSound(named: SoundScape.buildup.rawValue)
         
         // Start with smaller scale
         withAnimation(.easeOut(duration: 0.2)) {
@@ -247,6 +272,9 @@ struct FillUpButtonStyle: ButtonStyle {
         // Cancel completion task
         completionTask?.cancel()
         completionTask = nil
+        
+        // Stop any playing audio
+        audioPlayer?.stop()
     }
     
     private func cancelFillAnimation() {
@@ -264,6 +292,9 @@ struct FillUpButtonStyle: ButtonStyle {
         isCompleted = true
         isPressed = false
         
+        /// Play completion sound
+        playSound(named: SoundScape.release.rawValue)
+        
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             scale = maxScale
             shakeOffset = 0
@@ -273,6 +304,8 @@ struct FillUpButtonStyle: ButtonStyle {
         // Final success haptic
         let notificationGenerator = UINotificationFeedbackGenerator()
         notificationGenerator.notificationOccurred(.success)
+        
+        onComplete?(buttonPosition)
         
         // Set final state
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -300,5 +333,41 @@ struct SingleVideoView: UIViewRepresentable {
         guard let youtubeURL = URL(string: "https://www.youtube.com/embed/\(videoID)") else { return }
         uiView.scrollView.isScrollEnabled = false
         uiView.load(URLRequest(url: youtubeURL))
+    }
+}
+
+private var audioPlayer: AVAudioPlayer?
+
+func playSound(named soundName: String, fileExtension: String? = nil) {
+    /// Try with provided extension first, then try common audio extensions
+    let extensions = fileExtension.map { [$0] } ?? ["wav", "mp3"]
+    
+    /// Find first matching audio file
+    let audioPath = extensions.lazy
+        .compactMap { ext in
+            Bundle.main.path(forResource: soundName, ofType: ext)
+        }
+        .first
+    
+    guard let path = audioPath else {
+        print("❌ Sound file not found for \(soundName) with extensions: \(extensions)")
+        return
+    }
+    
+    let url = URL(fileURLWithPath: path)
+    
+    do {
+        audioPlayer = try AVAudioPlayer(contentsOf: url)
+        audioPlayer?.prepareToPlay()
+        
+        guard let player = audioPlayer else {
+            print("❌ audioPlayer is nil after creation")
+            return
+        }
+        
+        player.play()
+        
+    } catch {
+        print("❌ Could not create audio player: \(error)")
     }
 }

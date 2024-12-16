@@ -10,19 +10,24 @@ import SwiftUI
 struct HomeView: View {
     @Binding var selectedTab: Tab
     @State private var showWorkoutView: Bool = false
+    @State private var showTrophyDisplayView: Bool = false
+    @State private var selectedTrophy: TrophyType = .gold
     @State var selectedDate: Date = Date()
     
     let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
     
     var body: some View {
         ZStack {
+            
+            /// Background gradient
             Image("GradientWaves").resizable().edgesIgnoringSafeArea(.all)
+            
+            /// Main scrollview
             ScrollView {
                 Text("FitBurst")
                     .font(.custom("Futura Bold", size: 40))
                     .foregroundColor(.white)
                     .padding(.bottom, 0)
-        
                 /// Workouts Counter
                 VStack (alignment: .center) {
                     Text("18")
@@ -43,7 +48,7 @@ struct HomeView: View {
                 .onTapGesture { selectedTab = Tab.calendar }
                 
                 Spacer().frame(height: 20)
-
+                
                 /// Week view with optional headers
                 CalendarViewWeek(
                     selectedDate: $selectedDate,
@@ -55,7 +60,7 @@ struct HomeView: View {
                 
                 
                 Spacer().frame(height: 30)
-
+                
                 Button (action: {
                     showWorkoutView.toggle()
                 }) {
@@ -73,16 +78,28 @@ struct HomeView: View {
                  Spacer()
                  }.padding()*/
                 
-                TrophyBox(height: 200, scrollHorizontally: true)
-                    .padding(.leading, 20)
-                    .padding(.trailing, 20)
-                    .onTapGesture { selectedTab = Tab.trophies }
+                TrophyBox(
+                    height: 170, 
+                    scrollHorizontally: true, 
+                    showTrophyDisplayView: $showTrophyDisplayView,
+                    selectedTrophy: $selectedTrophy
+                )
+                .padding(.leading, 20)
+                .padding(.trailing, 20)
+                .onTapGesture { selectedTab = Tab.trophies }
                 
             }
             //     .frame(maxWidth: .infinity, maxHeight: .infinity)
             //.background(Color.greenBrandColor)
-            if showWorkoutView == true {
+            if showWorkoutView {
                 RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
+            }
+            
+            if showTrophyDisplayView {
+                SingleTrophyView(
+                    showTrophyDisplayView: $showTrophyDisplayView,
+                    trophyType: selectedTrophy
+                )
             }
             
         }.onAppear {showWorkoutView = false }
