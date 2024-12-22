@@ -9,54 +9,65 @@ import SwiftUI
 import Model3DView
 
 enum TrophyType: CaseIterable {
-    case gold
-    case silver
-    case bronze
-    case team_sport
-    case mtv
-    case worldcup
-    case football
-    case dumbbell
+    case newbie
+    case fiveX
+    case tenX
+    case twentyFiveX
+    case fiftyX
+    case oneHundredX
+    case twoHundredX
+    case firstPerfectWeek
+    case secondPerfectWeek
+    case thirdPerfectWeek
+    case fourthPerfectWeek
+    case fifthPerfectWeek
+    case sixthPerfectWeek
+    case seventhPerfectWeek
+    case twoInADay
+    case threeInADay
+    case lotsInADay
     
     var displayName: String {
         switch self {
-        case .gold:
-            return "Gold\nAward"
-        case .silver:
-            return "Silver\nAward"
-        case .bronze:
-            return "Bronze\nAward"
-        case .team_sport:
-            return "Team\nAward"
-        case .mtv:
-            return "Rocking it!"
-        case .worldcup:
-            return "100 days!"
-        case .football:
-            return "Football\nrocks!"
-        case .dumbbell:
-            return "Weights!"
+        case .newbie: return "First workout!"
+        case .fiveX: return "5 in a row"
+        case .tenX: return "10 in a row!"
+        case .twentyFiveX: return "25 in a row!"
+        case .fiftyX: return "50 in a row!!"
+        case .oneHundredX: return "100 in a row!!"
+        case .twoHundredX: return "200 in a row!!!"
+        case .firstPerfectWeek: return "First Perfect Week"
+        case .secondPerfectWeek: return "Second Perfect Week"
+        case .thirdPerfectWeek: return "Third Perfect Week!"
+        case .fourthPerfectWeek: return "Fourth Perfect Week!"
+        case .fifthPerfectWeek: return "Fifth Perfect Week!!"
+        case .sixthPerfectWeek: return "Sixth Perfect Week!!"
+        case .seventhPerfectWeek: return "Seventh Perfect Week!!!"
+        case .twoInADay: return "Two in a day"
+        case .threeInADay: return "Three in a day"
+        case .lotsInADay: return "Lots in a day"
         }
     }
     
     var fileName: String {
         switch self {
-        case .gold:
-            return "Gold Trophy 3D Model.usdz"
-        case .silver:
-            return "Sliver Trophy 3D Model.usdz"
-        case .bronze:
-            return "Bronze Trophy 3D Model.usdz"
-        case .team_sport:
-            return "Golden Ball Award 3D Model.usdz"
-        case .mtv:
-            return "MTV Award 3D Model.usdz"
-        case .worldcup:
-            return "World Cup Trophy.usdz"
-        case .football:
-            return "Football Medal 2 by Moshe Caine.usdz"
-        case .dumbbell:
-            return "Dumbbell 3D Model by Yigit Ayyildiz.usdz"
+        case .newbie: return "Coin_Star_Silver.usdz"
+        case .fiveX: return "Coin_Zap_Silver.usdz"
+        case .tenX: return "Coin_Zap_Gold.usdz"
+        case .twentyFiveX: return "Coin_Crown_Gold.usdz"
+        case .fiftyX: return "Star_Cup.usdz"
+        case .oneHundredX: return "1_Stack_Coins.usdz"
+        case .twoHundredX: return "3_Stacks_Coins.usdz"
+        case .firstPerfectWeek: return "Gem_01_Red.usdz"
+        case .secondPerfectWeek: return "Gem_02_Red.usdz"
+        case .thirdPerfectWeek: return "Diamond_Red.usdz"
+        case .fourthPerfectWeek: return "Gem_01_Green.usdz"
+        case .fifthPerfectWeek: return "Gem_02_Green.usdz"
+        case .sixthPerfectWeek: return "Diamond_Green.usdz"
+        case .seventhPerfectWeek: return "Diamond_Blue.usdz"
+        case .twoInADay: return "2_Coins_Silver.usdz"
+        case .threeInADay: return "3_Coins_Gold.usdz"
+        case .lotsInADay: return "5_Coins_Gold.usdz"
         }
     }
 }
@@ -84,8 +95,11 @@ struct SingleTrophyView: View {
             VStack {
                 Spacer()
                 
-                Text("Your trophy:")
+                Text("\(trophyType.displayName)")
+                    .padding(.top, 10)
                     .foregroundColor(.white)
+                    .font(.custom("Futura Bold", size: 20))
+                
                 Spacer()
 
                 .padding(.horizontal)
@@ -193,8 +207,11 @@ struct TrophyIconView: View {
             showTrophyDisplayView = true
         }) {
             VStack {
-                Model3DView(named: trophyType.fileName)
-                    .frame(width:70, height:70)
+                ZStack{
+                    Circle().frame(width:70, height:70).foregroundColor(Color.limeAccentColor.opacity(0.25))
+                    Model3DView(named: trophyType.fileName)
+                        .frame(width:70, height:70)
+                }
                 Text(trophyType.displayName)
                     .font(.caption2)
                     .foregroundStyle(Color.white)
@@ -221,5 +238,5 @@ struct TrophyIconView: View {
 
 
 #Preview {
-    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .gold)
+    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .threeInADay)
 }

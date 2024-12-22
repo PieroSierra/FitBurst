@@ -11,7 +11,7 @@ import Model3DView
 
 struct TrophyPageView: View {
     @State private var showTrophyDisplayView: Bool = false
-    @State private var selectedTrophy: TrophyType = .gold
+    @State private var selectedTrophy: TrophyType = .newbie
     
     var body: some View {
         ZStack {

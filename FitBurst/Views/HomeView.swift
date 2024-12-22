@@ -11,7 +11,7 @@ struct HomeView: View {
     @Binding var selectedTab: Tab
     @State private var showWorkoutView: Bool = false
     @State private var showTrophyDisplayView: Bool = false
-    @State private var selectedTrophy: TrophyType = .gold
+    @State private var selectedTrophy: TrophyType = .newbie
     @State var selectedDate: Date = Date()
     
     let gradientColors = Gradient(colors: [.blueBrandColor, .orangeBrandColor,.greenBrandColor,.blueBrandColor,.purpleBrandColor,.pinkBrandColor])
