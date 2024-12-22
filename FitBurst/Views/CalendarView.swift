@@ -92,16 +92,27 @@ struct CalendarViewMonth: View {
 struct CalendarViewYear: View {
     @Binding var selectedDate: Date
     var config: CalendarViewConfigurable = YearCalendarConfig()
-    var year: Int = Calendar.current.component(.year, from: Date())  // Default to current year
-    private let columns = Array(repeating: GridItem(.flexible()), count: 3)
+    var year: Int = Calendar.current.component(.year, from: Date())
+    
+    // Define columns with equal flexible width and no spacing
+    private let columns = [
+        GridItem(.flexible(minimum: 0), spacing: 0),
+        GridItem(.flexible(minimum: 0), spacing: 0),
+        GridItem(.flexible(minimum: 0), spacing: 0)
+    ]
     
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 0) {
-            ForEach(0..<12) { monthIndex in
-                if let monthDate = Calendar.current.date(from: DateComponents(year: year, month: monthIndex + 1, day: 1)) {
-                    MonthCell(date: monthDate, 
-                             selectedDate: $selectedDate, 
-                             config: config)
+        GeometryReader { geometry in
+            let cellWidth = geometry.size.width / 3
+            
+            LazyVGrid(columns: columns, spacing: 0) {
+                ForEach(0..<12) { monthIndex in
+                    if let monthDate = Calendar.current.date(from: DateComponents(year: year, month: monthIndex + 1, day: 1)) {
+                        MonthCell(date: monthDate, 
+                                selectedDate: $selectedDate, 
+                                config: config)
+                            .frame(width: cellWidth)  // Force exact width
+                    }
                 }
             }
         }
@@ -115,12 +126,13 @@ private struct MonthCell: View {
     var config: CalendarViewConfigurable
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             Text(date.formatted(.dateTime.month(.wide)))
                 .font(.custom("Futura Bold", size: 14))
                 .fontWeight(.bold)
                 .foregroundColor(.limeAccentColor)
-                .padding(0)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
             
             CalendarViewBase(
                 selectedDate: $selectedDate,
@@ -136,8 +148,6 @@ private struct MonthCell: View {
                 showMonthHeader: false,
                 showWeekdayHeader: true
             )
-            .scaleEffect(1)
-            .padding(0)
         }
     }
 }
@@ -290,25 +300,24 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         // Disable scrolling for year view cells
         calendar.scrollEnabled = allowsScrolling
         
-        // Set the current page if provided and prevent it from changing
+        // Force 6 rows display and handle placeholders
+        calendar.placeholderType = .fillSixRows  // Change from .fillHeadTail
+        calendar.appearance.titlePlaceholderColor = UIColor(white: 1, alpha: 0.2) // Make placeholders visible but subtle
+        
+        // Ensure calendar fills all available space
+        calendar.adjustsBoundingRectWhenChangingMonths = false
+        
         if let currentPage = currentPage {
             calendar.setCurrentPage(currentPage, animated: false)
+            calendar.scrollEnabled = false
         }
-        
-        // Add these lines to control placeholder dates
-        calendar.placeholderType = .fillHeadTail // or .fillSixRows
-        calendar.appearance.titlePlaceholderColor = UIColor.clear // Adjust color as needed
-        
-        // Add or update these appearance settings
-        calendar.appearance.eventDefaultColor = .clear
-        calendar.appearance.eventSelectionColor = .clear  // This hides the dots when selected
-  //      calendar.appearance.eventFillDefaultColor = .clear
-    //    calendar.appearance.eventFillSelectionColor = .clear
         
         return calendar
     }
     
-    func updateUIView(_ uiView: FSCalendar, context: Context) {}
+    func updateUIView(_ uiView: FSCalendar, context: Context) {
+        // No updates needed, but we'll keep the method for protocol conformance
+    }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -403,11 +412,11 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         
         func maximumDate(for calendar: FSCalendar) -> Date {
-            Date.now.addingTimeInterval(86400 * 30)
+            return Date.distantFuture
         }
         
         func minimumDate(for calendar: FSCalendar) -> Date {
-            Date.now.addingTimeInterval(-86400 * 30 * 4)
+            return Date.distantPast
         }
     }
 }

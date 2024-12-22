@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Model3DView
+import SceneKit
 
 enum TrophyType: CaseIterable {
     case newbie
@@ -72,6 +73,7 @@ enum TrophyType: CaseIterable {
     }
 }
 
+
 struct SingleTrophyView: View {
     @Binding var showTrophyDisplayView: Bool
     let trophyType: TrophyType 
@@ -86,7 +88,7 @@ struct SingleTrophyView: View {
     @State private var rippleCounter: Int = 0
 //    @State private var ripplePosition: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2)
     @State private var ripplePosition: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2)
-
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
@@ -138,6 +140,7 @@ struct SingleTrophyView: View {
                 }
                 rippleCounter += 1
                // playSound(named: "Cinematic Riser Sound Effect")
+                
             }
             
             Model3DView(named: trophyType.fileName)  // Use the passed trophy type
