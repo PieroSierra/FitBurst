@@ -108,10 +108,10 @@ struct CalendarViewYear: View {
             LazyVGrid(columns: columns, spacing: 0) {
                 ForEach(0..<12) { monthIndex in
                     if let monthDate = Calendar.current.date(from: DateComponents(year: year, month: monthIndex + 1, day: 1)) {
-                        MonthCell(date: monthDate, 
-                                selectedDate: $selectedDate, 
-                                config: config)
-                            .frame(width: cellWidth)  // Force exact width
+                        MonthCell(date: monthDate,
+                                  selectedDate: $selectedDate,
+                                  config: config)
+                        .frame(width: cellWidth)  // Force exact width
                     }
                 }
             }
@@ -196,7 +196,7 @@ struct CalendarView: View {
                 
                 ScrollView {
                     // CalendarViewMonth(selectedDate: $selectedDate).scaleEffect(scale)
-
+                    
                     // Custom year view with grid of months
                     CalendarViewYear(
                         selectedDate: $selectedDate,
@@ -215,15 +215,15 @@ struct CalendarView: View {
                     }
                     Spacer()
                 }
-/*                .onAppear {
-                    scale = 0.6
-                    withAnimation(.bouncy) { scale = 1 }
-                    withAnimation(.bouncy.delay(0.25)) { scale = 1 }
-                }*/
+                /*                .onAppear {
+                 scale = 0.6
+                 withAnimation(.bouncy) { scale = 1 }
+                 withAnimation(.bouncy.delay(0.25)) { scale = 1 }
+                 }*/
                 
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-           // .background(Color.greenBrandColor)
+            // .background(Color.greenBrandColor)
             .overlay(
                 Button (action: {
                     showWorkoutView.toggle()
@@ -235,7 +235,7 @@ struct CalendarView: View {
                 }.padding()
                     .buttonStyle(GrowingButtonStyle()),
                 alignment: .bottomTrailing)
-           
+            
             
             if showWorkoutView == true {
                 RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
@@ -300,6 +300,9 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         // Disable scrolling for year view cells
         calendar.scrollEnabled = allowsScrolling
         
+        // Force single selection per calendar instance
+        calendar.allowsMultipleSelection = false
+        
         // Force 6 rows display and handle placeholders
         calendar.placeholderType = .fillSixRows  // Change from .fillHeadTail
         calendar.appearance.titlePlaceholderColor = UIColor(white: 1, alpha: 0.2) // Make placeholders visible but subtle
@@ -316,7 +319,21 @@ struct CalendarViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: FSCalendar, context: Context) {
-        // No updates needed, but we'll keep the method for protocol conformance
+        // Always start fresh
+        for date in uiView.selectedDates {
+            uiView.deselect(date)
+        }
+        
+        // If currentPage is set, check if selectedDate is in the same month
+        if let currentPage = currentPage {
+            let cal = Calendar.current
+            let sameMonth = cal.isDate(selectedDate, equalTo: currentPage, toGranularity: .month)
+            
+            // 3. If the global selectedDate is in this month, visually select it
+            if sameMonth {
+                uiView.select(selectedDate)
+            }
+        }
     }
     
     func makeCoordinator() -> Coordinator {
@@ -331,6 +348,8 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+            // This is all you need: set the single global binding,
+            // which triggers SwiftUI to update the entire view hierarchy.
             parent.selectedDate = date
         }
         
