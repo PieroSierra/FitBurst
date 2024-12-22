@@ -117,7 +117,8 @@ private struct MonthCell: View {
     var body: some View {
         VStack {
             Text(date.formatted(.dateTime.month(.wide)))
-                .font(.custom("", size: 14))
+                .font(.custom("Futura Bold", size: 14))
+                .fontWeight(.bold)
                 .foregroundColor(.limeAccentColor)
                 .padding(0)
             
@@ -138,7 +139,6 @@ private struct MonthCell: View {
             .scaleEffect(1)
             .padding(0)
         }
-   
     }
 }
 
@@ -171,7 +171,7 @@ struct CalendarViewWeek: View {
 
 struct CalendarView: View {
     @State var selectedDate: Date = Date()
-    @State var scale: CGFloat = 0.6
+    @State var scale: CGFloat = 1
     @State private var showWorkoutView: Bool = false
     
     var body: some View {
@@ -205,11 +205,11 @@ struct CalendarView: View {
                     }
                     Spacer()
                 }
-                .onAppear {
+/*                .onAppear {
                     scale = 0.6
-                    withAnimation(.bouncy) { scale = 1.15 }
+                    withAnimation(.bouncy) { scale = 1 }
                     withAnimation(.bouncy.delay(0.25)) { scale = 1 }
-                }
+                }*/
                 
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -259,13 +259,14 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         // Apply configuration
         calendar.appearance.weekdayTextColor = .white
         calendar.appearance.weekdayFont = config.weekdayFont
-        calendar.appearance.selectionColor = .orange
-        calendar.appearance.todayColor = UIColor(Color.limeAccentColor)
+        calendar.appearance.selectionColor = UIColor(Color.limeAccentColor)
+        calendar.appearance.titleSelectionColor = .black
+        calendar.appearance.todayColor = .white
         calendar.appearance.titleTodayColor = .black
-        calendar.appearance.eventDefaultColor = .orange
+        calendar.appearance.eventDefaultColor = .clear
         calendar.appearance.titleFont = config.titleFont
         calendar.appearance.titleDefaultColor = .white
-        calendar.appearance.titleWeekendColor = UIColor(Color.gray)
+        calendar.appearance.titleWeekendColor = .white
         calendar.appearance.headerMinimumDissolvedAlpha = headerAlpha
         calendar.appearance.headerTitleFont = config.headerTitleFont
         calendar.appearance.headerTitleColor = .white
@@ -298,6 +299,12 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         calendar.placeholderType = .fillHeadTail // or .fillSixRows
         calendar.appearance.titlePlaceholderColor = UIColor.clear // Adjust color as needed
         
+        // Add or update these appearance settings
+        calendar.appearance.eventDefaultColor = .clear
+        calendar.appearance.eventSelectionColor = .clear  // This hides the dots when selected
+  //      calendar.appearance.eventFillDefaultColor = .clear
+    //    calendar.appearance.eventFillSelectionColor = .clear
+        
         return calendar
     }
     
@@ -319,24 +326,54 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         
         func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
-            // Create calendar instance for date comparison
             let calendar = Calendar.current
             
             // Check if the date is tomorrow
             if calendar.isDateInTomorrow(date) {
-                // Get the custom image
-                if let originalImage = UIImage(named: "LogoSqClear") {
-                    // Resize the image to appropriate size for calendar (e.g., 20x20)
-                    let size = CGSize(width: 20, height: 20)
-                    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-                    originalImage.draw(in: CGRect(origin: .zero, size: size))
-                    let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-                    UIGraphicsEndImageContext()
-                    return resizedImage
+                // Determine if we're in year view by checking config type
+                let isYearView = parent.config is YearCalendarConfig
+                
+                // Adjust sizes based on view type
+                let size: CGSize = isYearView ? CGSize(width: 13, height: 13) : CGSize(width: 34, height: 34)
+                let checkmarkSize: CGFloat = isYearView ? 6 : 16
+                let yOffset: CGFloat = isYearView ? 1.5 : 8
+                
+                // Create a checkmark image
+                let checkmarkConfig = UIImage.SymbolConfiguration(pointSize: checkmarkSize, weight: .black)
+                let checkmark = UIImage(systemName: "checkmark", withConfiguration: checkmarkConfig)?
+                    .withTintColor(.black, renderingMode: .alwaysTemplate)
+                
+                UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+                
+                if let context = UIGraphicsGetCurrentContext() {
+                    // Draw lime circle
+                    let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
+                    UIColor(Color.limeAccentColor).setFill()
+                    circlePath.fill()
+                    
+                    // Draw checkmark in center
+                    if let checkmark = checkmark {
+                        let checkmarkRect = CGRect(
+                            x: (size.width - checkmark.size.width) / 2,
+                            y: (size.height - checkmark.size.height) / 2,
+                            width: checkmark.size.width,
+                            height: checkmark.size.height
+                        )
+                        checkmark.draw(in: checkmarkRect)
+                    }
                 }
-            }
-            else if isWeekend(date: date) {
-                return nil ///return UIImage(systemName: "dumbbell")
+                
+                let finalImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                
+                // Add offset to move image up
+                let finalSize = CGSize(width: size.width, height: size.height + (isYearView ? 4 : 16))
+                UIGraphicsBeginImageContextWithOptions(finalSize, false, 0.0)
+                finalImage?.draw(at: CGPoint(x: 0, y: yOffset))
+                let offsetImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                
+                return offsetImage
             }
             return nil
         }

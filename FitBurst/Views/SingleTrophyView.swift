@@ -13,6 +13,10 @@ enum TrophyType: CaseIterable {
     case silver
     case bronze
     case team_sport
+    case mtv
+    case worldcup
+    case football
+    case dumbbell
     
     var displayName: String {
         switch self {
@@ -24,6 +28,14 @@ enum TrophyType: CaseIterable {
             return "Bronze\nAward"
         case .team_sport:
             return "Team\nAward"
+        case .mtv:
+            return "Rocking it!"
+        case .worldcup:
+            return "100 days!"
+        case .football:
+            return "Football\nrocks!"
+        case .dumbbell:
+            return "Weights!"
         }
     }
     
@@ -37,6 +49,14 @@ enum TrophyType: CaseIterable {
             return "Bronze Trophy 3D Model.usdz"
         case .team_sport:
             return "Golden Ball Award 3D Model.usdz"
+        case .mtv:
+            return "MTV Award 3D Model.usdz"
+        case .worldcup:
+            return "World Cup Trophy.usdz"
+        case .football:
+            return "Football Medal 2 by Moshe Caine.usdz"
+        case .dumbbell:
+            return "Dumbbell 3D Model by Yigit Ayyildiz.usdz"
         }
     }
 }
@@ -92,7 +112,7 @@ struct SingleTrophyView: View {
                     dampingFraction: 0.6,
                     blendDuration: 0.5
                 )) {
-                    modelScale = SIMD3<Float>(repeating: 1.0)
+                    modelScale = SIMD3<Float>(repeating: 1)
                 }
                 
                 withAnimation(.spring(
@@ -100,9 +120,10 @@ struct SingleTrophyView: View {
                     dampingFraction: 0.7,
                     blendDuration: 1.0
                 )) {
-                    rotationDegrees = 360
+                    rotationDegrees = 360+180
                 }
                 rippleCounter += 1
+               // playSound(named: "Cinematic Riser Sound Effect")
             }
             
             Model3DView(named: trophyType.fileName)  // Use the passed trophy type
@@ -115,7 +136,30 @@ struct SingleTrophyView: View {
                     camera: $camera,
                     sensitivity: 0.5
                 ))
-                .frame(width: 350, height: 370)
+                .simultaneousGesture(
+                    TapGesture()
+                        .onEnded { _ in
+                            showTrophyDisplayView = false
+                        }
+                )
+                
+            VStack{
+                Rectangle()
+                    .fill(Color.clear)
+                    .ignoresSafeArea()
+                    .frame(width: .infinity, height: 200)
+                    .onTapGesture {
+                        showTrophyDisplayView = false
+                    }
+                Spacer()
+                Rectangle()
+                    .fill(Color.clear)
+                    .ignoresSafeArea()
+                    .frame(width: .infinity, height: 160)
+                    .onTapGesture {
+                        showTrophyDisplayView = false
+                    }
+            }
 
         }
         .onTapGesture {

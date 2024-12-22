@@ -53,9 +53,9 @@ struct HomeView: View {
                 CalendarViewWeek(
                     selectedDate: $selectedDate,
                     showMonthHeader: false,     /// show Month
-                    showWeekdayHeader: false    /// show Days
+                    showWeekdayHeader: true    /// show Days
                 )
-                .frame(height: 50)
+                .frame(height: 100)
                 .offset(y: 130)
                 
                 
@@ -71,12 +71,6 @@ struct HomeView: View {
                 }.buttonStyle(GrowingButtonStyle())
                 
                 Spacer().frame(height: 40)
-                
-                /*
-                 HStack {
-                 Text("Your trophies:")
-                 Spacer()
-                 }.padding()*/
                 
                 TrophyBox(
                     height: 170, 
