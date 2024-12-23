@@ -9,6 +9,118 @@ import SwiftUI
 import UIKit
 import FSCalendar
 
+/// Main Calendar View
+struct CalendarView: View {
+    @State var selectedDate: Date = Date()
+    @State var scale: CGFloat = 1
+    @State private var showWorkoutView: Bool = false
+    @State private var selectedYear: Int = Calendar.current.component(.year, from: Date())
+    
+    var body: some View {
+        ZStack {
+            /// Blackboard waves
+            Image("GradientWaves").resizable().ignoresSafeArea()
+            
+            VStack {
+                HStack {
+                    Button(action: {
+                        selectedYear -= 1
+                    }) {
+                        Image(systemName: "chevron.backward.circle")
+                            .foregroundColor(.white)
+                            .imageScale(.large)
+                    }
+                    
+                    Text(String(format: "%d", selectedYear))
+                        .font(.custom("Futura Bold", size: 40))
+                        .foregroundColor(.white)
+                    
+                    Button(action: {
+                        selectedYear += 1
+                    }) {
+                        Image(systemName:"chevron.forward.circle")
+                            .foregroundColor(.white)
+                            .imageScale(.large)
+                    }
+                }
+                
+                ScrollView {
+                    // CalendarViewMonth(selectedDate: $selectedDate).scaleEffect(scale)
+                    
+                    // Custom year view with grid of months
+                    CalendarViewYear(
+                        selectedDate: $selectedDate,
+                        year: selectedYear
+                    )
+                    .scaleEffect(scale)
+                    .frame(height:650)
+                    
+                    
+                    HStack (alignment: .top) {
+                        VStack (alignment: .leading){
+                            Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                                .animation(.bouncy(), value: selectedDate)
+                                .fontWeight(.bold)
+                            HStack {
+                                /* TrophyIconView(
+                                 showTrophyDisplayView: $showTrophyDisplayView,
+                                 selectedTrophy: $selectedTrophy,
+                                 trophyType: trophy
+                                 )*/
+                                Text("5 in a row!")
+                                Spacer()
+                                Image(systemName: "trash.fill")
+                                    .imageScale(.large)
+                                    .foregroundColor(Color.red)
+                            }
+                            HStack {
+                                Text("First Perfect Week")
+                                Spacer()
+                                Image(systemName: "trash.fill")
+                                    .imageScale(.large)
+                                    .foregroundColor(Color.red)
+                            }
+                        }
+                        .padding()
+                        .foregroundColor(.white)
+                        .font(.body)
+                        
+                        Spacer()
+                        
+                        Button (action: {
+                            showWorkoutView.toggle()
+                        }) {
+                            HStack {
+                                Image(systemName: "dumbbell.fill").imageScale(.large)
+                                Text("Record")
+                            }
+                        }.padding()
+                            .buttonStyle(GrowingButtonStyle())
+                    }
+                    
+                    Spacer()
+                    Spacer()
+                   
+                }
+                /*                .onAppear {
+                 scale = 0.6
+                 withAnimation(.bouncy) { scale = 1 }
+                 withAnimation(.bouncy.delay(0.25)) { scale = 1 }
+                 }*/
+                
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // .background(Color.greenBrandColor)
+            
+            
+            
+            if showWorkoutView == true {
+                RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
+            }
+        }.onAppear { showWorkoutView = false }
+    }
+}
+
 // Create a base protocol for common calendar configuration
 protocol CalendarViewConfigurable {
     var titleFont: UIFont { get }
@@ -94,6 +206,16 @@ struct CalendarViewYear: View {
     var config: CalendarViewConfigurable = YearCalendarConfig()
     var year: Int = Calendar.current.component(.year, from: Date())
     
+    // Add this to track the current year for refresh purposes
+    private let id: Int
+    
+    init(selectedDate: Binding<Date>, config: CalendarViewConfigurable = YearCalendarConfig(), year: Int) {
+        self._selectedDate = selectedDate
+        self.config = config
+        self.year = year
+        self.id = year  // Store the year as an ID
+    }
+    
     // Define columns with equal flexible width and no spacing
     private let columns = [
         GridItem(.flexible(minimum: 0), spacing: 0),
@@ -116,6 +238,7 @@ struct CalendarViewYear: View {
                 }
             }
         }
+        .id(id)  // Force view refresh when year changes
     }
 }
 
@@ -176,71 +299,6 @@ struct CalendarViewWeek: View {
             headerHeight: showMonthHeader ? 40 : 0,
             weekdayHeight: showWeekdayHeader ? 40 : 0
         )
-    }
-}
-
-struct CalendarView: View {
-    @State var selectedDate: Date = Date()
-    @State var scale: CGFloat = 1
-    @State private var showWorkoutView: Bool = false
-    
-    var body: some View {
-        ZStack {
-            /// Blackboard waves
-            Image("GradientWaves").resizable().ignoresSafeArea()
-            
-            VStack {
-                Text("Calendar")
-                    .font(.custom("Futura Bold", size: 40))
-                    .foregroundColor(.white)
-                
-                ScrollView {
-                    // CalendarViewMonth(selectedDate: $selectedDate).scaleEffect(scale)
-                    
-                    // Custom year view with grid of months
-                    CalendarViewYear(
-                        selectedDate: $selectedDate,
-                        year: 2024  // Or use current year: Calendar.current.component(.year, from: Date())
-                    )
-                    .scaleEffect(scale)
-                    
-                    
-                    HStack {
-                        Text("Awards for\n" + selectedDate.formatted(date: .abbreviated, time: .omitted))
-                            .font(.body)
-                            .foregroundColor(.white)
-                            .padding()
-                            .animation(.bouncy(), value: selectedDate)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                /*                .onAppear {
-                 scale = 0.6
-                 withAnimation(.bouncy) { scale = 1 }
-                 withAnimation(.bouncy.delay(0.25)) { scale = 1 }
-                 }*/
-                
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // .background(Color.greenBrandColor)
-            .overlay(
-                Button (action: {
-                    showWorkoutView.toggle()
-                }) {
-                    HStack {
-                        Image(systemName: "dumbbell.fill").imageScale(.large)
-                        Text("Record Workout")
-                    }
-                }.padding()
-                    .buttonStyle(GrowingButtonStyle()),
-                alignment: .bottomTrailing)
-            
-            
-            if showWorkoutView == true {
-                RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
-            }
-        }.onAppear { showWorkoutView = false }
     }
 }
 

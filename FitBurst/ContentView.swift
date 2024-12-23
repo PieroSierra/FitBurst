@@ -74,45 +74,6 @@ extension Notification.Name {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
 
-/*
-struct MainTabView: View {
-    @State private var selectedTab: Tab = Tab.home
-    @State private var previousTab: Tab = Tab.home
-
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            Group {
-                HomeView(selectedTab: $selectedTab)
-                    .tag(Tab.home)
-                    .tabItem { Label("Home", systemImage: "house") }
-                CalendarView()
-                    .tag(Tab.workouts)
-                    .tabItem { Label("Calendar", systemImage: "calendar") }
-                VideosView()
-                    .tag(Tab.videos)
-                    .tabItem { Label("Videos", systemImage: "play.rectangle.fill") }
-                TrophyPageView()
-                    .tag(Tab.trophies)
-                    .tabItem { Label("Trophies", systemImage: "medal.fill") }
-                    /*    SettingsView()
-                    .tag(Tab.settings)
-                    .tabItem { Label("Settings", systemImage: "person.crop.circle.fill") } */
-            }
-            .toolbarBackground(.visible, for: .tabBar)
-            .toolbarBackground(Color.black.opacity(0.4), for: .tabBar)
-            .toolbarColorScheme(.dark, for: .tabBar)
-        }
-        .onChange(of: selectedTab) {
-            if selectedTab == previousTab {
-                NotificationCenter.default.post(name: .scrollToTop, object: nil)
-            }
-            previousTab = selectedTab
-        }
-    }
-}
-*/
-
-
 
 
 
