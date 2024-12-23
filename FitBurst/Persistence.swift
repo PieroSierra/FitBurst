@@ -55,3 +55,62 @@ struct PersistenceController {
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
 }
+
+extension PersistenceController {
+    func recordWorkout(date: Date, workoutType: Int32) {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "timestamp == %@ AND workoutType == %d", date as NSDate, workoutType)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            if results.isEmpty {
+                let newWorkout = Workouts(context: context)
+                newWorkout.timestamp = Calendar.current.startOfDay(for: date)
+                newWorkout.workoutID = UUID()
+                newWorkout.workoutType = workoutType
+                try context.save()
+            } else {
+                print("Workout of this type already exists for the selected date.")
+            }
+        } catch {
+            print("Failed to record workout: \(error.localizedDescription)")
+        }
+    }
+    
+    func deleteWorkout(workout: Workouts) {
+        let context = container.viewContext
+        context.delete(workout)
+        do {
+            try context.save()
+        } catch {
+            print("Failed to delete workout: \(error.localizedDescription)")
+        }
+    }
+    
+    func countWorkouts() -> Int {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
+        
+        do {
+            return try context.count(for: fetchRequest)
+        } catch {
+            print("Failed to count workouts: \(error.localizedDescription)")
+            return 0
+        }
+    }
+    
+    func deleteAllWorkouts() {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Workouts.fetchRequest()
+        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(batchDeleteRequest)
+            try context.save()
+        } catch {
+            print("Failed to delete all workouts: \(error.localizedDescription)")
+        }
+    }
+}
+

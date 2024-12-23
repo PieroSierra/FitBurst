@@ -8,6 +8,7 @@
 import SwiftUI
 import UIKit
 import FSCalendar
+import CoreData
 
 /// Main Calendar View
 struct CalendarView: View {
@@ -15,6 +16,9 @@ struct CalendarView: View {
     @State var scale: CGFloat = 1
     @State private var showWorkoutView: Bool = false
     @State private var selectedYear: Int = Calendar.current.component(.year, from: Date())
+    @State private var context = PersistenceController.shared.container.viewContext
+    @State private var workoutToDelete: Workouts? = nil
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
         ZStack {
@@ -45,8 +49,6 @@ struct CalendarView: View {
                 }
                 
                 ScrollView {
-                    // CalendarViewMonth(selectedDate: $selectedDate).scaleEffect(scale)
-                    
                     // Custom year view with grid of months
                     CalendarViewYear(
                         selectedDate: $selectedDate,
@@ -55,39 +57,35 @@ struct CalendarView: View {
                     .scaleEffect(scale)
                     .frame(height:650)
                     
-                    
-                    HStack (alignment: .top) {
-                        VStack (alignment: .leading){
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading) {
                             Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
                                 .animation(.bouncy(), value: selectedDate)
                                 .fontWeight(.bold)
-                            HStack {
-                                /* TrophyIconView(
-                                 showTrophyDisplayView: $showTrophyDisplayView,
-                                 selectedTrophy: $selectedTrophy,
-                                 trophyType: trophy
-                                 )*/
-                                Text("5 in a row!")
-                                Spacer()
-                                Image(systemName: "trash.fill")
-                                    .imageScale(.large)
-                                    .foregroundColor(Color.red)
+                            
+                            ForEach(fetchWorkouts(for: selectedDate), id: \Workouts.workoutID) { workout in
+                                HStack {
+                                    Text(WorkoutType(rawValue: workout.workoutType)?.description ?? "Unknown")
+                                    Spacer()
+                                    Button(action: {
+                                        workoutToDelete = workout
+                                        showingDeleteConfirmation = true
+                                    }) {
+                                        Image(systemName: "trash.fill")
+                                            .foregroundColor(.red)
+                                    }
+                                }.padding(.top, 10)
                             }
-                            HStack {
-                                Text("First Perfect Week")
-                                Spacer()
-                                Image(systemName: "trash.fill")
-                                    .imageScale(.large)
-                                    .foregroundColor(Color.red)
-                            }
+                            
                         }
                         .padding()
                         .foregroundColor(.white)
+                        .background(Color.clear)
                         .font(.body)
                         
                         Spacer()
                         
-                        Button (action: {
+                        Button(action: {
                             showWorkoutView.toggle()
                         }) {
                             HStack {
@@ -99,25 +97,44 @@ struct CalendarView: View {
                     }
                     
                     Spacer()
-                    Spacer()
-                   
                 }
-                /*                .onAppear {
-                 scale = 0.6
-                 withAnimation(.bouncy) { scale = 1 }
-                 withAnimation(.bouncy.delay(0.25)) { scale = 1 }
-                 }*/
-                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // .background(Color.greenBrandColor)
-            
-            
             
             if showWorkoutView == true {
                 RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
+                    .onDisappear {
+                        refreshCalendar()
+                    }
             }
         }.onAppear { showWorkoutView = false }
+        .alert("Delete Workout", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if let workout = workoutToDelete {
+                    PersistenceController.shared.deleteWorkout(workout: workout)
+                    refreshCalendar()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to delete this workout?")
+        }
+    }
+    
+    private func fetchWorkouts(for date: Date) -> [Workouts] {
+        let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "timestamp == %@", Calendar.current.startOfDay(for: date) as NSDate)
+        
+        do {
+            return try context.fetch(fetchRequest)
+        } catch {
+            print("Failed to fetch workouts: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    private func refreshCalendar() {
+        NotificationCenter.default.post(name: NSNotification.Name("RefreshCalendar"), object: nil)
     }
 }
 
@@ -411,59 +428,60 @@ struct CalendarViewRepresentable: UIViewRepresentable {
             parent.selectedDate = date
         }
         
-        func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
-            let calendar = Calendar.current
-            
-            // Check if the date is tomorrow
-            if calendar.isDateInTomorrow(date) {
-                // Determine if we're in year view by checking config type
-                let isYearView = parent.config is YearCalendarConfig
-                
-                // Adjust sizes based on view type
-                let size: CGSize = isYearView ? CGSize(width: 13, height: 13) : CGSize(width: 34, height: 34)
-                let checkmarkSize: CGFloat = isYearView ? 6 : 16
-                let yOffset: CGFloat = isYearView ? 1.5 : 8
-                
-                // Create a checkmark image
-                let checkmarkConfig = UIImage.SymbolConfiguration(pointSize: checkmarkSize, weight: .black)
-                let checkmark = UIImage(systemName: "checkmark", withConfiguration: checkmarkConfig)?
-                    .withTintColor(.black, renderingMode: .alwaysTemplate)
-                
-                UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-                
-                if let context = UIGraphicsGetCurrentContext() {
-                    // Draw lime circle
-                    let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
-                    UIColor(Color.limeAccentColor).setFill()
-                    circlePath.fill()
-                    
-                    // Draw checkmark in center
-                    if let checkmark = checkmark {
-                        let checkmarkRect = CGRect(
-                            x: (size.width - checkmark.size.width) / 2,
-                            y: (size.height - checkmark.size.height) / 2,
-                            width: checkmark.size.width,
-                            height: checkmark.size.height
-                        )
-                        checkmark.draw(in: checkmarkRect)
-                    }
-                }
-                
-                let finalImage = UIGraphicsGetImageFromCurrentImageContext()
-                UIGraphicsEndImageContext()
-                
-                // Add offset to move image up
-                let finalSize = CGSize(width: size.width, height: size.height + (isYearView ? 4 : 16))
-                UIGraphicsBeginImageContextWithOptions(finalSize, false, 0.0)
-                finalImage?.draw(at: CGPoint(x: 0, y: yOffset))
-                let offsetImage = UIGraphicsGetImageFromCurrentImageContext()
-                UIGraphicsEndImageContext()
-                
-                return offsetImage
-            }
-            return nil
-        }
-        
+        /*
+         func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
+         let calendar = Calendar.current
+         
+         // Check if the date is tomorrow
+         if calendar.isDateInTomorrow(date) {
+         // Determine if we're in year view by checking config type
+         let isYearView = parent.config is YearCalendarConfig
+         
+         // Adjust sizes based on view type
+         let size: CGSize = isYearView ? CGSize(width: 13, height: 13) : CGSize(width: 34, height: 34)
+         let checkmarkSize: CGFloat = isYearView ? 6 : 16
+         let yOffset: CGFloat = isYearView ? 1.5 : 8
+         
+         // Create a checkmark image
+         let checkmarkConfig = UIImage.SymbolConfiguration(pointSize: checkmarkSize, weight: .black)
+         let checkmark = UIImage(systemName: "checkmark", withConfiguration: checkmarkConfig)?
+         .withTintColor(.black, renderingMode: .alwaysTemplate)
+         
+         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+         
+         if let context = UIGraphicsGetCurrentContext() {
+         // Draw lime circle
+         let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
+         UIColor(Color.limeAccentColor).setFill()
+         circlePath.fill()
+         
+         // Draw checkmark in center
+         if let checkmark = checkmark {
+         let checkmarkRect = CGRect(
+         x: (size.width - checkmark.size.width) / 2,
+         y: (size.height - checkmark.size.height) / 2,
+         width: checkmark.size.width,
+         height: checkmark.size.height
+         )
+         checkmark.draw(in: checkmarkRect)
+         }
+         }
+         
+         let finalImage = UIGraphicsGetImageFromCurrentImageContext()
+         UIGraphicsEndImageContext()
+         
+         // Add offset to move image up
+         let finalSize = CGSize(width: size.width, height: size.height + (isYearView ? 4 : 16))
+         UIGraphicsBeginImageContextWithOptions(finalSize, false, 0.0)
+         finalImage?.draw(at: CGPoint(x: 0, y: yOffset))
+         let offsetImage = UIGraphicsGetImageFromCurrentImageContext()
+         UIGraphicsEndImageContext()
+         
+         return offsetImage
+         }
+         return nil
+         }
+         */
         func calendar(_ calendar: FSCalendar,
                       numberOfEventsFor date: Date) -> Int {
             let eventDates = [Date(), Date(),
@@ -516,6 +534,61 @@ func isAward(date: Date) -> Bool {
 func isWorkoutDay(date: Date) -> Bool {
     
     return false
+}
+
+// CalendarViewRepresentable Coordinator Update
+extension CalendarViewRepresentable.Coordinator {
+    func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
+        let context = PersistenceController.shared.container.viewContext
+        let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "timestamp == %@", Calendar.current.startOfDay(for: date) as NSDate)
+        
+        do {
+            let count = try context.count(for: fetchRequest)
+            if count > 0 {
+                // Use existing checkmark rendering logic
+                let isYearView = parent.config is YearCalendarConfig
+                
+                let size: CGSize = isYearView ? CGSize(width: 13, height: 13) : CGSize(width: 34, height: 34)
+                let checkmarkSize: CGFloat = isYearView ? 6 : 16
+                let yOffset: CGFloat = isYearView ? 1.5 : 8
+                
+                let checkmarkConfig = UIImage.SymbolConfiguration(pointSize: checkmarkSize, weight: .black)
+                let checkmark = UIImage(systemName: "checkmark", withConfiguration: checkmarkConfig)?.withTintColor(.black, renderingMode: .alwaysTemplate)
+                
+                UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+                if let context = UIGraphicsGetCurrentContext() {
+                    let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
+                    UIColor(Color.limeAccentColor).setFill()
+                    circlePath.fill()
+                    
+                    if let checkmark = checkmark {
+                        let checkmarkRect = CGRect(
+                            x: (size.width - checkmark.size.width) / 2,
+                            y: (size.height - checkmark.size.height) / 2,
+                            width: checkmark.size.width,
+                            height: checkmark.size.height
+                        )
+                        checkmark.draw(in: checkmarkRect)
+                    }
+                }
+                
+                let finalImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                
+                let finalSize = CGSize(width: size.width, height: size.height + (isYearView ? 4 : 16))
+                UIGraphicsBeginImageContextWithOptions(finalSize, false, 0.0)
+                finalImage?.draw(at: CGPoint(x: 0, y: yOffset))
+                let offsetImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                
+                return offsetImage
+            }
+        } catch {
+            print("Error fetching workouts for date \(date): \(error.localizedDescription)")
+        }
+        return nil
+    }
 }
 
 

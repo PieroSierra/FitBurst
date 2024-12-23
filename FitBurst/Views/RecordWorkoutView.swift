@@ -7,6 +7,26 @@
 
 import SwiftUI
 
+enum WorkoutType: Int32 {
+    case strength = 0
+    case run = 1
+    case teamSport = 2
+    case cardio = 3
+    case yoga = 4
+    case martialArts = 5
+    
+    var description: String {
+        switch self {
+        case .strength: return "Strength"
+        case .run: return "Run"
+        case .teamSport: return "Team Sport"
+        case .cardio: return "Cardio"
+        case .yoga: return "Yoga"
+        case .martialArts: return "Martial Arts"
+        }
+    }
+}
+
 
 enum SoundScape: String {
     // Sci Fi 1
@@ -67,7 +87,10 @@ struct RecordWorkoutView: View {
 
                 HStack {
                     Group {
-                        Button (action: {  })
+                        Button (action: {
+                            let workoutType: Int32 = 0  // Replace with the corresponding workout type
+                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        })
                         {
                             HStack {
                                 Image(systemName: "dumbbell.fill").imageScale(.large)
@@ -75,7 +98,10 @@ struct RecordWorkoutView: View {
                             }
                         }
                         
-                        Button (action: {  })
+                        Button (action: {
+                            let workoutType: Int32 = 1  // Replace with the corresponding workout type
+                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        })
                         {
                             HStack {
                                 Image(systemName: "figure.run.circle.fill").imageScale(.large)
@@ -88,7 +114,10 @@ struct RecordWorkoutView: View {
                 }
                 HStack {
                     Group {
-                        Button (action: {  })
+                        Button (action: {
+                            let workoutType: Int32 = 2  // Replace with the corresponding workout type
+                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        })
                         {
                             HStack {
                                 Image(systemName: "soccerball").imageScale(.large)
@@ -96,7 +125,10 @@ struct RecordWorkoutView: View {
                             }
                         }
                         
-                        Button (action: {  })
+                        Button (action: {
+                            let workoutType: Int32 = 3  // Replace with the corresponding workout type
+                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        })
                         {
                             HStack {
                                 Image(systemName: "figure.run.treadmill.circle.fill").imageScale(.large)
@@ -110,7 +142,10 @@ struct RecordWorkoutView: View {
                 }
                 HStack {
                     Group {
-                        Button (action: {  })
+                        Button (action: {
+                            let workoutType: Int32 = 4  // Replace with the corresponding workout type
+                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        })
                         {
                             HStack {
                                 Image(systemName: "figure.yoga.circle.fill").imageScale(.large)
@@ -118,7 +153,10 @@ struct RecordWorkoutView: View {
                             }
                         }
 
-                        Button (action: {  })
+                        Button (action: {
+                            let workoutType: Int32 = 5  // Replace with the corresponding workout type
+                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        })
                         {
                             HStack {
                                 Image(systemName: "figure.martial.arts.circle.fill").imageScale(.large)

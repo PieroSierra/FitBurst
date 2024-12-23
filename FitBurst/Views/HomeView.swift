@@ -30,7 +30,7 @@ struct HomeView: View {
                     .padding(.bottom, 0)
                 /// Workouts Counter
                 VStack (alignment: .center) {
-                    Text("18")
+                    Text("\(PersistenceController.shared.countWorkouts())")
                         .font(.custom("Futura Bold", size: 80))
                         .multilineTextAlignment(.center)
                         .fontWeight(.bold)
@@ -38,6 +38,15 @@ struct HomeView: View {
                         .foregroundColor(.limeAccentColor)
                         .padding(0)
                         .padding(.top, -10)
+                    /*
+                    Text("18")
+                        .font(.custom("Futura Bold", size: 80))
+                        .multilineTextAlignment(.center)
+                        .fontWeight(.bold)
+                        .lineLimit(1)
+                        .foregroundColor(.limeAccentColor)
+                        .padding(0)
+                        .padding(.top, -10)*/
                     Text ("WORKOUTS")
                         .font(.custom("Futura Bold", size: 16))
                         .fontWeight(.bold)
