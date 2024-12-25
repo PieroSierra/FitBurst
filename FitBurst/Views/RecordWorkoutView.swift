@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+extension Notification.Name {
+    static let workoutAdded = Notification.Name("workoutAdded")
+}
+
 enum WorkoutType: Int32 {
     case strength = 0
     case run = 1
@@ -54,6 +58,7 @@ enum SoundScape: String {
 struct RecordWorkoutView: View {
     @Binding var showWorkoutView: Bool
     @Binding var selectedDate: Date
+    
     @State private var scale: CGFloat = 0.6
     
     ///for ripple
@@ -86,86 +91,99 @@ struct RecordWorkoutView: View {
                 Spacer().frame(height: 30)
 
                 HStack {
-                    Group {
-                        Button (action: {
-                            let workoutType: Int32 = 0  // Replace with the corresponding workout type
-                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        })
-                        {
-                            HStack {
-                                Image(systemName: "dumbbell.fill").imageScale(.large)
-                                Text("Strength")
-                            }
-                        }
-                        
-                        Button (action: {
-                            let workoutType: Int32 = 1  // Replace with the corresponding workout type
-                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        })
-                        {
-                            HStack {
-                                Image(systemName: "figure.run.circle.fill").imageScale(.large)
-                                Text("Run")
-                            }
+                    Button (action: { })
+                    {
+                        HStack {
+                            Image(systemName: "dumbbell.fill").imageScale(.large)
+                            Text("Strength")
                         }
                     }
                     .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: triggerRipple))
+                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
+                        triggerRipple(at: position)
+                        // Only record workout when button fill-up completes
+                        let workoutType: Int32 = 0
+                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
+                    }))
+                    
+                    Button (action: { })
+                    {
+                        HStack {
+                            Image(systemName: "figure.run.circle.fill").imageScale(.large)
+                            Text("Run")
+                        }
+                    }
+                    .padding(5)
+                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
+                        triggerRipple(at: position)
+                        let workoutType: Int32 = 1
+                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
+                    }))
                 }
                 HStack {
-                    Group {
-                        Button (action: {
-                            let workoutType: Int32 = 2  // Replace with the corresponding workout type
-                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        })
-                        {
-                            HStack {
-                                Image(systemName: "soccerball").imageScale(.large)
-                                Text("Team Sport")
-                            }
-                        }
-                        
-                        Button (action: {
-                            let workoutType: Int32 = 3  // Replace with the corresponding workout type
-                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        })
-                        {
-                            HStack {
-                                Image(systemName: "figure.run.treadmill.circle.fill").imageScale(.large)
-                                Text("Cardio")
-                            }
+                    Button (action: { })
+                    {
+                        HStack {
+                            Image(systemName: "soccerball").imageScale(.large)
+                            Text("Team Sport")
                         }
                     }
                     .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: triggerRipple))
+                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
+                        triggerRipple(at: position)
+                        let workoutType: Int32 = 2
+                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
+                    }))
+                    
+                    Button (action: { })
+                    {
+                        HStack {
+                            Image(systemName: "figure.run.treadmill.circle.fill").imageScale(.large)
+                            Text("Cardio")
+                        }
+                    }
+                    .padding(5)
+                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
+                        triggerRipple(at: position)
+                        let workoutType: Int32 = 3
+                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
+                    }))
                     
                 }
                 HStack {
-                    Group {
-                        Button (action: {
-                            let workoutType: Int32 = 4  // Replace with the corresponding workout type
-                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        })
-                        {
-                            HStack {
-                                Image(systemName: "figure.yoga.circle.fill").imageScale(.large)
-                                Text("Yoga")
-                            }
-                        }
-
-                        Button (action: {
-                            let workoutType: Int32 = 5  // Replace with the corresponding workout type
-                            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        })
-                        {
-                            HStack {
-                                Image(systemName: "figure.martial.arts.circle.fill").imageScale(.large)
-                                Text("Martial Arts")
-                            }
+                    Button (action: { })
+                    {
+                        HStack {
+                            Image(systemName: "figure.yoga.circle.fill").imageScale(.large)
+                            Text("Yoga")
                         }
                     }
                     .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: triggerRipple))
+                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
+                        triggerRipple(at: position)
+                        let workoutType: Int32 = 4
+                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
+                    }))
+
+                    Button (action: { })
+                    {
+                        HStack {
+                            Image(systemName: "figure.martial.arts.circle.fill").imageScale(.large)
+                            Text("Martial Arts")
+                        }
+                    }
+                    .padding(5)
+                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
+                        triggerRipple(at: position)
+                        let workoutType: Int32 = 5
+                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
+                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
+                    }))
 
                 }
                 
@@ -208,9 +226,9 @@ struct RecordWorkoutView: View {
                            selection: $selectedDate,
                            displayedComponents: [.date])
                 .labelsHidden()
-                .accentColor(.limeAccentColor)
+                .accentColor(.black)
                 .colorScheme(.dark)
-                .background(Color.white.opacity(0.1))
+                .background(Color.white.opacity(0.3))
                 .cornerRadius(8)
             }
             .padding(.horizontal)

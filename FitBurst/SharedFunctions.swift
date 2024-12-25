@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import WebKit
 import AVFoundation
+import SceneKit
 
 /// Define custom colors
 extension Color {
@@ -369,5 +370,115 @@ func playSound(named soundName: String, fileExtension: String? = nil) {
         
     } catch {
         print("❌ Could not create audio player: \(error)")
+    }
+}
+
+import SwiftUI
+import SceneKit
+
+struct ThreeDTextView: UIViewRepresentable {
+    
+    // MARK: - Public Properties
+    var text: String
+    var extrusionDepth: CGFloat
+    var fontFace: String
+    var fontSize: CGFloat
+    var fontColor: Color
+    
+    /// Rotation in radians about the X, Y, and Z axes.
+    var rotationX: CGFloat
+    var rotationY: CGFloat
+    var rotationZ: CGFloat
+    
+    var animationDuration: TimeInterval = 1.0
+    
+    // MARK: - UIViewRepresentable
+    
+    func makeUIView(context: Context) -> SCNView {
+        let scnView = SCNView()
+        scnView.scene = SCNScene()
+        
+        // Allows the user to pan/zoom/rotate the scene
+        scnView.allowsCameraControl = true
+        
+        // Scene background color
+        scnView.backgroundColor = .clear
+        
+        // Add a camera node
+        let cameraNode = SCNNode()
+        cameraNode.camera = SCNCamera()
+        cameraNode.position = SCNVector3(x: 0, y: 0, z: 20)
+        scnView.scene?.rootNode.addChildNode(cameraNode)
+        
+        // Add a simple omni light
+        let lightNode = SCNNode()
+        lightNode.light = SCNLight()
+        lightNode.light?.type = .omni
+        lightNode.position = SCNVector3(x: 0, y: 10, z: 20)
+        scnView.scene?.rootNode.addChildNode(lightNode)
+        
+        // Optionally, add an ambient light so the text isn’t fully in shadow
+        let ambientLightNode = SCNNode()
+        ambientLightNode.light = SCNLight()
+        ambientLightNode.light?.type = .ambient
+        ambientLightNode.light?.color = UIColor.darkGray
+        scnView.scene?.rootNode.addChildNode(ambientLightNode)
+        
+        return scnView
+    }
+    
+    func updateUIView(_ scnView: SCNView, context: Context) {
+        guard let scene = scnView.scene else { return }
+        
+        // Remove existing text nodes
+        scene.rootNode.childNodes
+            .filter { $0.geometry is SCNText }
+            .forEach { $0.removeFromParentNode() }
+        
+        // Create text geometry
+        let textGeometry = SCNText(string: text, extrusionDepth: extrusionDepth)
+        
+        // Configure material (text color, shininess, etc.)
+        textGeometry.firstMaterial?.diffuse.contents = UIColor (fontColor)
+        
+        // Set the font (now actually used because we're not passing NSAttributedString)
+        if let customFont = UIFont(name: fontFace, size: fontSize) {
+            textGeometry.font = customFont
+        } else {
+            // Fallback if the provided fontFace is invalid
+            textGeometry.font = UIFont.systemFont(ofSize: fontSize)
+        }
+        
+        // Adjust flatness to control polygon count (optional)
+        // textGeometry.flatness = 0.0001 // smoother text
+        // textGeometry.chamferRadius = 0.1 // slightly bevel edges, optional
+        textGeometry.flatness = 0.01
+        textGeometry.chamferRadius = 0.1
+        
+        // Create a node with the text geometry
+        let textNode = SCNNode(geometry: textGeometry)
+        
+        // Center the text
+        let (minBound, maxBound) = textNode.boundingBox
+        textNode.pivot = SCNMatrix4MakeTranslation(
+            (minBound.x + maxBound.x) / 2,
+            (minBound.y + maxBound.y) / 2,
+            (minBound.z + maxBound.z) / 2
+        )
+        
+        // Create rotation animation
+        let rotateAction = SCNAction.rotateBy(
+            x: rotationX - CGFloat(textNode.eulerAngles.x),
+            y: rotationY - CGFloat(textNode.eulerAngles.y),
+            z: rotationZ - CGFloat(textNode.eulerAngles.z),
+            duration: animationDuration
+        )
+        rotateAction.timingMode = .easeOut
+        
+        // Run the animation
+        textNode.runAction(rotateAction)
+        
+        // Add the node to the scene
+        scene.rootNode.addChildNode(textNode)
     }
 }

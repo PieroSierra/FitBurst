@@ -19,6 +19,7 @@ struct CalendarView: View {
     @State private var context = PersistenceController.shared.container.viewContext
     @State private var workoutToDelete: Workouts? = nil
     @State private var showingDeleteConfirmation = false
+    @State private var refreshCounter: Int = 0
     
     var body: some View {
         ZStack {
@@ -52,73 +53,86 @@ struct CalendarView: View {
                     // Custom year view with grid of months
                     CalendarViewYear(
                         selectedDate: $selectedDate,
-                        year: selectedYear
+                        year: selectedYear,
+                        refreshTrigger: refreshCounter
                     )
                     .scaleEffect(scale)
-                    .frame(height:650)
-                    
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading) {
-                            Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
-                                .animation(.bouncy(), value: selectedDate)
-                                .fontWeight(.bold)
-                            
-                            ForEach(fetchWorkouts(for: selectedDate), id: \Workouts.workoutID) { workout in
-                                HStack {
-                                    Text(WorkoutType(rawValue: workout.workoutType)?.description ?? "Unknown")
-                                    Spacer()
-                                    Button(action: {
-                                        workoutToDelete = workout
-                                        showingDeleteConfirmation = true
-                                    }) {
-                                        Image(systemName: "trash.fill")
-                                            .foregroundColor(.red)
-                                    }
-                                }.padding(.top, 10)
-                            }
-                            
-                        }
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(Color.clear)
-                        .font(.body)
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            showWorkoutView.toggle()
-                        }) {
-                            HStack {
-                                Image(systemName: "dumbbell.fill").imageScale(.large)
-                                Text("Record")
-                            }
-                        }.padding()
-                            .buttonStyle(GrowingButtonStyle())
-                    }
-                    
-                    Spacer()
+                    .frame(height:700)
                 }
+                
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading) {
+                        Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                            .animation(.bouncy(), value: selectedDate)
+                            .fontWeight(.bold)
+                        
+                        // Create a local state to track workouts
+                        let workouts = fetchWorkouts(for: selectedDate)
+                        
+                        ForEach(workouts, id: \Workouts.workoutID) { workout in
+                            HStack {
+                                
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.limeAccentColor)
+                                
+                                
+                                Text(WorkoutType(rawValue: workout.workoutType)?.description ?? "Unknown")
+                                Spacer()
+                                Button(action: {
+                                    workoutToDelete = workout
+                                    showingDeleteConfirmation = true
+                                }) {
+                                    Image(systemName: "trash.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }.padding(.top, 7)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                        .animation(.bouncy(duration: 0.3), value: workouts)
+                    }
+                    .padding()
+                    .foregroundColor(.white)
+                    .background(Color.clear)
+                    .font(.body)
+                    Spacer()
+                    
+                    Button(action: {
+                        showWorkoutView.toggle()
+                    }) {
+                        HStack {
+                            Image(systemName: "dumbbell.fill").imageScale(.large)
+                            Text("Record")
+                        }
+                    }.padding()
+                        .buttonStyle(GrowingButtonStyle())
+                }
+                
+                Spacer()
+                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             if showWorkoutView == true {
-                RecordWorkoutView(showWorkoutView: $showWorkoutView, selectedDate: $selectedDate)
-                    .onDisappear {
-                        refreshCalendar()
-                    }
-            }
-        }.onAppear { showWorkoutView = false }
-        .alert("Delete Workout", isPresented: $showingDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                if let workout = workoutToDelete {
-                    PersistenceController.shared.deleteWorkout(workout: workout)
+                RecordWorkoutView(
+                    showWorkoutView: $showWorkoutView, 
+                    selectedDate: $selectedDate
+                )
+                .onDisappear {
                     refreshCalendar()
                 }
             }
-        } message: {
-            Text("Are you sure you want to delete this workout?")
-        }
+        }.onAppear { showWorkoutView = false }
+            .alert("Delete Workout", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    if let workout = workoutToDelete {
+                        PersistenceController.shared.deleteWorkout(workout: workout)
+                        refreshCalendar()
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this workout?")
+            }
     }
     
     private func fetchWorkouts(for date: Date) -> [Workouts] {
@@ -134,6 +148,7 @@ struct CalendarView: View {
     }
     
     private func refreshCalendar() {
+        refreshCounter += 1
         NotificationCenter.default.post(name: NSNotification.Name("RefreshCalendar"), object: nil)
     }
 }
@@ -195,10 +210,11 @@ struct CalendarViewBase: View {
             showMonthHeader: showMonthHeader,
             showWeekdayHeader: showWeekdayHeader
         )
+        .frame(maxWidth: .infinity)
         .frame(height: height)
         .padding(.bottom)
         .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10))
-        .ignoresSafeArea(.all, edges: .top)
+       // .ignoresSafeArea(.all, edges: .top)
     }
 }
 
@@ -222,14 +238,16 @@ struct CalendarViewYear: View {
     @Binding var selectedDate: Date
     var config: CalendarViewConfigurable = YearCalendarConfig()
     var year: Int = Calendar.current.component(.year, from: Date())
+    var refreshTrigger: Int
     
     // Add this to track the current year for refresh purposes
     private let id: Int
     
-    init(selectedDate: Binding<Date>, config: CalendarViewConfigurable = YearCalendarConfig(), year: Int) {
+    init(selectedDate: Binding<Date>, config: CalendarViewConfigurable = YearCalendarConfig(), year: Int, refreshTrigger: Int = 0) {
         self._selectedDate = selectedDate
         self.config = config
         self.year = year
+        self.refreshTrigger = refreshTrigger
         self.id = year  // Store the year as an ID
     }
     
@@ -255,7 +273,7 @@ struct CalendarViewYear: View {
                 }
             }
         }
-        .id(id)  // Force view refresh when year changes
+        .id("\(id)_\(refreshTrigger)")  // Force view refresh when year changes
     }
 }
 
@@ -272,7 +290,7 @@ private struct MonthCell: View {
                 .fontWeight(.bold)
                 .foregroundColor(.limeAccentColor)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 2)
+                .padding(.vertical, 0)
             
             CalendarViewBase(
                 selectedDate: $selectedDate,
@@ -288,6 +306,7 @@ private struct MonthCell: View {
                 showMonthHeader: false,
                 showWeekdayHeader: true
             )
+            
         }
     }
 }
@@ -300,12 +319,43 @@ extension Calendar {
     }
 }
 
+struct CalendarViewWeekStatic: View {
+    @Binding var selectedDate: Date
+
+    var body: some View {
+        CalendarViewBase(
+            selectedDate: $selectedDate,
+            config: WeekCalendarConfig(),
+            scope: .week,
+            height: 100,               // Enough for 1 row + weekday labels
+            rowHeight: 40,
+            headerHeight: 0,          // No month header
+            weekdayHeight: 20,        // Show day names
+            currentPage: startOfThisWeek, // Monday of the current week
+            allowsScrolling: false,
+            showMonthHeader: false,
+            showWeekdayHeader: true
+        )
+    }
+
+    private var startOfThisWeek: Date {
+        let cal = Calendar.current
+        let weekday = cal.component(.weekday, from: Date())
+        // If firstWeekday=2 => Monday
+        let daysSinceMonday = (weekday + 5) % 7 
+        return cal.date(byAdding: .day, value: -daysSinceMonday, to: Date())!
+    }
+}
+
+
 struct CalendarViewWeek: View {
     @Binding var selectedDate: Date
     var config: CalendarViewConfigurable = WeekCalendarConfig()
-    // Add toggles for header elements
     var showMonthHeader: Bool = true
     var showWeekdayHeader: Bool = false
+    
+    // Optional external refresh trigger if you want to programmatically force it:
+    @State private var localRefreshID = UUID()
     
     var body: some View {
         CalendarViewBase(
@@ -313,9 +363,13 @@ struct CalendarViewWeek: View {
             config: config,
             scope: .week,
             height: 300,
+            rowHeight: 50,
             headerHeight: showMonthHeader ? 40 : 0,
             weekdayHeight: showWeekdayHeader ? 40 : 0
         )
+        .id(localRefreshID)        // If you ever need to force redraw, just do localRefreshID = UUID()
+        .frame(maxWidth: .infinity)
+        .frame(height: 300)
     }
 }
 
@@ -339,14 +393,15 @@ struct CalendarViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> FSCalendar {
         calendar.delegate = context.coordinator
         calendar.dataSource = context.coordinator
-        calendar.firstWeekday = 2
         
-        // Apply configuration
+        calendar.firstWeekday = 2  // Monday = 2, Sunday = 1, etc.
+        
+        // --- Appearance configuration ---
         calendar.appearance.weekdayTextColor = .white
         calendar.appearance.weekdayFont = config.weekdayFont
-        calendar.appearance.selectionColor = UIColor(Color.limeAccentColor)
+        calendar.appearance.selectionColor = .white
         calendar.appearance.titleSelectionColor = .black
-        calendar.appearance.todayColor = .white
+        calendar.appearance.todayColor = .gray
         calendar.appearance.titleTodayColor = .black
         calendar.appearance.eventDefaultColor = .clear
         calendar.appearance.titleFont = config.titleFont
@@ -357,55 +412,68 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         calendar.appearance.headerTitleColor = .white
         calendar.appearance.headerDateFormat = "MMMM"
         
-        // Add these lines to properly hide headers
         calendar.headerHeight = headerHeight
         calendar.weekdayHeight = weekdayHeight
-        calendar.appearance.headerMinimumDissolvedAlpha = headerAlpha
         calendar.appearance.caseOptions = .weekdayUsesSingleUpperCase
         
-        // These are the proper toggles to hide headers
+        // Hide or show headers according to flags
         calendar.appearance.headerTitleColor = showMonthHeader ? .white : .clear
         calendar.appearance.weekdayTextColor = showWeekdayHeader ? .white : .clear
         
+        // Layout & scrolling
         calendar.rowHeight = rowHeight
         calendar.scrollDirection = .horizontal
         calendar.scope = scope
         calendar.clipsToBounds = false
         
-        // Disable scrolling for year view cells
-        calendar.scrollEnabled = allowsScrolling
-        
-        // Force single selection per calendar instance
-        calendar.allowsMultipleSelection = false
-        
-        // Force 6 rows display and handle placeholders
-        calendar.placeholderType = .fillSixRows  // Change from .fillHeadTail
-        calendar.appearance.titlePlaceholderColor = UIColor(white: 1, alpha: 0.2) // Make placeholders visible but subtle
-        
-        // Ensure calendar fills all available space
-        calendar.adjustsBoundingRectWhenChangingMonths = false
-        
-        if let currentPage = currentPage {
-            calendar.setCurrentPage(currentPage, animated: false)
-            calendar.scrollEnabled = false
+        // The key fix for the “only one day” glitch in week scope:
+        if scope == .week {
+            calendar.placeholderType = .none
+            calendar.adjustsBoundingRectWhenChangingMonths = true
+            calendar.scrollEnabled = true
+        } else {
+            calendar.placeholderType = .none
+            calendar.adjustsBoundingRectWhenChangingMonths = true
+        // Single-selection
+            calendar.allowsMultipleSelection = false
+            
+            if let currentPage = currentPage {
+                calendar.setCurrentPage(currentPage, animated: false)
+                calendar.scrollEnabled = false
+            }
         }
-        
         return calendar
+    }
+
+    var mondayOfSelectedDate: Date {
+        let cal = Calendar.current
+        let weekday = cal.component(.weekday, from: selectedDate)
+        let daysSinceMonday = (weekday + 5) % 7  // if Monday=2, Sunday=1, etc.
+        return cal.date(byAdding: .day, value: -daysSinceMonday, to: selectedDate) ?? selectedDate
     }
     
     func updateUIView(_ uiView: FSCalendar, context: Context) {
-        // Always start fresh
-        for date in uiView.selectedDates {
-            uiView.deselect(date)
-        }
-        
-        // If currentPage is set, check if selectedDate is in the same month
-        if let currentPage = currentPage {
-            let cal = Calendar.current
-            let sameMonth = cal.isDate(selectedDate, equalTo: currentPage, toGranularity: .month)
-            
-            // 3. If the global selectedDate is in this month, visually select it
-            if sameMonth {
+        uiView.scope = scope
+
+        if scope == .week {
+            let dateToSelect = mondayOfSelectedDate
+            uiView.select(dateToSelect)
+            uiView.reloadData()
+        } else {
+            // Clear old selections:
+            for date in uiView.selectedDates {
+                uiView.deselect(date)
+            }
+            if let currentPage = currentPage {
+                let cal = Calendar.current
+                // For month scope, we check the month
+                // For week scope, you can check the weekOfYear or just let FSCalendar handle it
+                let sameMonth = cal.isDate(selectedDate, equalTo: currentPage, toGranularity: .month)
+                if sameMonth {
+                uiView.select(selectedDate)
+            }
+            } else {
+                // If no fixed currentPage, just select the global selectedDate
                 uiView.select(selectedDate)
             }
         }
@@ -423,65 +491,11 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-            // This is all you need: set the single global binding,
-            // which triggers SwiftUI to update the entire view hierarchy.
             parent.selectedDate = date
+            // Force calendar to refresh its appearance
+            calendar.reloadData()
         }
         
-        /*
-         func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
-         let calendar = Calendar.current
-         
-         // Check if the date is tomorrow
-         if calendar.isDateInTomorrow(date) {
-         // Determine if we're in year view by checking config type
-         let isYearView = parent.config is YearCalendarConfig
-         
-         // Adjust sizes based on view type
-         let size: CGSize = isYearView ? CGSize(width: 13, height: 13) : CGSize(width: 34, height: 34)
-         let checkmarkSize: CGFloat = isYearView ? 6 : 16
-         let yOffset: CGFloat = isYearView ? 1.5 : 8
-         
-         // Create a checkmark image
-         let checkmarkConfig = UIImage.SymbolConfiguration(pointSize: checkmarkSize, weight: .black)
-         let checkmark = UIImage(systemName: "checkmark", withConfiguration: checkmarkConfig)?
-         .withTintColor(.black, renderingMode: .alwaysTemplate)
-         
-         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-         
-         if let context = UIGraphicsGetCurrentContext() {
-         // Draw lime circle
-         let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
-         UIColor(Color.limeAccentColor).setFill()
-         circlePath.fill()
-         
-         // Draw checkmark in center
-         if let checkmark = checkmark {
-         let checkmarkRect = CGRect(
-         x: (size.width - checkmark.size.width) / 2,
-         y: (size.height - checkmark.size.height) / 2,
-         width: checkmark.size.width,
-         height: checkmark.size.height
-         )
-         checkmark.draw(in: checkmarkRect)
-         }
-         }
-         
-         let finalImage = UIGraphicsGetImageFromCurrentImageContext()
-         UIGraphicsEndImageContext()
-         
-         // Add offset to move image up
-         let finalSize = CGSize(width: size.width, height: size.height + (isYearView ? 4 : 16))
-         UIGraphicsBeginImageContextWithOptions(finalSize, false, 0.0)
-         finalImage?.draw(at: CGPoint(x: 0, y: yOffset))
-         let offsetImage = UIGraphicsGetImageFromCurrentImageContext()
-         UIGraphicsEndImageContext()
-         
-         return offsetImage
-         }
-         return nil
-         }
-         */
         func calendar(_ calendar: FSCalendar,
                       numberOfEventsFor date: Date) -> Int {
             let eventDates = [Date(), Date(),
@@ -499,19 +513,15 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         
         func calendar(_ calendar: FSCalendar, shouldSelect date: Date, at monthPosition: FSCalendarMonthPosition) -> Bool {
-            // Remove or comment out the weekend check to allow weekend selection
-            // if isWeekend(date: date) {
-            //     return false
-            // }
-            return true
+            true
         }
         
         func maximumDate(for calendar: FSCalendar) -> Date {
-            return Date.distantFuture
+            .distantFuture
         }
         
         func minimumDate(for calendar: FSCalendar) -> Date {
-            return Date.distantPast
+            .distantPast
         }
     }
 }
@@ -526,28 +536,20 @@ func isWeekend(date: Date) -> Bool {
     return false
 }
 
-func isAward(date: Date) -> Bool {
-    
-    return false
-}
-
-func isWorkoutDay(date: Date) -> Bool {
-    
-    return false
-}
-
 // CalendarViewRepresentable Coordinator Update
 extension CalendarViewRepresentable.Coordinator {
     func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
+        
         let context = PersistenceController.shared.container.viewContext
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "timestamp == %@", Calendar.current.startOfDay(for: date) as NSDate)
         
         do {
             let count = try context.count(for: fetchRequest)
+            
             if count > 0 {
-                // Use existing checkmark rendering logic
                 let isYearView = parent.config is YearCalendarConfig
+                let isSelectedDate = Calendar.current.isDate(date, inSameDayAs: parent.selectedDate)
                 
                 let size: CGSize = isYearView ? CGSize(width: 13, height: 13) : CGSize(width: 34, height: 34)
                 let checkmarkSize: CGFloat = isYearView ? 6 : 16
@@ -559,7 +561,12 @@ extension CalendarViewRepresentable.Coordinator {
                 UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
                 if let context = UIGraphicsGetCurrentContext() {
                     let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
-                    UIColor(Color.limeAccentColor).setFill()
+                    
+                    if isSelectedDate {
+                        UIColor.white.setFill()
+                    } else {
+                        UIColor(Color.limeAccentColor).setFill()
+                    }
                     circlePath.fill()
                     
                     if let checkmark = checkmark {
@@ -591,6 +598,99 @@ extension CalendarViewRepresentable.Coordinator {
     }
 }
 
+struct SimpleWeekRow: View {
+    @Binding var selectedDate: Date
+    
+    private let weekdays = ["M","T","W","T","F","S","S"]
+    
+    var body: some View {
+        let cal = Calendar.current
+        let start = startOfWeek(for: selectedDate)
+  
+        HStack(spacing: 20) {
+            ForEach(0..<7, id: \.self) { i in
+                let day = cal.date(byAdding: .day, value: i, to: start)!
+                
+                VStack(spacing: 4) {
+                    // Top label: "M, T, W, T, F, S, S"
+                    Text(weekdays[i])
+                        .foregroundColor(.white)
+                    
+                    // Bottom: either checkmark or day number
+                    Group {
+                        if cal.isDate(day, inSameDayAs: selectedDate) {
+                            if hasWorkout(on: day) {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.black)
+                                    .padding(8)
+                                    .background(Circle().foregroundColor(.white))
+                            } else {
+                                Text("\(cal.component(.day, from: day))")
+                                    .foregroundColor(.black)
+                                    .padding(8)
+                                    .background(Circle().foregroundColor(.white))
+                            }
+                        } else if hasWorkout(on: day) {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.black)
+                                .padding(8)
+                                .background(Circle().foregroundColor(.limeAccentColor))
+                        } else if cal.isDateInToday(day) {
+                            Text("\(cal.component(.day, from: day))")
+                                .foregroundColor(.black)
+                                .padding(8)
+                                .background(Circle().foregroundColor(.gray))
+                        } else {
+                            Text("\(cal.component(.day, from: day))")
+                                .foregroundColor(.white)
+                                .padding(8)
+                        }
+                    }
+                    .transition(.scale.combined(with: .opacity))
+                }
+                .font(.caption)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity)
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3)) {
+                        selectedDate = day
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+    
+    /// Computes the Monday of the selectedDate’s week, assuming Monday is firstWeekday = 2.
+    private func startOfWeek(for date: Date) -> Date {
+        var cal = Calendar.current
+        cal.firstWeekday = 2 // Monday
+        let weekday = cal.component(.weekday, from: date)
+        let daysFromMonday = (weekday - cal.firstWeekday + 7) % 7
+        return cal.date(byAdding: .day, value: -daysFromMonday, to: date) ?? date
+    }
+    
+    /// Stub: replace with Core Data check for workouts, e.g. fetchWorkouts(day).count > 0
+    private func hasWorkout(on date: Date) -> Bool {
+        let context = PersistenceController.shared.container.viewContext
+        let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "timestamp == %@", Calendar.current.startOfDay(for: date) as NSDate)
+        
+        do {
+            let count = try context.count(for: fetchRequest)
+            if count > 0 {
+                return true
+            }
+            else {
+                return false
+            }
+        } catch {
+            print("Error fetching workouts for date \(date): \(error.localizedDescription)")
+        }
+        return false
+    }
+}
 
 #Preview {
     CalendarView()
