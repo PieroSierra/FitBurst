@@ -7,6 +7,26 @@
 
 import SwiftUI
 
+enum WorkoutType: Int32 {
+    case strength = 0
+    case run = 1
+    case teamSport = 2
+    case cardio = 3
+    case yoga = 4
+    case martialArts = 5
+    
+    var description: String {
+        switch self {
+        case .strength: return "Strength"
+        case .run: return "Run"
+        case .teamSport: return "Team Sport"
+        case .cardio: return "Cardio"
+        case .yoga: return "Yoga"
+        case .martialArts: return "Martial Arts"
+        }
+    }
+}
+
 struct SettingsView: View {
     @AppStorage("username") private var userName: String = ""
     @AppStorage("settingOne") private var settingOne: Bool = true
@@ -14,39 +34,38 @@ struct SettingsView: View {
     @AppStorage("settingThree") private var settingThree: Bool = true
     
     var body: some View {
-        VStack {
-            HStack {
-                Image(systemName: "person.crop.circle.fill")
-                    .imageScale(.large)
-                
+        ZStack {
+            Image("GradientWaves").resizable().ignoresSafeArea()
+            
+            VStack {
                 Text("Settings")
-                    .font(.title)
-                    .bold()
-            }
-            Group {
-                HStack {
-                    Text("Enter your name: ")
-                    Spacer()
-                    TextField("Your name", text: $userName)
-                        .frame(width: 150, height:30)
-                        .multilineTextAlignment(.trailing)
-                        .background(.white)
+                    .font(.custom("Futura Bold", size: 40))
+                    .foregroundColor(.white)
+                    .padding(.bottom, 20)
+
+                Group {
+                    HStack {
+                        Text("Enter your name: ")
+                        Spacer()
+                        TextField("Your name", text: $userName)
+                            .frame(width: 150, height:30)
+                            .multilineTextAlignment(.trailing)
+                            .background(.white)
                         //.overlay(RoundedRectangle(cornerRadius: 2).stroke(.gray))
+                    }
+                    
+                    Toggle("Example setting 1", isOn: $settingOne)
+                    Toggle("Example setting 2", isOn: $settingTwo)
+                    Toggle("Example setting 3", isOn: $settingThree)
                 }
-                
-                Toggle("Example setting 1", isOn: $settingOne)
-                Toggle("Example setting 2", isOn: $settingTwo)
-                Toggle("Example setting 3", isOn: $settingThree)
+                .padding(.leading, 20)
+                .padding(.trailing, 20)
+                Spacer()
             }
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            Spacer()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.greenBrandColor)
     }
 }
-
 #Preview {
     SettingsView()
 }

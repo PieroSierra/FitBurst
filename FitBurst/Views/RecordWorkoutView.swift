@@ -11,27 +11,6 @@ extension Notification.Name {
     static let workoutAdded = Notification.Name("workoutAdded")
 }
 
-enum WorkoutType: Int32 {
-    case strength = 0
-    case run = 1
-    case teamSport = 2
-    case cardio = 3
-    case yoga = 4
-    case martialArts = 5
-    
-    var description: String {
-        switch self {
-        case .strength: return "Strength"
-        case .run: return "Run"
-        case .teamSport: return "Team Sport"
-        case .cardio: return "Cardio"
-        case .yoga: return "Yoga"
-        case .martialArts: return "Martial Arts"
-        }
-    }
-}
-
-
 enum SoundScape: String {
     // Sci Fi 1
     //case buildup = "Sci-Fi Sound Effect Designed Circuits SFX 32"
