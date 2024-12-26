@@ -27,32 +27,34 @@ enum TrophyType: CaseIterable {
     case twoInADay
     case threeInADay
     case lotsInADay
+  //  case testCASE
     
     var displayName: String {
         switch self {
-        case .newbie: return "First\nworkout!"
-        case .fiveX: return "5 in\na row"
-        case .tenX: return "10 in\na row!"
-        case .twentyFiveX: return "25 in\na row!"
-        case .fiftyX: return "50 in\na row!!"
-        case .oneHundredX: return "100 in\na row!!"
-        case .twoHundredX: return "200 in\na row!!!"
-        case .firstPerfectWeek: return "First\nPerfect\nWeek"
-        case .secondPerfectWeek: return "Second\nPerfect\nWeek"
-        case .thirdPerfectWeek: return "Third\nPerfect\nWeek!"
-        case .fourthPerfectWeek: return "Fourth\nPerfect\nWeek!"
-        case .fifthPerfectWeek: return "Fifth\nPerfect\nWeek!!"
-        case .sixthPerfectWeek: return "Sixth\nPerfect\nWeek!!"
-        case .seventhPerfectWeek: return "Seventh\nPerfect\nWeek!!!"
-        case .twoInADay: return "Two\nin a day"
-        case .threeInADay: return "Three\nin a day"
-        case .lotsInADay: return "Lots\nin a day"
+        case .newbie: return "First workout!"
+        case .fiveX: return "5 in a row"
+        case .tenX: return "10 in a row!"
+        case .twentyFiveX: return "25 in a row!"
+        case .fiftyX: return "50 in a row!!"
+        case .oneHundredX: return "100 in a row!!"
+        case .twoHundredX: return "200 in a row!!!"
+        case .firstPerfectWeek: return "First Perfect Week"
+        case .secondPerfectWeek: return "Second Perfect Week"
+        case .thirdPerfectWeek: return "Third Perfect Week!"
+        case .fourthPerfectWeek: return "Fourth Perfect Week!"
+        case .fifthPerfectWeek: return "Fifth Perfect Week!!"
+        case .sixthPerfectWeek: return "Sixth Perfect Week!!"
+        case .seventhPerfectWeek: return "Seventh Perfect Week!!!"
+        case .twoInADay: return "Two in a day"
+        case .threeInADay: return "Three in a day"
+        case .lotsInADay: return "Lots in a day"
+     //   case .testCASE: return "Test Case"
         }
     }
     
     var fileName: String {
         switch self {
-        case .newbie: return "Coin_Star_Silver.usdz"
+        case .newbie: return "Coin_Star_Gold.usdz"
         case .fiveX: return "Coin_Zap_Silver.usdz"
         case .tenX: return "Coin_Zap_Gold.usdz"
         case .twentyFiveX: return "Coin_Crown_Gold.usdz"
@@ -69,6 +71,7 @@ enum TrophyType: CaseIterable {
         case .twoInADay: return "2_Coins_Silver.usdz"
         case .threeInADay: return "3_Coins_Gold.usdz"
         case .lotsInADay: return "5_Coins_Gold.usdz"
+    //    case .testCASE: return "Red_Diamond_Metal.usdz"
         }
     }
 }
@@ -100,7 +103,7 @@ struct SingleTrophyView: View {
                 Text("\(trophyType.displayName)")
                     .padding(.top, 10)
                     .foregroundColor(.white)
-                    .font(.custom("Futura Bold", size: 20))
+                    .font(.custom("Futura Bold", size: 24))
                 
                 Spacer()
 
@@ -153,12 +156,14 @@ struct SingleTrophyView: View {
                     camera: $camera,
                     sensitivity: 0.5
                 ))
+                .ibl(named: "studio_small_03_1k.exr", intensity: 2)
                 .simultaneousGesture(
                     TapGesture()
                         .onEnded { _ in
                             showTrophyDisplayView = false
                         }
                 )
+                .padding(.top, 80)
                 
             VStack{
                 Rectangle()
@@ -211,17 +216,20 @@ struct TrophyIconView: View {
         }) {
             VStack {
                 ZStack{
-                    Circle().frame(width:70, height:70).foregroundColor(Color.limeAccentColor.opacity(0.25))
+                    RoundedRectangle(cornerRadius: 10).frame(width:70, height:70).foregroundColor(.black).opacity(0.3)
                     Model3DView(named: trophyType.fileName)
                         .frame(width:70, height:70)
                 }
                 Text(trophyType.displayName)
-                    .font(.caption2)
+                    .font(.custom("Futura", size: 14))
+                  //  .font(.caption2)
                     .foregroundStyle(Color.white)
                     .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .frame(width: 70)
+                Spacer()
             }
         }
-        .foregroundStyle(.blue)
         .scaleEffect(wasPressed ? 0.9 : scale)
         .animation(.spring(response: 0.2), value: wasPressed)
         .simultaneousGesture(
@@ -241,5 +249,5 @@ struct TrophyIconView: View {
 
 
 #Preview {
-    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .threeInADay)
+    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .thirdPerfectWeek)
 }

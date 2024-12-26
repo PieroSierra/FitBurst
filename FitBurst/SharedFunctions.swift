@@ -430,6 +430,13 @@ struct ThreeDTextView: UIViewRepresentable {
     func updateUIView(_ scnView: SCNView, context: Context) {
         guard let scene = scnView.scene else { return }
         
+        // Add HDRI environment but keep background clear
+        if let hdriURL = Bundle.main.url(forResource: "studio_small_03_1k", withExtension: "exr") {
+            scene.background.contents = UIColor.clear  // Keep background transparent
+            scene.lightingEnvironment.contents = hdriURL  // Keep HDRI for reflections
+            scene.lightingEnvironment.intensity = 1.0
+        }
+        
         // Remove existing text nodes
         scene.rootNode.childNodes
             .filter { $0.geometry is SCNText }
@@ -438,8 +445,12 @@ struct ThreeDTextView: UIViewRepresentable {
         // Create text geometry
         let textGeometry = SCNText(string: text, extrusionDepth: extrusionDepth)
         
-        // Configure material (text color, shininess, etc.)
-        textGeometry.firstMaterial?.diffuse.contents = UIColor (fontColor)
+        // Configure material with metallic and reflective properties
+        let material = textGeometry.firstMaterial!
+        material.diffuse.contents = UIColor(fontColor)
+        material.metalness.contents = 1.0  // Full metallic
+        material.roughness.contents = 0.5  // Medium roughness (inverse of reflectivity)
+        material.lightingModel = .physicallyBased  // Use PBR lighting
         
         // Set the font (now actually used because we're not passing NSAttributedString)
         if let customFont = UIFont(name: fontFace, size: fontSize) {

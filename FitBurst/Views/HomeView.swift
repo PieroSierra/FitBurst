@@ -43,7 +43,7 @@ struct HomeView: View {
             
                 VStack (alignment: .center) {
                     ThreeDTextView(text: "\(workoutCount)",
-                                   extrusionDepth: 3,
+                                   extrusionDepth: 4,
                                    fontFace: "Futura Bold",
                                    fontSize: 20,
                                    fontColor: .limeAccentColor,
@@ -52,7 +52,7 @@ struct HomeView: View {
                                    rotationZ: rotationZ,
                                    animationDuration: 0.5)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 130)
+                    .frame(height: 180)
                     
                     Text (workoutCount == 1 ? "WORKOUT" : "WORKOUTS")
                         .font(.custom("Futura Bold", size: 16))
@@ -84,13 +84,11 @@ struct HomeView: View {
                     Spacer().frame(height: 40)
                     
                     TrophyBox(
-                        height: 170,
                         scrollHorizontally: true,
                         showTrophyDisplayView: $showTrophyDisplayView,
                         selectedTrophy: $selectedTrophy
                     )
-                    .padding(.leading, 20)
-                    .padding(.trailing, 20)
+                    .frame(height: 170)
                     .onTapGesture { selectedTab = Tab.trophies }
                 }
                 .onTapGesture { selectedTab = Tab.calendar }

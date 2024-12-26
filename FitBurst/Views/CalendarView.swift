@@ -20,6 +20,7 @@ struct CalendarView: View {
     @State private var workoutToDelete: Workouts? = nil
     @State private var showingDeleteConfirmation = false
     @State private var refreshCounter: Int = 0
+    @State private var scrollToMonth: Int?
     
     var body: some View {
         ZStack {
@@ -49,15 +50,22 @@ struct CalendarView: View {
                     }
                 }
                 
-                ScrollView {
-                    // Custom year view with grid of months
-                    CalendarViewYear(
-                        selectedDate: $selectedDate,
-                        year: selectedYear,
-                        refreshTrigger: refreshCounter
-                    )
-                    .scaleEffect(scale)
-                    .frame(height:700)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        CalendarViewYear(
+                            selectedDate: $selectedDate,
+                            year: selectedYear,
+                            refreshTrigger: refreshCounter
+                        )
+                        .scaleEffect(scale)
+                        .frame(height:650)
+                        .onChange(of: selectedDate) { newDate in
+                            let month = Calendar.current.component(.month, from: newDate)
+                            withAnimation {
+                                proxy.scrollTo(month, anchor: .center)
+                            }
+                        }
+                    }
                 }
                 
                 HStack(alignment: .top) {
@@ -306,8 +314,8 @@ private struct MonthCell: View {
                 showMonthHeader: false,
                 showWeekdayHeader: true
             )
-            
         }
+        .id(Calendar.current.component(.month, from: date))
     }
 }
 

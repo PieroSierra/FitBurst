@@ -17,20 +17,20 @@ struct TrophyPageView: View {
         ZStack {
             Image("GradientWaves").resizable().ignoresSafeArea()
             
-            VStack {
+            VStack(spacing: 0) {
                 Text("Trophies")
                     .font(.custom("Futura Bold", size: 40))
                     .foregroundColor(.white)
+                    .padding(.bottom, 20)
                 
-                TrophyBox(
-                    height: 400,
-                    scrollHorizontally: false,
-                    showTrophyDisplayView: $showTrophyDisplayView,
-                    selectedTrophy: $selectedTrophy
-                )
-                .padding()
+                ScrollView {
+                    TrophyBox(
+                        scrollHorizontally: false,
+                        showTrophyDisplayView: $showTrophyDisplayView,
+                        selectedTrophy: $selectedTrophy
+                    )
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             if showTrophyDisplayView {
                 SingleTrophyView(
@@ -43,7 +43,6 @@ struct TrophyPageView: View {
 }
 
 struct TrophyBox: View {
-    var height: CGFloat
     var scrollHorizontally: Bool
     @State private var appearingItems: Set<Int> = []
     @State private var scale: CGFloat = 0.6
@@ -52,7 +51,7 @@ struct TrophyBox: View {
     
     @State var trophies: [TrophyType] = {
         var types: [TrophyType] = []
-        for _ in 0..<17 {
+        for _ in 0..<24 {
             types.append(TrophyType.allCases.randomElement()!)
         }
         return types
@@ -60,7 +59,7 @@ struct TrophyBox: View {
     
     let columns = [GridItem(.adaptive(minimum: 70))]
     let rows = [GridItem(.adaptive(minimum: 90))]
-    let numberOfTrophies = 17
+    let numberOfTrophies = 24
     
     private func trophyIcon(for trophy: TrophyType, at index: Int) -> some View {
         TrophyIconView(
@@ -73,51 +72,58 @@ struct TrophyBox: View {
     }
     
     var body: some View {
-        VStack {
-            ScrollView(scrollHorizontally ? .horizontal : .vertical) {
-                if scrollHorizontally {
+        Group {
+            if scrollHorizontally {
+                ScrollView(.horizontal, showsIndicators: false) {
                     LazyHGrid(rows: rows) {
                         ForEach(Array(trophies.enumerated()), id: \.offset) { index, trophy in
                             trophyIcon(for: trophy, at: index)
+                                .scaleEffect(appearingItems.contains(index) ? 1 : 0)
+                                .animation(
+                                    .spring(response: 0.25, dampingFraction: 0.6)
+                                    .delay(Double(index) * 0.05),
+                                    value: appearingItems.contains(index)
+                                )
                         }
                     }
-                    .padding(20).padding(.top, 0)
-                } else {
-                    LazyVGrid(columns: columns) {
-                        ForEach(Array(trophies.enumerated()), id: \.offset) { index, trophy in
-                            trophyIcon(for: trophy, at: index)
-                        }
-                    }
-                    .padding(20).padding(.top, 0)
+                    .padding(20)
+                    .padding(.top, 0)
                 }
+                .scaleEffect(scale)
+            } else {
+                // For vertical, just the grid without ScrollView
+                LazyVGrid(columns: columns) {
+                    ForEach(Array(trophies.enumerated()), id: \.offset) { index, trophy in
+                        trophyIcon(for: trophy, at: index)
+                            .scaleEffect(appearingItems.contains(index) ? 1 : 0)
+                            .animation(
+                                .spring(response: 0.25, dampingFraction: 0.6)
+                                .delay(Double(index) * 0.05),
+                                value: appearingItems.contains(index)
+                            )
+                    }
+                }
+                .padding(20)
+                .padding(.top, 0)
+                .scaleEffect(scale)
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: height)
-        .background(Color.black)
-        .clipShape(RoundedRectangle(cornerRadius: 40))
-        .scaleEffect(scale)
         .onAppear {
-            if trophies.isEmpty {
-                trophies = (0..<numberOfTrophies).map { _ in
-                    TrophyType.allCases.randomElement()!
-                }
-            }
-            // Animat the box itself
+            // Animate the box itself (also faster)
             scale = 0.6
-            withAnimation(.bouncy) { scale = 1.15 }
-            withAnimation(.bouncy.delay(0.25)) { scale = 1 }
+            withAnimation(.bouncy.speed(2)) { scale = 1.15 }
+            withAnimation(.bouncy.speed(2).delay(0.125)) { scale = 1 }
+            
+            // Reset appearing items
+            appearingItems.removeAll()
             
             // Animate items appearing one by one
-            // appearingItems = []
             for index in 0..<numberOfTrophies {
-                DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.05) {
                     appearingItems.insert(index)
                 }
             }
-            
         }
-        Spacer()
     }
     
 }
