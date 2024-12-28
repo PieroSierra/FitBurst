@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var selectedTab: Tab
+    
     /// View controls
     @State private var showWorkoutView: Bool = false
     @State private var showTrophyDisplayView: Bool = false
@@ -28,6 +29,9 @@ struct HomeView: View {
     @State private var rotationX: CGFloat = 0
     @State private var rotationY: CGFloat = 0
     @State private var rotationZ: CGFloat = 0
+    
+    /// Add refresh trigger for TrophyBox
+    @State private var trophyBoxRefreshTrigger = UUID()
     
     var body: some View {
         ZStack {
@@ -75,7 +79,8 @@ struct HomeView: View {
                         showWorkoutView.toggle()
                     }) {
                         HStack {
-                            Image(systemName: "dumbbell.fill").imageScale(.large)
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title)
                             Text("Record Workout")
                         }
                     }
@@ -86,10 +91,12 @@ struct HomeView: View {
                     TrophyBox(
                         scrollHorizontally: true,
                         showTrophyDisplayView: $showTrophyDisplayView,
-                        selectedTrophy: $selectedTrophy
+                        selectedTrophy: $selectedTrophy,
+                        showDummyData: false
                     )
-                    .frame(height: 170)
+                    .frame(height: 180)
                     .onTapGesture { selectedTab = Tab.trophies }
+                    .id(trophyBoxRefreshTrigger)  // Force refresh when trigger changes
                 }
                 .onTapGesture { selectedTab = Tab.calendar }
                 
@@ -129,6 +136,9 @@ struct HomeView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 workoutCount = PersistenceController.shared.countWorkouts()
             }
+        }.onReceive(NotificationCenter.default.publisher(for: .achievementsChanged)) { _ in
+            // Force TrophyBox to refresh
+            trophyBoxRefreshTrigger = UUID()
         }
     }
     

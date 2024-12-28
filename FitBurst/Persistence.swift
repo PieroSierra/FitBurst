@@ -56,17 +56,19 @@ struct PersistenceController {
     }
 }
 
+/// Workout Management Extensions
 extension PersistenceController {
     func recordWorkout(date: Date, workoutType: Int32) {
         let context = container.viewContext
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "timestamp == %@ AND workoutType == %d", date as NSDate, workoutType)
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        fetchRequest.predicate = NSPredicate(format: "timestamp == %@ AND workoutType == %d", startOfDay as NSDate, workoutType)
         
         do {
             let results = try context.fetch(fetchRequest)
             if results.isEmpty {
                 let newWorkout = Workouts(context: context)
-                newWorkout.timestamp = Calendar.current.startOfDay(for: date)
+                newWorkout.timestamp = startOfDay  // Keep using start of day for workouts
                 newWorkout.workoutID = UUID()
                 newWorkout.workoutType = workoutType
                 try context.save()
@@ -113,4 +115,85 @@ extension PersistenceController {
         }
     }
 }
+
+
+/// Award Management Extensions
+extension PersistenceController {
+    func recordAchievement(date: Date, achievementType: Int32) {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
+        
+        // Get count of achievements already recorded for this day
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let existingCountRequest = NSFetchRequest<Achievements>(entityName: "Achievements")
+        existingCountRequest.predicate = NSPredicate(format: "timestamp >= %@ AND timestamp < %@", startOfDay as NSDate, endOfDay as NSDate)
+        
+        // Check if this specific achievement already exists for this specific day
+        let achievementExistsRequest = NSFetchRequest<Achievements>(entityName: "Achievements")
+        achievementExistsRequest.predicate = NSPredicate(
+            format: "achievementType == %d AND timestamp >= %@ AND timestamp < %@",
+            achievementType,
+            startOfDay as NSDate,
+            endOfDay as NSDate
+        )
+        
+        do {
+            let existingCount = try context.count(for: existingCountRequest)
+            let achievementExists = try context.count(for: achievementExistsRequest) > 0
+            
+            // Only proceed if we haven't already recorded this achievement type today
+            if !achievementExists {
+                // Add minutes based on how many achievements we already have for this day
+                let achievementDate = Calendar.current.date(byAdding: .minute, value: existingCount, to: date)!
+                
+                let newAchievement = Achievements(context: context)
+                newAchievement.timestamp = achievementDate
+                newAchievement.achievementID = UUID()
+                newAchievement.achievementType = achievementType
+                try context.save()
+            } else {
+                print("Achievement of type \(achievementType) already exists for today")
+            }
+        } catch {
+            print("Failed to record achievement: \(error.localizedDescription)")
+        }
+    }
+    
+    func deleteAchievement(achievement: Achievements) {
+        let context = container.viewContext
+        context.delete(achievement)
+        do {
+            try context.save()
+        } catch {
+            print("Failed to delete achievement: \(error.localizedDescription)")
+        }
+    }
+    
+    func countAchievements() -> Int {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
+        
+        do {
+            return try context.count(for: fetchRequest)
+        } catch {
+            print("Failed to count achievements: \(error.localizedDescription)")
+            return 0
+        }
+    }
+    
+    func deleteAllAchievements() {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Achievements.fetchRequest()
+        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(batchDeleteRequest)
+            try context.save()
+        } catch {
+            print("Failed to delete all achievements: \(error.localizedDescription)")
+        }
+    }
+}
+
 

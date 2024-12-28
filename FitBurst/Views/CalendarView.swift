@@ -12,6 +12,7 @@ import CoreData
 
 /// Main Calendar View
 struct CalendarView: View {
+    @StateObject private var config = WorkoutConfiguration.shared
     @State var selectedDate: Date = Date()
     @State var scale: CGFloat = 1
     @State private var showWorkoutView: Bool = false
@@ -32,9 +33,12 @@ struct CalendarView: View {
                     Button(action: {
                         selectedYear -= 1
                     }) {
-                        Image(systemName: "chevron.backward.circle")
-                            .foregroundColor(.white)
-                            .imageScale(.large)
+                        Text(String(format: "%d", selectedYear-1))
+                            .font(.custom("Futura Bold", size: 40))
+                            .foregroundStyle(Color.gray)
+                        //Image(systemName: "chevron.backward.circle")
+                          //  .foregroundColor(.white)
+                            //.imageScale(.large)
                     }
                     
                     Text(String(format: "%d", selectedYear))
@@ -44,9 +48,13 @@ struct CalendarView: View {
                     Button(action: {
                         selectedYear += 1
                     }) {
-                        Image(systemName:"chevron.forward.circle")
-                            .foregroundColor(.white)
-                            .imageScale(.large)
+                        Text(String(format: "%d", selectedYear+1))
+                            .font(.custom("Futura Bold", size: 40))
+                            .foregroundStyle(Color.gray)
+                        
+                        //Image(systemName:"chevron.forward.circle")
+                          //  .foregroundColor(.white)
+                            //.imageScale(.large)
                     }
                 }
                 
@@ -68,7 +76,7 @@ struct CalendarView: View {
                     }
                 }
                 
-                HStack(alignment: .top) {
+                HStack(alignment: .bottom) {
                     VStack(alignment: .leading) {
                         Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
                             .animation(.bouncy(), value: selectedDate)
@@ -79,12 +87,12 @@ struct CalendarView: View {
                         
                         ForEach(workouts, id: \Workouts.workoutID) { workout in
                             HStack {
-                                
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.limeAccentColor)
                                 
+                                let workoutName = config.getName(for: workout.workoutType)
+                                Text(workoutName)
                                 
-                                Text(WorkoutType(rawValue: workout.workoutType)?.description ?? "Unknown")
                                 Spacer()
                                 Button(action: {
                                     workoutToDelete = workout
@@ -108,7 +116,8 @@ struct CalendarView: View {
                         showWorkoutView.toggle()
                     }) {
                         HStack {
-                            Image(systemName: "dumbbell.fill").imageScale(.large)
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title)
                             Text("Record")
                         }
                     }.padding()

@@ -7,9 +7,11 @@
 
 import SwiftUI
 import Model3DView
+import CoreData
 
 
 struct TrophyPageView: View {
+    let showDummyData: Bool
     @State private var showTrophyDisplayView: Bool = false
     @State private var selectedTrophy: TrophyType = .newbie
     
@@ -27,7 +29,8 @@ struct TrophyPageView: View {
                     TrophyBox(
                         scrollHorizontally: false,
                         showTrophyDisplayView: $showTrophyDisplayView,
-                        selectedTrophy: $selectedTrophy
+                        selectedTrophy: $selectedTrophy,
+                        showDummyData: showDummyData
                     )
                 }
             }
@@ -48,14 +51,44 @@ struct TrophyBox: View {
     @State private var scale: CGFloat = 0.6
     @Binding var showTrophyDisplayView: Bool
     @Binding var selectedTrophy: TrophyType
+    let showDummyData: Bool
     
-    @State var trophies: [TrophyType] = {
-        var types: [TrophyType] = []
-        for _ in 0..<24 {
-            types.append(TrophyType.allCases.randomElement()!)
+    @State private var trophies: [TrophyType] = []
+    
+    // Add observation of CoreData changes
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    private func loadTrophies() {
+        if showDummyData {
+            // Generate random trophies for dummy data
+            trophies = (0..<24).map { _ in
+                TrophyType.allCases.randomElement()!
+            }
+        } else {
+            // Load real trophies from CoreData
+            let context = PersistenceController.shared.container.viewContext
+            let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
+            
+            // Add sort descriptor for descending timestamp order
+            fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Achievements.timestamp, ascending: false)]
+            
+            do {
+                let achievements = try context.fetch(fetchRequest)
+                
+                // Debug: Print achievements timestamps
+                for achievement in achievements {
+                    print("Achievement type: \(achievement.achievementType), timestamp: \(achievement.timestamp ?? Date())")
+                }
+                
+                trophies = achievements.map { achievement in
+                    TrophyType.allCases[Int(achievement.achievementType)]
+                }
+            } catch {
+                print("Failed to fetch achievements: \(error)")
+                trophies = []
+            }
         }
-        return types
-    }()
+    }
     
     let columns = [GridItem(.adaptive(minimum: 70))]
     let rows = [GridItem(.adaptive(minimum: 90))]
@@ -88,8 +121,8 @@ struct TrophyBox: View {
                     }
                     .padding(20)
                     .padding(.top, 0)
+                    .scaleEffect(scale)
                 }
-                .scaleEffect(scale)
             } else {
                 // For vertical, just the grid without ScrollView
                 LazyVGrid(columns: columns) {
@@ -109,6 +142,8 @@ struct TrophyBox: View {
             }
         }
         .onAppear {
+            loadTrophies()
+            
             // Animate the box itself (also faster)
             scale = 0.6
             withAnimation(.bouncy.speed(2)) { scale = 1.15 }
@@ -118,17 +153,26 @@ struct TrophyBox: View {
             appearingItems.removeAll()
             
             // Animate items appearing one by one
-            for index in 0..<numberOfTrophies {
+            for index in 0..<trophies.count {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.05) {
                     appearingItems.insert(index)
                 }
             }
+        }
+        // Add listener for achievement changes
+        .onReceive(NotificationCenter.default.publisher(for: .workoutAdded)) { _ in
+            print("Loading Trophies")
+            loadTrophies() // Reload trophies when a workout is added
         }
     }
     
 }
 
 
-#Preview {
-    TrophyPageView()
+#Preview("Real Data") {
+    TrophyPageView(showDummyData: false)
+}
+
+#Preview("Sample Data") {
+    TrophyPageView(showDummyData: true)
 }

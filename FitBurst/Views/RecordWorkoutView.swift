@@ -9,28 +9,12 @@ import SwiftUI
 
 extension Notification.Name {
     static let workoutAdded = Notification.Name("workoutAdded")
+    static let achievementsChanged = Notification.Name("achievementsChanged")
 }
 
 enum SoundScape: String {
-    // Sci Fi 1
-    //case buildup = "Sci-Fi Sound Effect Designed Circuits SFX 32"
-    //case release = "Sci-Fi Sound Effect Circuits SFX 31"
-    
-   
-    
-    // Cinematic + Futuristic
-    // case buildup = "Cinematic Riser Sound Effect (1)"
-    // case release = "Futuristic Whoosh Sound Effect"
-    
-    // Cinematic + TikTok
-    //case buildup = "Cinematic Riser Sound Effect (1)"
-    //case release = "TikTok Boom Bling Sound Effect"
-    
-    // Cinematic2 + TikTok
     case buildup = "Cinematic Riser Sound Effect"
     case release = "TikTok Boom Bling Sound Effect"
-    
-
 }
 
 
@@ -61,7 +45,7 @@ struct RecordWorkoutView: View {
             VStack {
                 Spacer().frame(height: 50)
 
-                Text("**Press & hold** to record workout:")
+                Text("**Press & hold** to record:")
                     .foregroundColor(.white)
                     .onTapGesture {
                         rippleCounter += 1
@@ -69,105 +53,32 @@ struct RecordWorkoutView: View {
 
                 Spacer().frame(height: 30)
 
-                HStack {
-                    Button (action: { })
-                    {
-                        HStack {
-                            Image(systemName: "dumbbell.fill").imageScale(.large)
-                            Text("Strength")
-                        }
+                
+                // First row (3 buttons)
+                HStack(spacing: 10) {
+                    ForEach(0..<2) { index in
+                        workoutButton(for: Int32(index))
                     }
-                    .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
-                        triggerRipple(at: position)
-                        // Only record workout when button fill-up completes
-                        let workoutType: Int32 = 0
-                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
-                    }))
-                    
-                    Button (action: { })
-                    {
-                        HStack {
-                            Image(systemName: "figure.run.circle.fill").imageScale(.large)
-                            Text("Run")
-                        }
-                    }
-                    .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
-                        triggerRipple(at: position)
-                        let workoutType: Int32 = 1
-                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
-                    }))
                 }
-                HStack {
-                    Button (action: { })
-                    {
-                        HStack {
-                            Image(systemName: "soccerball").imageScale(.large)
-                            Text("Team Sport")
-                        }
+                
+                Spacer().frame(height: 10)
+                
+                // Second row (3 buttons)
+                HStack(spacing: 10) {
+                    ForEach(2..<4) { index in
+                        workoutButton(for: Int32(index))
                     }
-                    .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
-                        triggerRipple(at: position)
-                        let workoutType: Int32 = 2
-                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
-                    }))
-                    
-                    Button (action: { })
-                    {
-                        HStack {
-                            Image(systemName: "figure.run.treadmill.circle.fill").imageScale(.large)
-                            Text("Cardio")
-                        }
-                    }
-                    .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
-                        triggerRipple(at: position)
-                        let workoutType: Int32 = 3
-                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
-                    }))
-                    
                 }
-                HStack {
-                    Button (action: { })
-                    {
-                        HStack {
-                            Image(systemName: "figure.yoga.circle.fill").imageScale(.large)
-                            Text("Yoga")
-                        }
+                Spacer().frame(height: 10)
+                
+                // Second row (3 buttons)
+                HStack(spacing: 10) {
+                    ForEach(4..<6) { index in
+                        workoutButton(for: Int32(index))
                     }
-                    .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
-                        triggerRipple(at: position)
-                        let workoutType: Int32 = 4
-                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
-                    }))
-
-                    Button (action: { })
-                    {
-                        HStack {
-                            Image(systemName: "figure.martial.arts.circle.fill").imageScale(.large)
-                            Text("Martial Arts")
-                        }
-                    }
-                    .padding(5)
-                    .buttonStyle(FillUpButtonStyle(onComplete: { position in
-                        triggerRipple(at: position)
-                        let workoutType: Int32 = 5
-                        PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: workoutType)
-                        NotificationCenter.default.post(name: .workoutAdded, object: nil)
-                    }))
-
                 }
                 
                 Spacer().frame(height: 60)
-                
             }
             .frame(width:350,height:330)
             .padding(.bottom, 40)
@@ -234,7 +145,49 @@ struct RecordWorkoutView: View {
                 .foregroundColor(.gray)
                 .imageScale(.large)
         }
-        .padding()
+        .padding(25)
+    }
+    
+    @ViewBuilder
+    private func workoutButton(for type: Int32) -> some View {
+        Button(action: { }) {
+            HStack {
+                Image(systemName: WorkoutConfiguration.shared.getIcon(for: type))
+                    .imageScale(.large)
+                Text(WorkoutConfiguration.shared.getName(for: type))
+                    .lineLimit(1)
+//                    .minimumScaleFactor(0.5)
+            }
+  //          .frame(width: 100)
+        }
+        .padding(5)
+        .buttonStyle(FillUpButtonStyle(onComplete: { position in
+            triggerRipple(at: position)
+            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: type)
+            calculateNewAchievements()
+            NotificationCenter.default.post(name: .workoutAdded, object: nil)
+        }))
+    }
+    
+    private func calculateNewAchievements() {
+        let calculator = AchievementCalculator()
+        let result = calculator.calculateAchievements()
+        
+        if !result.newAchievements.isEmpty {
+            print("New achievements earned: \(result.newAchievements)")
+            
+            // Save each new achievement
+            for achievement in result.newAchievements {
+                let achievementIndex = TrophyType.allCases.firstIndex(of: achievement)!
+                PersistenceController.shared.recordAchievement(
+                    date: selectedDate,
+                    achievementType: Int32(achievementIndex)
+                )
+            }
+            
+            // Post notification that achievements have changed
+            NotificationCenter.default.post(name: .achievementsChanged, object: nil)
+        }
     }
 }
 

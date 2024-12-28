@@ -15,7 +15,7 @@ enum WorkoutType: Int32 {
     case yoga = 4
     case martialArts = 5
     
-    var description: String {
+    var defaultName: String {
         switch self {
         case .strength: return "Strength"
         case .run: return "Run"
@@ -25,15 +25,104 @@ enum WorkoutType: Int32 {
         case .martialArts: return "Martial Arts"
         }
     }
+    
+    var defaultIcon: String {
+        switch self {
+        case .strength: return "dumbbell.fill"
+        case .run: return "figure.run"
+        case .teamSport: return "soccerball"
+        case .cardio: return "figure.run.treadmill"
+        case .yoga: return "figure.yoga"
+        case .martialArts: return "figure.martial.arts"
+        }
+    }
+}
+
+/// Class to handle reading/writing overrides from UserDefaults
+class WorkoutConfiguration: ObservableObject {
+    static let shared = WorkoutConfiguration()
+    
+    @Published private var nameOverrides: [Int32: String] = [:]
+    @Published private var iconOverrides: [Int32: String] = [:]
+    
+    private let defaults = UserDefaults.standard
+    
+    private init() {
+        // Load saved overrides
+        loadOverrides()
+    }
+    
+    func getName(for type: Int32) -> String {
+        nameOverrides[type] ?? WorkoutType(rawValue: type)?.defaultName ?? "Unknown"
+    }
+    
+    func getIcon(for type: Int32) -> String {
+        iconOverrides[type] ?? WorkoutType(rawValue: type)?.defaultIcon ?? "questionmark.circle"
+    }
+    
+    func setName(_ name: String?, for type: Int32) {
+        nameOverrides[type] = name
+        saveOverrides()
+    }
+    
+    func setIcon(_ icon: String?, for type: Int32) {
+        iconOverrides[type] = icon
+        saveOverrides()
+    }
+    
+    private func loadOverrides() {
+        if let savedNames = defaults.dictionary(forKey: "workoutNameOverrides") as? [String: String] {
+            nameOverrides = savedNames.reduce(into: [:]) { result, pair in
+                if let type = Int32(pair.key) {
+                    result[type] = pair.value
+                }
+            }
+        }
+        
+        if let savedIcons = defaults.dictionary(forKey: "workoutIconOverrides") as? [String: String] {
+            iconOverrides = savedIcons.reduce(into: [:]) { result, pair in
+                if let type = Int32(pair.key) {
+                    result[type] = pair.value
+                }
+            }
+        }
+    }
+    
+    private func saveOverrides() {
+        let namesDict = nameOverrides.reduce(into: [:]) { result, pair in
+            result[String(pair.key)] = pair.value
+        }
+        let iconsDict = iconOverrides.reduce(into: [:]) { result, pair in
+            result[String(pair.key)] = pair.value
+        }
+        
+        defaults.set(namesDict, forKey: "workoutNameOverrides")
+        defaults.set(iconsDict, forKey: "workoutIconOverrides")
+    }
+    
+    func resetToDefaults() {
+        nameOverrides.removeAll()
+        iconOverrides.removeAll()
+        
+        // Clear UserDefaults
+        defaults.removeObject(forKey: "workoutNameOverrides")
+        defaults.removeObject(forKey: "workoutIconOverrides")
+    }
 }
 
 struct SettingsView: View {
-    @AppStorage("workoutOneOverride") private var workoutOneOverride: String = "Strength"
-    @AppStorage("workoutTwoOverride") private var workoutTwoOverride: String = "Run"
-    @AppStorage("workoutThreeOverride") private var workoutThreeOverride: String = "Team Sport"
-    @AppStorage("workoutFourOverride") private var workoutFourOverride: String = "Cardio"
-    @AppStorage("workoutFiveOverride") private var workoutFiveOverride: String = "Yoga"
-    @AppStorage("workoutSixOverride") private var workoutSixOverride: String = "Martial Arts"
+    /// Shared states
+    @StateObject private var config = WorkoutConfiguration.shared
+    @State private var context = PersistenceController.shared.container.viewContext
+    
+    /// View states
+    @State private var showIconPickerView = false
+    @State private var editingWorkoutType: Int32?
+    @State private var showResetAlert = false
+#if DEBUG
+    @State private var showDeleteWorkoutsAlert = false
+    @State private var showDeleteAchievementsAlert = false
+#endif
     
     var body: some View {
         ZStack {
@@ -45,78 +134,133 @@ struct SettingsView: View {
                     .padding(.bottom, 20)
                     .foregroundStyle(.white)
                 
-                VStack (alignment: .leading){
-                    Group {
-                        
-                        Text("Customize your workout types")
-                        Divider().foregroundStyle(Color.white)
-                        
-                        Text("Workout type 1")
-                        TextField("Strength", text: $workoutOneOverride)
-                            .frame(width: 150, height:30)
-                            .background(.white.opacity(0.3))
-                            .cornerRadius(5)
-                        Spacer()
-                        Text("Workout type 2")
-                        TextField("Run", text: $workoutTwoOverride)
-                            .frame(width: 150, height:30)
-                            .background(.white.opacity(0.3))
-                            .cornerRadius(5)
-                        Spacer()
-                        Text("Workout type 3")
-                        TextField("Team Sport", text: $workoutThreeOverride)
-                            .frame(width: 150, height:30)
-                            .background(.white.opacity(0.3))
-                            .cornerRadius(5)
-                        Spacer()
-                        Text("Workout type 4")
-                        TextField("Cardio", text: $workoutFourOverride)
-                            .frame(width: 150, height:30)
-                            .background(.white.opacity(0.3))
-                            .cornerRadius(5)
-                        Spacer()
-                        Text("Workout type 5")
-                        TextField("Yoga", text: $workoutFiveOverride)
-                            .frame(width: 150, height:30)
-                            .background(.white.opacity(0.3))
-                            .cornerRadius(5)
-                        Spacer()
-                        Text("Workout type 6")
-                        TextField("Martial Arts", text: $workoutSixOverride)
-                            .frame(width: 150, height:30)
-                            .background(.white.opacity(0.3))
-                            .cornerRadius(5)
-                        Spacer()
-                    }
-                    .foregroundColor(.white)
+                Text ("Customize your workout types")
+                    .foregroundStyle(.white)
+                
+                ScrollView {
                     
-                    Spacer()
+                    VStack (alignment: .center) {
+                        
+                        ForEach(0..<6) { index in
+                            let type = Int32(index)
+                            
+                            HStack {
+                                Button(action: {
+                                    editingWorkoutType = type
+                                    showIconPickerView = true
+                                }) {
+                                    Image(systemName: config.getIcon(for: type))
+                                        .font(.title2)
+                                        .frame(width: 40, height: 40)
+                                        .background(Color.white)
+                                        .foregroundStyle(Color.black)
+                                        .cornerRadius(10)
+                                }
+                                TextField(WorkoutType(rawValue: type)?.defaultName ?? "",
+                                          text: Binding(
+                                            get: { config.getName(for: type) },
+                                            set: { config.setName($0, for: type) }
+                                          ))
+                                .font(.custom("Futura", size: 15))
+                                .frame(width: 150, height:40)
+                                .padding(.horizontal, 10)
+                                .background(.black.opacity(0.3))
+                                .cornerRadius(10)
+                                .foregroundColor(.white)
+                            }
+                            Spacer()
+                        }
+                        
+                        Button(action: {
+                            showResetAlert = true
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.counterclockwise.circle.fill")
+                                    .font(.title2)
+                                Text("Reset to defaults")
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red.opacity(0.6))
+                            .cornerRadius(10)
+                        }
+                        .padding(.top, 30)
+#if DEBUG
+                        Button(action: {
+                            showDeleteWorkoutsAlert = true
+                        }) {
+                            HStack {
+                                Image(systemName: "trash.fill")
+                                    .font(.title2)
+                                Text("Delete all workouts")
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red.opacity(0.6))
+                            .cornerRadius(10)
+                        }
+                        .padding(.top, 30)
+                        
+                        Button(action: {
+                            showDeleteAchievementsAlert = true
+                        }) {
+                            HStack {
+                                Image(systemName: "trash.fill")
+                                    .font(.title2)
+                                Text("Delete all Achievements")
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red.opacity(0.6))
+                            .cornerRadius(10)
+                        }
+                        .padding(.top, 30)
+#endif
+                        
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(35)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(35)
+            }
+            
+            if showIconPickerView {
+                if let type = editingWorkoutType {
+                    IconPickerView(
+                        showIconPickerView: $showIconPickerView,
+                        workoutType: type
+                    )
+                }
             }
         }
+        .alert("Reset Settings", isPresented: $showResetAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                config.resetToDefaults()
+            }
+        } message: {
+            Text("This will reset all workout names and icons to their defaults.")
+        }
+        #if DEBUG
+        .alert("Reset Settings", isPresented: $showDeleteWorkoutsAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                PersistenceController.shared.deleteAllWorkouts()
+            }
+        } message: {
+            Text("This will delete all recorded workouts. This action cannot be undone.")
+        }
+        .alert("Reset Settings", isPresented: $showDeleteAchievementsAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                PersistenceController.shared.deleteAllAchievements()
+            }
+        } message: {
+            Text("This will delete all achievements. This action cannot be undone.")
+        }
+        #endif
     }
 }
+
 #Preview {
     SettingsView()
 }
-
-
-/* Group {
- HStack {
- Text("Enter your name: ")
- Spacer()
- TextField("Your name", text: $userName)
- .frame(width: 150, height:30)
- .multilineTextAlignment(.trailing)
- .background(.white)
- //.overlay(RoundedRectangle(cornerRadius: 2).stroke(.gray))
- }
- 
- Toggle("Example setting 1", isOn: $settingOne)
- Toggle("Example setting 2", isOn: $settingTwo)
- Toggle("Example setting 3", isOn: $settingThree)
- }
- .padding(.leading, 20)
- .padding(.trailing, 20)*/
