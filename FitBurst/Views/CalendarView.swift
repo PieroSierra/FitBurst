@@ -25,131 +25,147 @@ struct CalendarView: View {
     
     var body: some View {
         ZStack {
-            /// Blackboard waves
-            Image("GradientWaves").resizable().ignoresSafeArea()
-            
-            VStack {
-                HStack {
-                    Button(action: {
-                        selectedYear -= 1
-                    }) {
-                        Text(String(format: "%d", selectedYear-1))
-                            .font(.custom("Futura Bold", size: 40))
-                            .foregroundStyle(Color.gray)
-                        //Image(systemName: "chevron.backward.circle")
-                          //  .foregroundColor(.white)
-                            //.imageScale(.large)
-                    }
-                    
-                    Text(String(format: "%d", selectedYear))
-                        .font(.custom("Futura Bold", size: 40))
-                        .foregroundColor(.white)
-                    
-                    Button(action: {
-                        selectedYear += 1
-                    }) {
-                        Text(String(format: "%d", selectedYear+1))
-                            .font(.custom("Futura Bold", size: 40))
-                            .foregroundStyle(Color.gray)
-                        
-                        //Image(systemName:"chevron.forward.circle")
-                          //  .foregroundColor(.white)
-                            //.imageScale(.large)
-                    }
-                }
-                
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        CalendarViewYear(
-                            selectedDate: $selectedDate,
-                            year: selectedYear,
-                            refreshTrigger: refreshCounter
-                        )
-                        .scaleEffect(scale)
-                        .frame(height:650)
-                        .onChange(of: selectedDate) { newDate in
-                            let month = Calendar.current.component(.month, from: newDate)
-                            withAnimation {
-                                proxy.scrollTo(month, anchor: .center)
-                            }
-                        }
-                    }
-                }
-                
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading) {
-                        Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
-                            .animation(.bouncy(), value: selectedDate)
-                            .fontWeight(.bold)
-                        
-                        // Create a local state to track workouts
-                        let workouts = fetchWorkouts(for: selectedDate)
-                        
-                        ForEach(workouts, id: \Workouts.workoutID) { workout in
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.limeAccentColor)
-                                
-                                let workoutName = config.getName(for: workout.workoutType)
-                                Text(workoutName)
-                                
-                                Spacer()
-                                Button(action: {
-                                    workoutToDelete = workout
-                                    showingDeleteConfirmation = true
-                                }) {
-                                    Image(systemName: "trash.fill")
-                                        .foregroundColor(.red)
-                                }
-                            }.padding(.top, 7)
-                                .transition(.scale.combined(with: .opacity))
-                        }
-                        .animation(.bouncy(duration: 0.3), value: workouts)
-                    }
-                    .padding()
-                    .foregroundColor(.white)
-                    .background(Color.clear)
-                    .font(.body)
-                    Spacer()
-                    
-                    Button(action: {
-                        showWorkoutView.toggle()
-                    }) {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.title)
-                            Text("Record")
-                        }
-                    }.padding()
-                        .buttonStyle(GrowingButtonStyle())
-                }
-                
-                Spacer()
-                
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
-            if showWorkoutView == true {
-                RecordWorkoutView(
-                    showWorkoutView: $showWorkoutView, 
-                    selectedDate: $selectedDate
-                )
-                .onDisappear {
+            backgroundView
+            mainContent
+        }
+        .onAppear { showWorkoutView = false }
+        .alert("Delete Workout", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if let workout = workoutToDelete {
+                    PersistenceController.shared.deleteWorkout(workout: workout)
                     refreshCalendar()
+                    RecordWorkoutView.recalculateAchievements()
                 }
             }
-        }.onAppear { showWorkoutView = false }
-            .alert("Delete Workout", isPresented: $showingDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
-                    if let workout = workoutToDelete {
-                        PersistenceController.shared.deleteWorkout(workout: workout)
-                        refreshCalendar()
+        } message: {
+            Text("Are you sure you want to delete this workout?")
+        }
+    }
+    
+    private var backgroundView: some View {
+        Image("GradientWaves")
+            .resizable()
+            .ignoresSafeArea()
+    }
+    
+    private var yearSelector: some View {
+        HStack {
+            Button(action: { selectedYear -= 1 }) {
+                Image(systemName: "chevron.backward.circle")
+                    .foregroundColor(.white)
+                    .imageScale(.large)
+            }
+            
+            Text(String(format: "%d", selectedYear))
+                .font(.custom("Futura Bold", size: 40))
+                .foregroundColor(.white)
+            
+            Button(action: { selectedYear += 1 }) {
+                Image(systemName:"chevron.forward.circle")
+                    .foregroundColor(.white)
+                    .imageScale(.large)
+            }
+        }
+    }
+    
+    private var calendarGrid: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                CalendarViewYear(
+                    selectedDate: $selectedDate,
+                    year: selectedYear,
+                    refreshTrigger: refreshCounter
+                )
+                .scaleEffect(scale)
+                .frame(height:650)
+                .onChange(of: selectedDate) { newDate in
+                    let month = Calendar.current.component(.month, from: newDate)
+                    withAnimation {
+                        proxy.scrollTo(month, anchor: .center)
                     }
                 }
-            } message: {
-                Text("Are you sure you want to delete this workout?")
             }
+        }
+    }
+    
+    private var workoutsList: some View {
+        VStack(alignment: .leading) {
+            Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                .animation(.bouncy(), value: selectedDate)
+                .fontWeight(.bold)
+            
+            let workouts = fetchWorkouts(for: selectedDate)
+            
+            ForEach(workouts, id: \Workouts.workoutID) { workout in
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.limeAccentColor)
+                    
+                    let workoutName = config.getName(for: workout.workoutType)
+                    Text(workoutName)
+                    
+                    Spacer()
+                    Button(action: {
+                        workoutToDelete = workout
+                        showingDeleteConfirmation = true
+                    }) {
+                        Image(systemName: "trash.fill")
+                            .foregroundColor(.red)
+                    }
+                }
+                .padding(.top, 7)
+                .transition(.scale.combined(with: .opacity))
+            }
+            .animation(.bouncy(duration: 0.3), value: workouts)
+        }
+        .padding()
+        .foregroundColor(.white)
+        .background(Color.clear)
+        .font(.body)
+    }
+    
+    private var recordButton: some View {
+        Button(action: {
+            showWorkoutView.toggle()
+        }) {
+            HStack {
+                Image(systemName: "dumbbell.fill").imageScale(.large)
+                Text("Record")
+            }
+        }
+        .padding()
+        .buttonStyle(GrowingButtonStyle())
+    }
+    
+    private var mainContent: some View {
+        VStack {
+            yearSelector
+            calendarGrid
+            
+            HStack(alignment: .top) {
+                workoutsList
+                Spacer()
+                recordButton
+            }
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(workoutOverlay)
+    }
+    
+    @ViewBuilder
+    private var workoutOverlay: some View {
+        if showWorkoutView {
+            RecordWorkoutView(
+                showWorkoutView: $showWorkoutView,
+                selectedDate: $selectedDate
+            )
+            .onDisappear {
+                refreshCalendar()
+            }
+        }
     }
     
     private func fetchWorkouts(for date: Date) -> [Workouts] {
@@ -231,7 +247,7 @@ struct CalendarViewBase: View {
         .frame(height: height)
         .padding(.bottom)
         .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10))
-       // .ignoresSafeArea(.all, edges: .top)
+        // .ignoresSafeArea(.all, edges: .top)
     }
 }
 
@@ -338,7 +354,7 @@ extension Calendar {
 
 struct CalendarViewWeekStatic: View {
     @Binding var selectedDate: Date
-
+    
     var body: some View {
         CalendarViewBase(
             selectedDate: $selectedDate,
@@ -354,7 +370,7 @@ struct CalendarViewWeekStatic: View {
             showWeekdayHeader: true
         )
     }
-
+    
     private var startOfThisWeek: Date {
         let cal = Calendar.current
         let weekday = cal.component(.weekday, from: Date())
@@ -451,7 +467,7 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         } else {
             calendar.placeholderType = .none
             calendar.adjustsBoundingRectWhenChangingMonths = true
-        // Single-selection
+            // Single-selection
             calendar.allowsMultipleSelection = false
             
             if let currentPage = currentPage {
@@ -461,7 +477,7 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         return calendar
     }
-
+    
     var mondayOfSelectedDate: Date {
         let cal = Calendar.current
         let weekday = cal.component(.weekday, from: selectedDate)
@@ -471,7 +487,7 @@ struct CalendarViewRepresentable: UIViewRepresentable {
     
     func updateUIView(_ uiView: FSCalendar, context: Context) {
         uiView.scope = scope
-
+        
         if scope == .week {
             let dateToSelect = mondayOfSelectedDate
             uiView.select(dateToSelect)
@@ -487,8 +503,8 @@ struct CalendarViewRepresentable: UIViewRepresentable {
                 // For week scope, you can check the weekOfYear or just let FSCalendar handle it
                 let sameMonth = cal.isDate(selectedDate, equalTo: currentPage, toGranularity: .month)
                 if sameMonth {
-                uiView.select(selectedDate)
-            }
+                    uiView.select(selectedDate)
+                }
             } else {
                 // If no fixed currentPage, just select the global selectedDate
                 uiView.select(selectedDate)
@@ -623,7 +639,7 @@ struct SimpleWeekRow: View {
     var body: some View {
         let cal = Calendar.current
         let start = startOfWeek(for: selectedDate)
-  
+        
         HStack(spacing: 20) {
             ForEach(0..<7, id: \.self) { i in
                 let day = cal.date(byAdding: .day, value: i, to: start)!

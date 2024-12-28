@@ -171,6 +171,12 @@ struct RecordWorkoutView: View {
     }
     
     private func calculateNewAchievements() {
+        RecordWorkoutView.recalculateAchievements()
+    }
+}
+
+extension RecordWorkoutView {
+    public static func recalculateAchievements() {
         let calculator = AchievementCalculator()
         let result = calculator.calculateAchievements()
         
