@@ -60,21 +60,16 @@ struct PersistenceController {
 extension PersistenceController {
     func recordWorkout(date: Date, workoutType: Int32) {
         let context = container.viewContext
-        let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
         let startOfDay = Calendar.current.startOfDay(for: date)
-        fetchRequest.predicate = NSPredicate(format: "timestamp == %@ AND workoutType == %d", startOfDay as NSDate, workoutType)
+        
+        // Create new workout without checking for existing ones
+        let newWorkout = Workouts(context: context)
+        newWorkout.timestamp = startOfDay
+        newWorkout.workoutID = UUID()
+        newWorkout.workoutType = workoutType
         
         do {
-            let results = try context.fetch(fetchRequest)
-            if results.isEmpty {
-                let newWorkout = Workouts(context: context)
-                newWorkout.timestamp = startOfDay  // Keep using start of day for workouts
-                newWorkout.workoutID = UUID()
-                newWorkout.workoutType = workoutType
-                try context.save()
-            } else {
-                print("Workout of this type already exists for the selected date.")
-            }
+            try context.save()
         } catch {
             print("Failed to record workout: \(error.localizedDescription)")
         }
@@ -121,13 +116,17 @@ extension PersistenceController {
 extension PersistenceController {
     func recordAchievement(date: Date, achievementType: Int32) {
         let context = container.viewContext
-        let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
         
-        // Get count of achievements already recorded for this day
+        // Get start and end of the workout's day (not today's date)
         let startOfDay = Calendar.current.startOfDay(for: date)
         let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        // Get count of achievements already recorded for this specific day
         let existingCountRequest = NSFetchRequest<Achievements>(entityName: "Achievements")
-        existingCountRequest.predicate = NSPredicate(format: "timestamp >= %@ AND timestamp < %@", startOfDay as NSDate, endOfDay as NSDate)
+        existingCountRequest.predicate = NSPredicate(format: "timestamp >= %@ AND timestamp < %@", 
+            startOfDay as NSDate, 
+            endOfDay as NSDate
+        )
         
         // Check if this specific achievement already exists for this specific day
         let achievementExistsRequest = NSFetchRequest<Achievements>(entityName: "Achievements")
@@ -144,8 +143,8 @@ extension PersistenceController {
             
             // Only proceed if we haven't already recorded this achievement type today
             if !achievementExists {
-                // Add minutes based on how many achievements we already have for this day
-                let achievementDate = Calendar.current.date(byAdding: .minute, value: existingCount, to: date)!
+                // Add minutes to the start of the achievement's day
+                let achievementDate = Calendar.current.date(byAdding: .minute, value: existingCount, to: startOfDay)!
                 
                 let newAchievement = Achievements(context: context)
                 newAchievement.timestamp = achievementDate
@@ -153,10 +152,10 @@ extension PersistenceController {
                 newAchievement.achievementType = achievementType
                 try context.save()
             } else {
-                print("Achievement of type \(achievementType) already exists for today")
+                print("Achievement of type \(achievementType) already exists for this day")
             }
         } catch {
-            print("Failed to record achievement: \(error.localizedDescription)")
+            print("Failed to record achievement: \(error)")
         }
     }
     

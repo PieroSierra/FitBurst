@@ -1,4 +1,3 @@
-//
 //  RecordWorkoutView.swift
 //  FitBurst
 //
@@ -6,9 +5,11 @@
 //
 
 import SwiftUI
+import CoreData
 
 extension Notification.Name {
     static let workoutAdded = Notification.Name("workoutAdded")
+    static let workoutDeleted = Notification.Name("workoutDeleted")
     static let achievementsChanged = Notification.Name("achievementsChanged")
 }
 
@@ -173,20 +174,49 @@ struct RecordWorkoutView: View {
         let calculator = AchievementCalculator()
         let result = calculator.calculateAchievements()
         
-        if !result.newAchievements.isEmpty {
-            print("New achievements earned: \(result.newAchievements)")
+        do {
+            let context = PersistenceController.shared.container.viewContext
+            let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
+            let existingAchievements = try context.fetch(fetchRequest)
             
-            // Save each new achievement
-            for achievement in result.newAchievements {
-                let achievementIndex = TrophyType.allCases.firstIndex(of: achievement)!
-                PersistenceController.shared.recordAchievement(
-                    date: selectedDate,
-                    achievementType: Int32(achievementIndex)
+            // Convert existing achievements to our record type
+            let existingRecords = existingAchievements.compactMap { achievement -> AchievementRecord? in
+                guard let timestamp = achievement.timestamp else { return nil }
+                return AchievementRecord(
+                    type: TrophyType.allCases[Int(achievement.achievementType)],
+                    date: timestamp
                 )
             }
             
-            // Post notification that achievements have changed
-            NotificationCenter.default.post(name: .achievementsChanged, object: nil)
+            // Compare as sets to ignore order
+            if Set(existingRecords) != Set(result.achievements) {
+                // Calculate new achievements for UI purposes
+                let existingTypes = Set(existingRecords.map { $0.type })
+                let newTypes = Set(result.achievements.map { $0.type })
+                let newlyEarned = newTypes.subtracting(existingTypes)
+                
+                if !newlyEarned.isEmpty {
+                    print("New achievements earned: \(newlyEarned)")
+                }
+                
+                // Delete all existing achievements
+                for achievement in existingAchievements {
+                    context.delete(achievement)
+                }
+                
+                // Save the complete new set
+                for achievement in result.achievements {
+                    let achievementIndex = TrophyType.allCases.firstIndex(of: achievement.type)!
+                    PersistenceController.shared.recordAchievement(
+                        date: achievement.date,
+                        achievementType: Int32(achievementIndex)
+                    )
+                }
+                
+                NotificationCenter.default.post(name: .achievementsChanged, object: nil)
+            }
+        } catch {
+            print("Error managing achievements: \(error)")
         }
     }
 }

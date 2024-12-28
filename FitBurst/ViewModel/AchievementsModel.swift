@@ -1,4 +1,3 @@
-//
 //  AchievementsModel.swift
 //  FitBurst
 //
@@ -73,6 +72,21 @@ enum TrophyType: CaseIterable {
     }
 }
 
+struct AchievementRecord: Equatable, Hashable {
+    let type: TrophyType
+    let date: Date
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(type)
+        hasher.combine(date)
+    }
+}
+
+struct AchievementResult {
+    let achievements: [AchievementRecord]
+    let dates: [TrophyType: Date]
+}
+
 class AchievementCalculator {
     private let persistenceController: PersistenceController
     
@@ -80,173 +94,209 @@ class AchievementCalculator {
         self.persistenceController = persistenceController
     }
     
-    struct AchievementResult {
-        let newAchievements: Set<TrophyType>
-        let removedAchievements: Set<TrophyType>
-    }
-    
     func calculateAchievements() -> AchievementResult {
         let context = persistenceController.container.viewContext
-        
-        // Fetch all workouts, sorted by date
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Workouts.timestamp, ascending: true)]
         
-        // Fetch existing achievements
-        let achievementsFetch: NSFetchRequest<Achievements> = Achievements.fetchRequest()
-        
         do {
             let workouts = try context.fetch(fetchRequest)
-            let existingAchievements = try context.fetch(achievementsFetch)
-            let existingTypes = Set(existingAchievements.map { achievement in
-                let index = Int(achievement.achievementType)
-                let trophyType = TrophyType.allCases[index]
-                return trophyType
-            })
+            var achievements: [AchievementRecord] = []
+            var achievementDates: [TrophyType: Date] = [:]
             
-            let calculatedAchievements = calculateEarnedAchievements(from: workouts)
-            
-            // Determine new and removed achievements
-            let newAchievements = calculatedAchievements.subtracting(existingTypes)
-            let removedAchievements = existingTypes.subtracting(calculatedAchievements)
-            
-            return AchievementResult(
-                newAchievements: newAchievements,
-                removedAchievements: removedAchievements
-            )
-        } catch {
-            print("Error calculating achievements: \(error)")
-            return AchievementResult(newAchievements: [], removedAchievements: [])
-        }
-    }
-    
-    private func calculateEarnedAchievements(from workouts: [Workouts]) -> Set<TrophyType> {
-        var earnedAchievements = Set<TrophyType>()
-        
-        // Early exit if no workouts
-        guard !workouts.isEmpty else { return earnedAchievements }
-        
-        // Newbie achievement - always earned if there's at least one workout
-        earnedAchievements.insert(.newbie)
-        
-        // Calculate streaks and counts
-        let streakInfo = calculateStreaks(from: workouts)
-        let workoutsByDay = groupWorkoutsByDay(workouts)
-        
-        // Check streak-based achievements
-        checkStreakAchievements(streakInfo.longestStreak, &earnedAchievements)
-        
-        // Check perfect weeks
-        let perfectWeeks = calculatePerfectWeeks(from: workouts)
-        checkPerfectWeekAchievements(perfectWeeks, &earnedAchievements)
-        
-        // Get existing achievements for comparison
-        let context = persistenceController.container.viewContext
-        let achievementsFetch: NSFetchRequest<Achievements> = Achievements.fetchRequest()
-        
-        do {
-            let existingAchievements = try context.fetch(achievementsFetch)
-            let existingByDay = Dictionary(grouping: existingAchievements) { achievement in
-                Calendar.current.startOfDay(for: achievement.timestamp!)
+            // Early exit if no workouts
+            guard !workouts.isEmpty,
+                  let firstWorkoutDate = workouts[0].timestamp else {
+                return AchievementResult(achievements: achievements, dates: achievementDates)
             }
+            
+            // Newbie achievement - first workout
+            achievements.append(AchievementRecord(type: .newbie, date: firstWorkoutDate))
+            achievementDates[.newbie] = firstWorkoutDate
+            
+            // Calculate streaks
+            let streakInfo = calculateStreaks(from: workouts)
+            checkStreakAchievements(streakInfo.longestStreak, &achievements, &achievementDates, latestDate: workouts.last?.timestamp)
+            
+            // Check perfect weeks
+            let perfectWeeks = calculatePerfectWeeks(from: workouts)
+            checkPerfectWeekAchievements(perfectWeeks, &achievements, &achievementDates)
             
             // Check multiple workouts per day
-            for (date, dayWorkouts) in workoutsByDay {
-                let startOfDay = Calendar.current.startOfDay(for: date)
-                let existingForDay = existingByDay[startOfDay] ?? []
-                let existingTypesForDay = Set(existingForDay.map { Int($0.achievementType) })
-                
-                let count = dayWorkouts.count
-                if count >= 2 && !existingTypesForDay.contains(TrophyType.allCases.firstIndex(of: .twoInADay)!) {
-                    earnedAchievements.insert(.twoInADay)
-                }
-                if count >= 3 && !existingTypesForDay.contains(TrophyType.allCases.firstIndex(of: .threeInADay)!) {
-                    earnedAchievements.insert(.threeInADay)
-                }
-                if count >= 4 && !existingTypesForDay.contains(TrophyType.allCases.firstIndex(of: .lotsInADay)!) {
-                    earnedAchievements.insert(.lotsInADay)
-                }
-            }
+            let workoutsByDay = groupWorkoutsByDay(workouts)
+            checkMultipleWorkoutsPerDay(workoutsByDay, &achievements)
+            
+            return AchievementResult(achievements: achievements, dates: achievementDates)
             
         } catch {
-            print("Error fetching existing achievements: \(error)")
+            print("Failed to fetch workouts: \(error)")
+            return AchievementResult(achievements: [], dates: [:])
         }
-        
-        return earnedAchievements
     }
     
     private struct StreakInfo {
         let longestStreak: Int
         let currentStreak: Int
+        let streakEndDate: Date?
     }
     
     private func calculateStreaks(from workouts: [Workouts]) -> StreakInfo {
         var longestStreak = 0
         var currentStreak = 0
         var lastDate: Date?
+        var streakEndDate: Date?
         
         let calendar = Calendar.current
         let workoutDays = Set(workouts.map { calendar.startOfDay(for: $0.timestamp!) })
+        let sortedDays = workoutDays.sorted()
         
-        for date in workoutDays.sorted() {
+        for date in sortedDays {
             if let last = lastDate,
                calendar.dateComponents([.day], from: last, to: date).day == 1 {
                 currentStreak += 1
+                if currentStreak > longestStreak {
+                    longestStreak = currentStreak
+                    streakEndDate = date
+                }
             } else {
                 currentStreak = 1
             }
-            
-            longestStreak = max(longestStreak, currentStreak)
             lastDate = date
         }
         
-        return StreakInfo(longestStreak: longestStreak, currentStreak: currentStreak)
+        return StreakInfo(
+            longestStreak: longestStreak,
+            currentStreak: currentStreak,
+            streakEndDate: streakEndDate
+        )
     }
     
-    private func checkStreakAchievements(_ streak: Int, _ achievements: inout Set<TrophyType>) {
-        if streak >= 5 { achievements.insert(.fiveX) }
-        if streak >= 10 { achievements.insert(.tenX) }
-        if streak >= 25 { achievements.insert(.twentyFiveX) }
-        if streak >= 50 { achievements.insert(.fiftyX) }
-        if streak >= 100 { achievements.insert(.oneHundredX) }
-        if streak >= 200 { achievements.insert(.twoHundredX) }
+    private func checkStreakAchievements(
+        _ streak: Int,
+        _ achievements: inout [AchievementRecord],
+        _ dates: inout [TrophyType: Date],
+        latestDate: Date?
+    ) {
+        guard let date = latestDate else { return }
+        
+        if streak >= 5 {
+            achievements.append(AchievementRecord(type: .fiveX, date: date))
+            dates[.fiveX] = date
+        }
+        if streak >= 10 {
+            achievements.append(AchievementRecord(type: .tenX, date: date))
+            dates[.tenX] = date
+        }
+        if streak >= 25 {
+            achievements.append(AchievementRecord(type: .twentyFiveX, date: date))
+            dates[.twentyFiveX] = date
+        }
+        if streak >= 50 {
+            achievements.append(AchievementRecord(type: .fiftyX, date: date))
+            dates[.fiftyX] = date
+        }
+        if streak >= 100 {
+            achievements.append(AchievementRecord(type: .oneHundredX, date: date))
+            dates[.oneHundredX] = date
+        }
+        if streak >= 200 {
+            achievements.append(AchievementRecord(type: .twoHundredX, date: date))
+            dates[.twoHundredX] = date
+        }
     }
     
-    private func calculatePerfectWeeks(from workouts: [Workouts]) -> Int {
+    private func calculatePerfectWeeks(from workouts: [Workouts]) -> [(weekCount: Int, endDate: Date)] {
         let calendar = Calendar.current
-        var perfectWeeks = 0
+        var perfectWeeks: [(weekCount: Int, endDate: Date)] = []
         
         // Group workouts by week
         let workoutsByWeek = Dictionary(grouping: workouts) { workout in
             calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: workout.timestamp!)
         }
         
-        for (_, weekWorkouts) in workoutsByWeek {
+        // Sort weeks by comparing year and week components
+        let sortedWeeks = workoutsByWeek.sorted { week1, week2 in
+            if week1.key.yearForWeekOfYear != week2.key.yearForWeekOfYear {
+                return week1.key.yearForWeekOfYear! < week2.key.yearForWeekOfYear!
+            }
+            return week1.key.weekOfYear! < week2.key.weekOfYear!
+        }
+        
+        for (_, weekWorkouts) in sortedWeeks {
             let workoutDays = Set(weekWorkouts.map { calendar.component(.weekday, from: $0.timestamp!) })
-            // Check if all weekdays (2-1, Monday-Sunday) have workouts
-            let hasAllWeekdays = (2...7).allSatisfy { workoutDays.contains($0) } && workoutDays.contains(1)
+            // Check if all weekdays (1-7, Sunday-Saturday) have workouts
+            let hasAllWeekdays = (1...7).allSatisfy { workoutDays.contains($0) }
+            
             if hasAllWeekdays {
-                perfectWeeks += 1
+                let weekEndDate = weekWorkouts.map { $0.timestamp! }.max()!
+                perfectWeeks.append((perfectWeeks.count + 1, weekEndDate))
             }
         }
         
         return perfectWeeks
     }
     
-    private func checkPerfectWeekAchievements(_ weeks: Int, _ achievements: inout Set<TrophyType>) {
-        if weeks >= 1 { achievements.insert(.firstPerfectWeek) }
-        if weeks >= 2 { achievements.insert(.secondPerfectWeek) }
-        if weeks >= 3 { achievements.insert(.thirdPerfectWeek) }
-        if weeks >= 4 { achievements.insert(.fourthPerfectWeek) }
-        if weeks >= 5 { achievements.insert(.fifthPerfectWeek) }
-        if weeks >= 6 { achievements.insert(.sixthPerfectWeek) }
-        if weeks >= 7 { achievements.insert(.seventhPerfectWeek) }
+    private func checkPerfectWeekAchievements(
+        _ perfectWeeks: [(weekCount: Int, endDate: Date)],
+        _ achievements: inout [AchievementRecord],
+        _ dates: inout [TrophyType: Date]
+    ) {
+        for week in perfectWeeks {
+            switch week.weekCount {
+            case 1:
+                achievements.append(AchievementRecord(type: .firstPerfectWeek, date: week.endDate))
+                dates[.firstPerfectWeek] = week.endDate
+            case 2:
+                achievements.append(AchievementRecord(type: .secondPerfectWeek, date: week.endDate))
+                dates[.secondPerfectWeek] = week.endDate
+            case 3:
+                achievements.append(AchievementRecord(type: .thirdPerfectWeek, date: week.endDate))
+                dates[.thirdPerfectWeek] = week.endDate
+            case 4:
+                achievements.append(AchievementRecord(type: .fourthPerfectWeek, date: week.endDate))
+                dates[.fourthPerfectWeek] = week.endDate
+            case 5:
+                achievements.append(AchievementRecord(type: .fifthPerfectWeek, date: week.endDate))
+                dates[.fifthPerfectWeek] = week.endDate
+            case 6:
+                achievements.append(AchievementRecord(type: .sixthPerfectWeek, date: week.endDate))
+                dates[.sixthPerfectWeek] = week.endDate
+            case 7:
+                achievements.append(AchievementRecord(type: .seventhPerfectWeek, date: week.endDate))
+                dates[.seventhPerfectWeek] = week.endDate
+            default: break
+            }
+        }
+    }
+    
+    private func checkMultipleWorkoutsPerDay(
+        _ workoutsByDay: [Date: [Workouts]],
+        _ achievements: inout [AchievementRecord]
+    ) {
+        let sortedDays = workoutsByDay.keys.sorted()
+        
+        for date in sortedDays {
+            let dayWorkouts = workoutsByDay[date]!
+            let count = dayWorkouts.count
+            
+            if count >= 2 {
+                print("Adding twoInADay achievement for \(date)")
+                achievements.append(AchievementRecord(type: .twoInADay, date: date))
+            }
+            if count >= 3 {
+                print("Adding threeInADay achievement for \(date)")
+                achievements.append(AchievementRecord(type: .threeInADay, date: date))
+            }
+            if count >= 4 {
+                print("Adding lotsInADay achievement for \(date)")
+                achievements.append(AchievementRecord(type: .lotsInADay, date: date))
+            }
+        }
     }
     
     private func groupWorkoutsByDay(_ workouts: [Workouts]) -> [Date: [Workouts]] {
-        let calendar = Calendar.current
-        return Dictionary(grouping: workouts) { workout in
-            calendar.startOfDay(for: workout.timestamp!)
+        Dictionary(grouping: workouts) { workout in
+            Calendar.current.startOfDay(for: workout.timestamp!)
         }
     }
 }

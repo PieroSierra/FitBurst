@@ -161,7 +161,6 @@ struct TrophyBox: View {
         }
         // Add listener for achievement changes
         .onReceive(NotificationCenter.default.publisher(for: .workoutAdded)) { _ in
-            print("Loading Trophies")
             loadTrophies() // Reload trophies when a workout is added
         }
     }
