@@ -58,7 +58,9 @@ struct RecordWorkoutView: View {
                 // First row (3 buttons)
                 HStack(spacing: 10) {
                     ForEach(0..<2) { index in
-                        workoutButton(for: Int32(index))
+                        if WorkoutConfiguration.shared.isVisible(for: Int32(index)) {
+                                workoutButton(for: Int32(index))
+                        }
                     }
                 }
                 
@@ -67,7 +69,9 @@ struct RecordWorkoutView: View {
                 // Second row (3 buttons)
                 HStack(spacing: 10) {
                     ForEach(2..<4) { index in
-                        workoutButton(for: Int32(index))
+                        if WorkoutConfiguration.shared.isVisible(for: Int32(index)) {
+                            workoutButton(for: Int32(index))
+                        }
                     }
                 }
                 Spacer().frame(height: 10)
@@ -75,7 +79,9 @@ struct RecordWorkoutView: View {
                 // Second row (3 buttons)
                 HStack(spacing: 10) {
                     ForEach(4..<6) { index in
-                        workoutButton(for: Int32(index))
+                        if WorkoutConfiguration.shared.isVisible(for: Int32(index)) {
+                            workoutButton(for: Int32(index))
+                        }
                     }
                 }
                 
