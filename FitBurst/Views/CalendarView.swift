@@ -51,21 +51,34 @@ struct CalendarView: View {
     
     private var yearSelector: some View {
         HStack {
-            Button(action: { selectedYear -= 1 }) {
-                Image(systemName: "chevron.backward.circle")
+  
+                Button(action: {
+                    selectedYear -= 1
+                }) {
+                    Text(String(format: "%d", selectedYear-1))
+                        .font(.custom("Futura Bold", size: 40))
+                        .foregroundStyle(Color.gray)
+                    //Image(systemName: "chevron.backward.circle")
+                    //  .foregroundColor(.white)
+                    //.imageScale(.large)
+                }
+                
+                Text(String(format: "%d", selectedYear))
+                    .font(.custom("Futura Bold", size: 40))
                     .foregroundColor(.white)
-                    .imageScale(.large)
-            }
+                
+                Button(action: {
+                    selectedYear += 1
+                }) {
+                    Text(String(format: "%d", selectedYear+1))
+                        .font(.custom("Futura Bold", size: 40))
+                        .foregroundStyle(Color.gray)
+                    
+                    //Image(systemName:"chevron.forward.circle")
+                    //  .foregroundColor(.white)
+                    //.imageScale(.large)
+                }
             
-            Text(String(format: "%d", selectedYear))
-                .font(.custom("Futura Bold", size: 40))
-                .foregroundColor(.white)
-            
-            Button(action: { selectedYear += 1 }) {
-                Image(systemName:"chevron.forward.circle")
-                    .foregroundColor(.white)
-                    .imageScale(.large)
-            }
         }
     }
     
@@ -78,7 +91,7 @@ struct CalendarView: View {
                     refreshTrigger: refreshCounter
                 )
                 .scaleEffect(scale)
-                .frame(height:650)
+                .frame(height:750)
                 .onChange(of: selectedDate) { newDate in
                     let month = Calendar.current.component(.month, from: newDate)
                     withAnimation {
@@ -143,7 +156,7 @@ struct CalendarView: View {
             yearSelector
             calendarGrid
             
-            HStack(alignment: .top) {
+            HStack(alignment: .bottom) {
                 workoutsList
                 Spacer()
                 recordButton
@@ -524,6 +537,11 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         }
         
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+            let oldDate = parent.selectedDate
+            print(">>> didSelect in subcalendar for month \(Calendar.current.component(.month, from: calendar.currentPage))")
+            print("    oldDate = \(oldDate), newDate = \(date)")
+            print("oldDate in local time = \(oldDate.formatted(date: .numeric, time: .omitted))")
+
             parent.selectedDate = date
             // Force calendar to refresh its appearance
             calendar.reloadData()
@@ -592,7 +610,7 @@ extension CalendarViewRepresentable.Coordinator {
                 let checkmark = UIImage(systemName: "checkmark", withConfiguration: checkmarkConfig)?.withTintColor(.black, renderingMode: .alwaysTemplate)
                 
                 UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-                if let context = UIGraphicsGetCurrentContext() {
+           //     if let context = UIGraphicsGetCurrentContext() {
                     let circlePath = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size))
                     
                     if isSelectedDate {
@@ -611,7 +629,7 @@ extension CalendarViewRepresentable.Coordinator {
                         )
                         checkmark.draw(in: checkmarkRect)
                     }
-                }
+              // }
                 
                 let finalImage = UIGraphicsGetImageFromCurrentImageContext()
                 UIGraphicsEndImageContext()

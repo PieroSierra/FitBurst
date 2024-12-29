@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct FitBurstApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {

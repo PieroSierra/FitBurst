@@ -7,6 +7,13 @@
 
 import SwiftUI
 import CoreData
+import UIKit
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return .portrait
+    }
+}
 
 enum Tab: String, CaseIterable {
     case home = "Home"
@@ -18,6 +25,7 @@ enum Tab: String, CaseIterable {
  
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     @State private var selectedTab: Tab = .home
     

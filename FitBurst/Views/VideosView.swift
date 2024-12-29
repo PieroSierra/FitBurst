@@ -111,7 +111,7 @@ struct VideosView: View {
                 
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onChange(of: selectedSegment) { _ in
+            .onChange(of: selectedSegment) { 
                 // Reset animations when category changes
                 appearingItems.removeAll()
                 // Animate new items
