@@ -13,7 +13,7 @@ struct HomeView: View {
     /// View controls
     @State private var showWorkoutView: Bool = false
     @State private var showTrophyDisplayView: Bool = false
-    @State private var selectedTrophy: TrophyType = .newbie
+    @State private var selectedTrophy: TrophyWithDate? = nil
     
     /// track the selected date
     @State var selectedDate: Date = Date()
@@ -116,10 +116,11 @@ struct HomeView: View {
                     }
             }
             
-            if showTrophyDisplayView {
+            if showTrophyDisplayView, let trophy = selectedTrophy {
                 SingleTrophyView(
                     showTrophyDisplayView: $showTrophyDisplayView,
-                    trophyType: selectedTrophy
+                    trophyType: trophy.type,
+                    earnedDate: trophy.earnedDate
                 )
             }
             

@@ -1,4 +1,3 @@
-//
 //  TrophyView.swift
 //  FitBurst
 //
@@ -9,11 +8,16 @@ import SwiftUI
 import Model3DView
 import CoreData
 
+// Add this struct at the top level
+struct TrophyWithDate {
+    let type: TrophyType
+    let earnedDate: Date
+}
 
 struct TrophyPageView: View {
     let showDummyData: Bool
     @State private var showTrophyDisplayView: Bool = false
-    @State private var selectedTrophy: TrophyType = .newbie
+    @State private var selectedTrophy: TrophyWithDate? = nil
     
     var body: some View {
         ZStack {
@@ -35,10 +39,11 @@ struct TrophyPageView: View {
                 }
             }
             
-            if showTrophyDisplayView {
+            if showTrophyDisplayView, let trophy = selectedTrophy {
                 SingleTrophyView(
                     showTrophyDisplayView: $showTrophyDisplayView,
-                    trophyType: selectedTrophy
+                    trophyType: trophy.type,
+                    earnedDate: trophy.earnedDate
                 )
             }
         }
@@ -50,38 +55,36 @@ struct TrophyBox: View {
     @State private var appearingItems: Set<Int> = []
     @State private var scale: CGFloat = 0.6
     @Binding var showTrophyDisplayView: Bool
-    @Binding var selectedTrophy: TrophyType
+    @Binding var selectedTrophy: TrophyWithDate?
     let showDummyData: Bool
     
-    @State private var trophies: [TrophyType] = []
+    @State private var trophies: [TrophyWithDate] = []
     
     // Add observation of CoreData changes
     @Environment(\.managedObjectContext) private var viewContext
     
     private func loadTrophies() {
         if showDummyData {
-            // Generate random trophies for dummy data
+            // Generate random trophies with dates for dummy data
             trophies = (0..<24).map { _ in
-                TrophyType.allCases.randomElement()!
+                TrophyWithDate(
+                    type: TrophyType.allCases.randomElement()!,
+                    earnedDate: Date().addingTimeInterval(-Double.random(in: 0...(86400 * 30))) // Random date within last 30 days
+                )
             }
         } else {
             // Load real trophies from CoreData
             let context = PersistenceController.shared.container.viewContext
             let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
-            
-            // Add sort descriptor for descending timestamp order
             fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Achievements.timestamp, ascending: false)]
             
             do {
                 let achievements = try context.fetch(fetchRequest)
-                
-                // Debug: Print achievements timestamps
-                for achievement in achievements {
-                    print("Achievement type: \(achievement.achievementType), timestamp: \(achievement.timestamp ?? Date())")
-                }
-                
                 trophies = achievements.map { achievement in
-                    TrophyType.allCases[Int(achievement.achievementType)]
+                    TrophyWithDate(
+                        type: TrophyType.allCases[Int(achievement.achievementType)],
+                        earnedDate: achievement.timestamp ?? Date()
+                    )
                 }
             } catch {
                 print("Failed to fetch achievements: \(error)")
@@ -94,11 +97,12 @@ struct TrophyBox: View {
     let rows = [GridItem(.adaptive(minimum: 90))]
     let numberOfTrophies = 24
     
-    private func trophyIcon(for trophy: TrophyType, at index: Int) -> some View {
+    private func trophyIcon(for trophy: TrophyWithDate, at index: Int) -> some View {
         TrophyIconView(
             showTrophyDisplayView: $showTrophyDisplayView,
             selectedTrophy: $selectedTrophy,
-            trophyType: trophy
+            trophyType: trophy.type,
+            earnedDate: trophy.earnedDate
         )
         .scaleEffect(appearingItems.contains(index) ? 1 : 0)
         .animation(.spring(response: 0.5, dampingFraction: 0.6), value: appearingItems.contains(index))

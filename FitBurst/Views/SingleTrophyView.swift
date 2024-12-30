@@ -11,7 +11,9 @@ import SceneKit
 
 struct SingleTrophyView: View {
     @Binding var showTrophyDisplayView: Bool
-    let trophyType: TrophyType 
+    let trophyType: TrophyType
+    let earnedDate: Date
+    
     @State private var scale: CGFloat = 0.6
     @State private var modelScale: SIMD3<Float> = SIMD3<Float>(0, 0, 0)
     @State private var rotationDegrees: CGFloat = 0
@@ -37,9 +39,12 @@ struct SingleTrophyView: View {
                     .foregroundColor(.white)
                     .font(.custom("Futura Bold", size: 24))
                 
-                Spacer()
-
-                .padding(.horizontal)
+                Spacer().padding(.horizontal)
+                
+                Text("Earned on \(earnedDate.formatted(date: .long, time: .omitted))")
+                    .padding(.top, 10)
+                    .foregroundColor(.white)
+                    .font(.custom("Futura", size: 12))
                 
                 Spacer()
             }
@@ -138,12 +143,13 @@ struct TrophyIconView: View {
     @State private var wasPressed: Bool = false
     @State private var scale: CGFloat = 1.0
     @Binding var showTrophyDisplayView: Bool
-    @Binding var selectedTrophy: TrophyType
+    @Binding var selectedTrophy: TrophyWithDate?
     let trophyType: TrophyType
+    let earnedDate: Date
     
     var body: some View {
-        Button (action: {
-            selectedTrophy = trophyType
+        Button(action: {
+            selectedTrophy = TrophyWithDate(type: trophyType, earnedDate: earnedDate)
             showTrophyDisplayView = true
         }) {
             VStack {
@@ -181,5 +187,5 @@ struct TrophyIconView: View {
 
 
 #Preview {
-    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .thirdPerfectWeek)
+    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .thirdPerfectWeek, earnedDate: Date())
 }

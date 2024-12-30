@@ -10,9 +10,11 @@ import SwiftUI
 struct IconPickerView: View {
     @Binding var showIconPickerView: Bool
     let workoutType: Int32
+    let textHint: String
     @StateObject private var config = WorkoutConfiguration.shared
     @Environment(\.dismiss) private var dismiss
     @State private var scale: CGFloat = 0.6
+    @State private var searchText = ""
     
     let sportIcons = [
         "dumbbell.fill",
@@ -89,21 +91,49 @@ struct IconPickerView: View {
         "figure.table.tennis"
     ]
     
+    init(showIconPickerView: Binding<Bool>, workoutType: Int32, textHint: String) {
+        self._showIconPickerView = showIconPickerView
+        self.workoutType = workoutType
+        self.textHint = textHint
+        
+        // Split textHint into words and check if all words appear in any icon
+        let searchWords = textHint.lowercased().split(separator: " ")
+        
+       let hasMatches = sportIcons.contains { icon in
+            let matches = searchWords.allSatisfy { word in
+                let contains = icon.lowercased().contains(word)
+                return contains
+            }
+            return matches
+        }
+        
+        self._searchText = State(initialValue: hasMatches ? textHint : "")
+    }
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
             
-            VStack(spacing: 16) {
+            VStack(spacing: 20) {
                 HStack {
                     Text("Choose a workout icon")
                         .font(.headline)
                         .foregroundStyle(.white)
                     Spacer()
-                }
-
+                }.padding(.leading, 4)
+            
                 ScrollView{
+                    SearchBar(searchText: $searchText)
+                        .padding(.bottom, 9)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 20) {
-                        ForEach(sportIcons, id: \.self) { iconName in
+                     
+                        ForEach(sportIcons.filter { icon in
+                            if searchText.isEmpty { return true }
+                            let searchWords = searchText.lowercased().split(separator: " ")
+                            return searchWords.allSatisfy { word in
+                                icon.lowercased().contains(word)
+                            }
+                        }, id: \.self) { iconName in
                             Button {
                                 config.setIcon(iconName, for: workoutType)
                                 showIconPickerView = false
@@ -118,7 +148,6 @@ struct IconPickerView: View {
                         }
                     }
                 }
-//                .padding()
             }
             .padding(30)
             .frame(width:350, height:400)
@@ -149,6 +178,30 @@ struct IconPickerView: View {
     }
 }
 
+struct SearchBar: View {
+    @Binding var searchText: String
+    
+    var body: some View {
+        TextField("Search", text: $searchText)
+            .textFieldStyle(.plain)
+            .padding (10)
+            .background(.white)
+            .cornerRadius(10)
+            .frame(maxWidth: .infinity)
+            .padding(4)
+            .overlay(
+                Button(action: { searchText = "" }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 5)
+                        .opacity(
+                            searchText.isEmpty ? 0 : 1)
+                }, alignment: .trailing
+            )
+    }
+}
+
+
 #Preview {
-    IconPickerView(showIconPickerView: .constant(true), workoutType: 0)
+    IconPickerView(showIconPickerView: .constant(true), workoutType: 0, textHint: "")
 }

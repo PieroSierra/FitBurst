@@ -201,7 +201,8 @@ struct SettingsView: View {
             if showIconPickerView, let type = editingWorkoutType {
                 IconPickerView(
                     showIconPickerView: $showIconPickerView,
-                    workoutType: type
+                    workoutType: type,
+                    textHint: WorkoutConfiguration.shared.getName(for: Int32(type))
                 )
             }
         }
@@ -271,7 +272,7 @@ struct WorkoutTypeRow: View {
             
             if type == 0 {
                 Toggle("", isOn: .constant(true))
-                    .tint(Color.limeAccentColor.opacity(0.5))
+                    .tint(Color.limeAccentColor.opacity(0.7))
                     .disabled(true)
                     .frame(width:60)
             } else {
@@ -280,7 +281,7 @@ struct WorkoutTypeRow: View {
                     set: { config.setVisibility($0, for: type) }
                 ))
                 .frame(width: 60)
-                .tint(Color.limeAccentColor.opacity(0.5))
+                .tint(Color.limeAccentColor.opacity(0.7))
             }
         }
     }
