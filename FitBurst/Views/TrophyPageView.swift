@@ -25,7 +25,7 @@ struct TrophyPageView: View {
             
             VStack(spacing: 0) {
                 Text("Trophies")
-                    .font(.custom("Futura Bold", size: 40))
+                    .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
                     .padding(.bottom, 20)
                 
@@ -174,8 +174,12 @@ struct TrophyBox: View {
 
 #Preview("Real Data") {
     TrophyPageView(showDummyData: false)
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }
 
 #Preview("Sample Data") {
     TrophyPageView(showDummyData: true)
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }

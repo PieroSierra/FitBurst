@@ -41,7 +41,7 @@ struct HomeView: View {
             /// Main scrollview
             ScrollView {
                 Text("FitBurst")
-                    .font(.custom("Futura Bold", size: 40))
+                    .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
                     .padding(.bottom, 0)
             
@@ -59,7 +59,7 @@ struct HomeView: View {
                     .frame(height: 180)
                     
                     Text (workoutCount == 1 ? "WORKOUT" : "WORKOUTS")
-                        .font(.custom("Futura Bold", size: 16))
+                        .font(.custom("Futura Bold", fixedSize: 16))
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
@@ -171,10 +171,14 @@ struct DebugWeekViewTest: View {
     }
 }
 
-#Preview {
+#Preview ("Full Content View") {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }
 
-#Preview {
+#Preview ("Just Home") {
     HomeView(selectedTab: .constant(.home))
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }

@@ -17,6 +17,8 @@ struct FitBurstApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environment(\.dynamicTypeSize, .medium)
+                .preferredColorScheme(.light)
         }
     }
 }

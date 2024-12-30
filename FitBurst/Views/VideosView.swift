@@ -74,7 +74,7 @@ struct VideosView: View {
             
             VStack {
                 Text("Videos")
-                    .font(.custom("Futura Bold", size: 40))
+                    .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
                 
                 Picker("Select Category", selection: $selectedSegment) {
@@ -162,4 +162,6 @@ struct VideosView: View {
 
 #Preview {
     VideosView()
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }

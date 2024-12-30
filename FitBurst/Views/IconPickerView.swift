@@ -99,7 +99,7 @@ struct IconPickerView: View {
         // Split textHint into words and check if all words appear in any icon
         let searchWords = textHint.lowercased().split(separator: " ")
         
-       let hasMatches = sportIcons.contains { icon in
+        let hasMatches = sportIcons.contains { icon in
             let matches = searchWords.allSatisfy { word in
                 let contains = icon.lowercased().contains(word)
                 return contains
@@ -121,12 +121,12 @@ struct IconPickerView: View {
                         .foregroundStyle(.white)
                     Spacer()
                 }.padding(.leading, 4)
-            
+                
                 ScrollView{
                     SearchBar(searchText: $searchText)
                         .padding(.bottom, 9)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 20) {
-                     
+                        
                         ForEach(sportIcons.filter { icon in
                             if searchText.isEmpty { return true }
                             let searchWords = searchText.lowercased().split(separator: " ")
@@ -186,6 +186,7 @@ struct SearchBar: View {
             .textFieldStyle(.plain)
             .padding (10)
             .background(.white)
+            .foregroundColor(.black)
             .cornerRadius(10)
             .frame(maxWidth: .infinity)
             .padding(4)
@@ -193,7 +194,7 @@ struct SearchBar: View {
                 Button(action: { searchText = "" }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.black)
-                        .padding(.horizontal, 5)
+                        .padding(.horizontal, 15)
                         .opacity(
                             searchText.isEmpty ? 0 : 1)
                 }, alignment: .trailing
@@ -204,4 +205,7 @@ struct SearchBar: View {
 
 #Preview {
     IconPickerView(showIconPickerView: .constant(true), workoutType: 0, textHint: "")
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
+    
 }

@@ -56,27 +56,20 @@ struct CalendarView: View {
                     selectedYear -= 1
                 }) {
                     Text(String(format: "%d", selectedYear-1))
-                        .font(.custom("Futura Bold", size: 40))
+                        .font(.custom("Futura Bold", fixedSize: 40))
                         .foregroundStyle(Color.gray)
-                    //Image(systemName: "chevron.backward.circle")
-                    //  .foregroundColor(.white)
-                    //.imageScale(.large)
                 }
                 
                 Text(String(format: "%d", selectedYear))
-                    .font(.custom("Futura Bold", size: 40))
+                    .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
                 
                 Button(action: {
                     selectedYear += 1
                 }) {
                     Text(String(format: "%d", selectedYear+1))
-                        .font(.custom("Futura Bold", size: 40))
+                        .font(.custom("Futura Bold", fixedSize: 40))
                         .foregroundStyle(Color.gray)
-                    
-                    //Image(systemName:"chevron.forward.circle")
-                    //  .foregroundColor(.white)
-                    //.imageScale(.large)
                 }
             
         }
@@ -91,9 +84,9 @@ struct CalendarView: View {
                     refreshTrigger: refreshCounter
                 )
                 .scaleEffect(scale)
-                .frame(height:750)
-                .onChange(of: selectedDate) { newDate in
-                    let month = Calendar.current.component(.month, from: newDate)
+                .frame(height:600)
+                .onChange(of: selectedDate) {
+                    let month = Calendar.current.component(.month, from: selectedDate)
                     withAnimation {
                         proxy.scrollTo(month, anchor: .center)
                     }
@@ -143,7 +136,7 @@ struct CalendarView: View {
             showWorkoutView.toggle()
         }) {
             HStack {
-                Image(systemName: "dumbbell.fill").imageScale(.large)
+                Image(systemName: "checkmark.circle.fill").imageScale(.large)
                 Text("Record")
             }
         }
@@ -258,9 +251,7 @@ struct CalendarViewBase: View {
         )
         .frame(maxWidth: .infinity)
         .frame(height: height)
-        .padding(.bottom)
-        .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10))
-        // .ignoresSafeArea(.all, edges: .top)
+        .padding(EdgeInsets(top: 0, leading: 7, bottom: 0, trailing: 7))
     }
 }
 
@@ -351,7 +342,7 @@ private struct MonthCell: View {
                 allowsScrolling: false,
                 showMonthHeader: false,
                 showWeekdayHeader: true
-            )
+            )//.background(Color.red)
         }
         .id(Calendar.current.component(.month, from: date))
     }
@@ -665,7 +656,9 @@ struct SimpleWeekRow: View {
                 VStack(spacing: 4) {
                     // Top label: "M, T, W, T, F, S, S"
                     Text(weekdays[i])
+                        .font(.custom("Futura Bold", fixedSize: 15))
                         .foregroundColor(.white)
+                        .padding(.bottom, 4)
                     
                     // Bottom: either checkmark or day number
                     Group {
@@ -673,34 +666,33 @@ struct SimpleWeekRow: View {
                             if hasWorkout(on: day) {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.black)
-                                    .padding(8)
+                                    .frame(width: 31, height:31)
                                     .background(Circle().foregroundColor(.white))
                             } else {
                                 Text("\(cal.component(.day, from: day))")
                                     .foregroundColor(.black)
-                                    .padding(8)
+                                    .frame(width: 31, height:31)
                                     .background(Circle().foregroundColor(.white))
                             }
                         } else if hasWorkout(on: day) {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.black)
-                                .padding(8)
+                                .frame(width: 31, height:31)
                                 .background(Circle().foregroundColor(.limeAccentColor))
                         } else if cal.isDateInToday(day) {
                             Text("\(cal.component(.day, from: day))")
                                 .foregroundColor(.black)
-                                .padding(8)
+                                .frame(width: 31, height:31)
                                 .background(Circle().foregroundColor(.gray))
                         } else {
                             Text("\(cal.component(.day, from: day))")
                                 .foregroundColor(.white)
-                                .padding(8)
+                                .frame(width: 31, height:31)
                         }
                     }
                     .transition(.scale.combined(with: .opacity))
                 }
-                .font(.caption)
-                .fontWeight(.bold)
+                .font(.custom("Futura Bold", fixedSize: 15))
                 .frame(maxWidth: .infinity)
                 .onTapGesture {
                     withAnimation(.spring(response: 0.3)) {
@@ -743,6 +735,18 @@ struct SimpleWeekRow: View {
     }
 }
 
-#Preview {
+#Preview ("12 month Calendar") {
     CalendarView()
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
+}
+
+#Preview ("This Week Calendar") {
+    ZStack {
+        Image("GradientWaves")
+            .resizable()
+            .ignoresSafeArea()
+        SimpleWeekRow(selectedDate: .constant(Date()))
+    }
+
 }

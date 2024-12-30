@@ -29,6 +29,9 @@ struct RecordWorkoutView: View {
     @State private var rippleCounter: Int = 0
     @State private var ripplePosition: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2)
     
+    @State private var newTrophies: [TrophyWithDate] = []
+    @State private var showTrophyView = false
+    
     func triggerRipple(at position: CGPoint) {
         let adjustedPosition = CGPoint(
             x: position.x,
@@ -48,6 +51,7 @@ struct RecordWorkoutView: View {
 
                 Text("**Press & hold** to record:")
                     .foregroundColor(.white)
+                    .font(.body)
                     .onTapGesture {
                         rippleCounter += 1
                     }
@@ -137,11 +141,30 @@ struct RecordWorkoutView: View {
             }
             .offset(y: +150)
             
+            // Add trophy display at the top Z-order
+            if showTrophyView, let nextTrophy = newTrophies.first {
+                SingleTrophyView(
+                    showTrophyDisplayView: $showTrophyView,
+                    trophyType: nextTrophy.type,
+                    earnedDate: nextTrophy.earnedDate
+                )
+                .onChange(of: showTrophyView) { isShowing in
+                    if !isShowing {
+                        // Remove the displayed trophy
+                        newTrophies.removeFirst()
+                        // Show next trophy if available
+                        if !newTrophies.isEmpty {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                showTrophyView = true
+                            }
+                        }
+                    }
+                }
+            }
         }
         .onTapGesture {
             showWorkoutView = false
         }
-
     }
     
     private var dismissButton: some View {
@@ -177,7 +200,67 @@ struct RecordWorkoutView: View {
     }
     
     private func calculateNewAchievements() {
-        RecordWorkoutView.recalculateAchievements()
+        let calculator = AchievementCalculator()
+        let result = calculator.calculateAchievements()
+        
+        do {
+            let context = PersistenceController.shared.container.viewContext
+            let fetchRequest: NSFetchRequest<Achievements> = Achievements.fetchRequest()
+            let existingAchievements = try context.fetch(fetchRequest)
+            
+            // Convert existing achievements to our record type
+            let existingRecords = existingAchievements.compactMap { achievement -> AchievementRecord? in
+                guard let timestamp = achievement.timestamp else { return nil }
+                return AchievementRecord(
+                    type: TrophyType.allCases[Int(achievement.achievementType)],
+                    date: timestamp
+                )
+            }
+            
+            // Create a unique identifier for each achievement (type + date)
+            let existingIdentifiers = Set(existingRecords.map { 
+                "\($0.type)_\(Calendar.current.startOfDay(for: $0.date))"
+            })
+            let newIdentifiers = Set(result.achievements.map { 
+                "\($0.type)_\(Calendar.current.startOfDay(for: $0.date))"
+            })
+            
+            // Find truly new achievements
+            let newlyEarnedIdentifiers = newIdentifiers.subtracting(existingIdentifiers)
+            
+            if !newlyEarnedIdentifiers.isEmpty {
+                // Create TrophyWithDate objects for new achievements
+                newTrophies = result.achievements
+                    .filter { achievement in
+                        let identifier = "\(achievement.type)_\(Calendar.current.startOfDay(for: achievement.date))"
+                        return newlyEarnedIdentifiers.contains(identifier)
+                    }
+                    .map { TrophyWithDate(type: $0.type, earnedDate: $0.date) }
+                
+                // Show the first trophy
+                if !newTrophies.isEmpty {
+                    showTrophyView = true
+                }
+            }
+            
+            // Delete all existing achievements
+            for achievement in existingAchievements {
+                context.delete(achievement)
+            }
+            
+            // Save the complete new set
+            for achievement in result.achievements {
+                let achievementIndex = TrophyType.allCases.firstIndex(of: achievement.type)!
+                PersistenceController.shared.recordAchievement(
+                    date: achievement.date,
+                    achievementType: Int32(achievementIndex)
+                )
+            }
+            
+            NotificationCenter.default.post(name: .achievementsChanged, object: nil)
+        } catch {
+            print("Error managing achievements: \(error)")
+        }
     }
 }
 
@@ -235,4 +318,6 @@ extension RecordWorkoutView {
 
 #Preview {
     RecordWorkoutView(showWorkoutView: .constant(true), selectedDate: .constant(Date()))
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }

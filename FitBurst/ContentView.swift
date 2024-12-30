@@ -26,7 +26,7 @@ enum Tab: String, CaseIterable {
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-
+    @AppStorage("firstRunComplete") private var firstRunComplete = false
     @State private var selectedTab: Tab = .home
     
     init() {
@@ -46,24 +46,30 @@ struct ContentView: View {
     }
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView(selectedTab: $selectedTab)
-                .tag(Tab.home)
-                .tabItem { Label("Home", systemImage: "house.fill") }
-            CalendarView()
-                .tag(Tab.calendar)
-                .tabItem { Label("Calendar", systemImage: "calendar") }
-            TrophyPageView(showDummyData: false)
-                .tag(Tab.trophies)
-                .tabItem { Label("Trophies", systemImage: "trophy.fill") }
-            VideosView()
-                .tag(Tab.videos)
-                .tabItem { Label("Videos", systemImage: "play.rectangle.fill") }
-            SettingsView()
-                .tag(Tab.settings)
-                .tabItem { Label("Settings", systemImage: "person.circle.fill") }
+        if !firstRunComplete {
+            FirstRunView(firstRunComplete: $firstRunComplete)
         }
-        .tint(.limeAccentColor)
+        else {
+            TabView(selection: $selectedTab) {
+                HomeView(selectedTab: $selectedTab)
+                    .tag(Tab.home)
+                    .tabItem { Label("Home", systemImage: "house.fill") }
+                
+                CalendarView()
+                    .tag(Tab.calendar)
+                    .tabItem { Label("Calendar", systemImage: "calendar") }
+                TrophyPageView(showDummyData: false)
+                    .tag(Tab.trophies)
+                    .tabItem { Label("Trophies", systemImage: "trophy.fill") }
+                VideosView()
+                    .tag(Tab.videos)
+                    .tabItem { Label("Videos", systemImage: "play.rectangle.fill") }
+                SettingsView()
+                    .tag(Tab.settings)
+                    .tabItem { Label("Settings", systemImage: "person.circle.fill") }
+            }
+            .tint(.limeAccentColor)
+        }
     }
 }
 
@@ -74,4 +80,6 @@ extension Notification.Name {
 
 #Preview {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }

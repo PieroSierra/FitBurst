@@ -148,13 +148,16 @@ class WorkoutConfiguration: ObservableObject {
 struct SettingsView: View {
     @StateObject private var config = WorkoutConfiguration.shared
     @State private var context = PersistenceController.shared.container.viewContext
-    
+     
+    @AppStorage("firstRunComplete") private var firstRunComplete = false
+
     @State private var showIconPickerView = false
     @State private var editingWorkoutType: Int32?
     @State private var showResetAlert = false
 #if DEBUG
     @State private var showDeleteWorkoutsAlert = false
     @State private var showDeleteAchievementsAlert = false
+    @State private var showResetFirstRunAlert = false
 #endif
     
     var body: some View {
@@ -163,7 +166,7 @@ struct SettingsView: View {
             
             VStack {
                 Text("Settings")
-                    .font(.custom("Futura Bold", size: 40))
+                    .font(.custom("Futura Bold", fixedSize: 40))
                     .padding(.bottom, 20)
                     .foregroundStyle(.white)
                 
@@ -186,7 +189,7 @@ struct SettingsView: View {
                         SettingsButtons(
                             config: config,
                             showResetAlert: $showResetAlert,showDeleteWorkoutsAlert: $showDeleteWorkoutsAlert,
-                            showDeleteAchievementsAlert: $showDeleteAchievementsAlert)
+                            showDeleteAchievementsAlert: $showDeleteAchievementsAlert, showResetFirstRunAlert: $showResetFirstRunAlert)
 #else
                         SettingsButtons(
                             config: config,
@@ -215,21 +218,29 @@ struct SettingsView: View {
             Text("This will reset all workout names and icons to their defaults.")
         }
 #if DEBUG
-        .alert("Reset Settings", isPresented: $showDeleteWorkoutsAlert) {
+        .alert("Delere Workouts", isPresented: $showDeleteWorkoutsAlert) {
             Button("Cancel", role: .cancel) { }
-            Button("Reset", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 PersistenceController.shared.deleteAllWorkouts()
             }
         } message: {
             Text("This will delete all recorded workouts. This action cannot be undone.")
         }
-        .alert("Reset Settings", isPresented: $showDeleteAchievementsAlert) {
+        .alert("Delete Achievements", isPresented: $showDeleteAchievementsAlert) {
             Button("Cancel", role: .cancel) { }
-            Button("Reset", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 PersistenceController.shared.deleteAllAchievements()
             }
         } message: {
             Text("This will delete all achievements. This action cannot be undone.")
+        }
+        .alert("Reset First Run", isPresented: $showResetFirstRunAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                firstRunComplete = false
+            }
+        } message: {
+            Text("This will reset First Run.  Close app and relaunch to see changes.")
         }
 #endif
     }
@@ -294,6 +305,7 @@ struct SettingsButtons: View {
 #if DEBUG
     @Binding var showDeleteWorkoutsAlert: Bool
     @Binding var showDeleteAchievementsAlert: Bool
+    @Binding var showResetFirstRunAlert: Bool
 #endif
     
     var body: some View {
@@ -312,6 +324,10 @@ struct SettingsButtons: View {
             .padding(.top, 30)
             
 #if DEBUG
+            Text ("Debug only controls:")
+                .foregroundColor(.white)
+                .padding(.top, 30)
+            
             Button(action: { showDeleteWorkoutsAlert = true }) {
                 HStack {
                     Image(systemName: "trash.fill")
@@ -329,7 +345,20 @@ struct SettingsButtons: View {
                 HStack {
                     Image(systemName: "trash.fill")
                         .font(.title2)
-                    Text("Delete all Achievements")
+                    Text("Delete all Trophies")
+                }
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.red.opacity(0.6))
+                .cornerRadius(10)
+            }
+            .padding(.top, 30)
+            
+            Button(action: { showResetFirstRunAlert = true }) {
+                HStack {
+                    Image(systemName: "arrow.counterclockwise.circle.fill")
+                        .font(.title2)
+                    Text("Reset First Run")
                 }
                 .foregroundColor(.white)
                 .padding()
@@ -344,4 +373,6 @@ struct SettingsButtons: View {
 
 #Preview {
     SettingsView()
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }

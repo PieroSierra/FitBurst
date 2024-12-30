@@ -37,14 +37,14 @@ struct SingleTrophyView: View {
                 Text("\(trophyType.displayName)")
                     .padding(.top, 10)
                     .foregroundColor(.white)
-                    .font(.custom("Futura Bold", size: 24))
+                    .font(.custom("Futura Bold", fixedSize: 24))
                 
                 Spacer().padding(.horizontal)
                 
                 Text("Earned on \(earnedDate.formatted(date: .long, time: .omitted))")
                     .padding(.top, 10)
                     .foregroundColor(.white)
-                    .font(.custom("Futura", size: 12))
+                    .font(.custom("Futura", fixedSize: 12))
                 
                 Spacer()
             }
@@ -159,8 +159,7 @@ struct TrophyIconView: View {
                         .frame(width:70, height:70)
                 }
                 Text(trophyType.displayName)
-                    .font(.custom("Futura", size: 14))
-                  //  .font(.caption2)
+                    .font(.custom("Futura", fixedSize: 14))
                     .foregroundStyle(Color.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
@@ -188,4 +187,6 @@ struct TrophyIconView: View {
 
 #Preview {
     SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .thirdPerfectWeek, earnedDate: Date())
+        .environment(\.dynamicTypeSize, .medium)
+        .preferredColorScheme(.light)
 }
