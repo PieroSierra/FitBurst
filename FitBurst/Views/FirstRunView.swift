@@ -10,6 +10,7 @@ import SwiftUI
 struct FirstRunView: View {
     @Binding var firstRunComplete: Bool
     @State private var selection : Int = 0
+    @State private var showRipple: Int = 0
     
     init(firstRunComplete: Binding<Bool>) {
         _firstRunComplete = firstRunComplete
@@ -21,6 +22,7 @@ struct FirstRunView: View {
     var body: some View {
         ZStack {
             Image("GradientWaves").resizable().edgesIgnoringSafeArea(.all)
+            
             VStack {
                 TabView (selection: $selection) {
                     screen0.tag(0)
@@ -45,7 +47,7 @@ struct FirstRunView: View {
                 .font(.custom("Futura Bold", fixedSize: 40))
                 .multilineTextAlignment(.center)
             
-            Text("FitBurst is the best wway to track your workouts.  Swipe for more.")
+            Text("Swipe right to continue")
                 .padding()
                 .font(.body)
                 .multilineTextAlignment(.center)
@@ -59,31 +61,48 @@ struct FirstRunView: View {
     
     var screen1: some View {
         VStack (alignment: .center){
-            Text("Things to know")
+            Text("How to record a workout")
                 .padding()
                 .font(.custom("Futura Bold", fixedSize: 40))
                 .multilineTextAlignment(.center)
             
-            Text("FitBurst is the best wway to track your workouts.")
+            Text("To record a workout, **press and hold** the record button. Try it out!")
                 .padding()
                 .font(.body)
                 .multilineTextAlignment(.center)
+            
+            Button(action: {
+                
+            }) {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .imageScale(.large)
+                    Text("Press and hold")
+                        .lineLimit(1)
+                }
+            }
+            .padding(5)
+            .buttonStyle(FillUpButtonStyle(onComplete: { _ in showRipple += 1 } ))
+            
         }
         .foregroundColor(.white)
         .padding(30)
         .frame(width:350, height: 500)
         .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
+        .modifier(RippleEffect(at: CGPoint(
+            x: UIScreen.main.bounds.width / 2 - 30,
+            y: UIScreen.main.bounds.height / 2 - 50 ), trigger: showRipple, amplitude: -22, frequency: 15, decay: 4, speed: 600))
     }
     
     var screen2: some View {
         VStack (alignment: .center){
-            Text("Mo Blah Blah")
+            Text("Make FitBurst your own")
                 .padding()
                 .font(.custom("Futura Bold", fixedSize: 40))
                 .multilineTextAlignment(.center)
             
-            Text("FitBurst is the best wway to track your workouts.")
+            Text("You can customize up to 6 of your favorite workouts in **settings**.")
                 .padding()
                 .font(.body)
                 .multilineTextAlignment(.center)
@@ -92,7 +111,7 @@ struct FirstRunView: View {
                 firstRunComplete = true
             }) {
                 HStack {
-                    Image(systemName: "checkmark.circle.fill")
+                    Image(systemName: "hand.thumbsup.circle.fill")
                         .font(.title)
                     Text("Let's go!")
                 }

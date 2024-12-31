@@ -105,7 +105,7 @@ struct CalendarView: View {
             
             ForEach(workouts, id: \Workouts.workoutID) { workout in
                 HStack {
-                    Image(systemName: "checkmark.circle.fill")
+                    Image(systemName: config.getIcon(for: workout.workoutType))
                         .foregroundColor(.limeAccentColor)
                     
                     let workoutName = config.getName(for: workout.workoutType)

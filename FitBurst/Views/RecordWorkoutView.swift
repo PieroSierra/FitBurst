@@ -40,6 +40,7 @@ struct RecordWorkoutView: View {
         ripplePosition = adjustedPosition
         rippleCounter += 1
     }
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
@@ -127,8 +128,8 @@ struct RecordWorkoutView: View {
                            selection: $selectedDate,
                            displayedComponents: [.date])
                 .labelsHidden()
-                .accentColor(.black)
                 .colorScheme(.dark)
+                .tint(Color.black)
                 .background(Color.white.opacity(0.3))
                 .cornerRadius(8)
             }

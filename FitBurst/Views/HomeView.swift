@@ -85,7 +85,10 @@ struct HomeView: View {
                         selectedTrophy: $selectedTrophy,
                         showDummyData: false
                     )
+                    .frame(maxWidth:.infinity)
                     .frame(height: 180)
+                    .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                    .padding(.horizontal)
                     .onTapGesture { selectedTab = Tab.trophies }
                     .id(trophyBoxRefreshTrigger)  // Force refresh when trigger changes
                     
