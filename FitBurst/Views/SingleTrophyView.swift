@@ -184,7 +184,6 @@ struct TrophyIconView: View {
     }
 }
 
-
 #Preview {
     SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .thirdPerfectWeek, earnedDate: Date())
         .environment(\.dynamicTypeSize, .medium)

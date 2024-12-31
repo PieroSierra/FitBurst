@@ -110,7 +110,13 @@ struct TrophyBox: View {
     
     var body: some View {
         Group {
-            if scrollHorizontally {
+            if trophies.isEmpty {
+                Text ("Your trophies will appear here")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(height: 180)
+            }
+            else if scrollHorizontally {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHGrid(rows: rows) {
                         ForEach(Array(trophies.enumerated()), id: \.offset) { index, trophy in

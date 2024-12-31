@@ -378,12 +378,15 @@ import SceneKit
 
 struct ThreeDTextView: UIViewRepresentable {
     
-    // MARK: - Public Properties
+    /// MARK: - Public Properties
     var text: String
     var extrusionDepth: CGFloat
     var fontFace: String
     var fontSize: CGFloat
     var fontColor: Color
+    
+    /// Camera position
+    var cameraPosition: SCNVector3
     
     /// Rotation in radians about the X, Y, and Z axes.
     var rotationX: CGFloat
@@ -407,7 +410,7 @@ struct ThreeDTextView: UIViewRepresentable {
         // Add a camera node
         let cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-        cameraNode.position = SCNVector3(x: 0, y: 0, z: 20)
+        cameraNode.position = cameraPosition
         scnView.scene?.rootNode.addChildNode(cameraNode)
         
         // Add a simple omni light
@@ -491,5 +494,19 @@ struct ThreeDTextView: UIViewRepresentable {
         
         // Add the node to the scene
         scene.rootNode.addChildNode(textNode)
+    }
+}
+
+extension UIView {
+    func findView<T: UIView>(ofType type: T.Type) -> T? {
+        if let typed = self as? T {
+            return typed
+        }
+        for subview in subviews {
+            if let found = subview.findView(ofType: type) {
+                return found
+            }
+        }
+        return nil
     }
 }

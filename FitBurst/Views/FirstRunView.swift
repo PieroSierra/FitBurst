@@ -11,6 +11,13 @@ struct FirstRunView: View {
     @Binding var firstRunComplete: Bool
     @State private var selection : Int = 0
     
+    init(firstRunComplete: Binding<Bool>) {
+        _firstRunComplete = firstRunComplete
+        // Customize UIPageControl appearance
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color.limeAccentColor)
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color.limeAccentColor.opacity(0.3))
+    }
+    
     var body: some View {
         ZStack {
             Image("GradientWaves").resizable().edgesIgnoringSafeArea(.all)
@@ -20,8 +27,9 @@ struct FirstRunView: View {
                     screen1.tag(1)
                     screen2.tag(2)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+                .tabViewStyle(.page)
+             //   .accentColor(.limeAccentColor)
+                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
             }
         }
     }

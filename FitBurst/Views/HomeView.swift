@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SceneKit
 
 struct HomeView: View {
     @Binding var selectedTab: Tab
@@ -26,6 +27,7 @@ struct HomeView: View {
     @State private var workoutCount: Int = 0
     
     /// For 3d Text
+    @State private var cameraPosition: SCNVector3 = SCNVector3(x: 0, y: 0, z: 20)
     @State private var rotationX: CGFloat = 0
     @State private var rotationY: CGFloat = 0
     @State private var rotationZ: CGFloat = 0
@@ -38,25 +40,33 @@ struct HomeView: View {
             /// Background gradient
             Image("GradientWaves").resizable().edgesIgnoringSafeArea(.all)
             
-            /// Main scrollview
-            ScrollView {
+            /// 3d Workout count
+            VStack() {
+                ThreeDTextView(text: "\(workoutCount)",
+                               extrusionDepth: 4,
+                               fontFace: "Futura Bold",
+                               fontSize: 13,
+                               fontColor: .limeAccentColor,
+                               cameraPosition: cameraPosition,
+                               rotationX: rotationX,
+                               rotationY: rotationY,
+                               rotationZ: rotationZ,
+                               animationDuration: 0.5)
+                .frame(maxWidth: .infinity)
+                .frame(height: 300)
+                .background(Color.clear)
+                Spacer()
+            }
+            
+            VStack {
                 Text("FitBurst")
                     .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
                     .padding(.bottom, 0)
+
             
                 VStack (alignment: .center) {
-                    ThreeDTextView(text: "\(workoutCount)",
-                                   extrusionDepth: 4,
-                                   fontFace: "Futura Bold",
-                                   fontSize: 20,
-                                   fontColor: .limeAccentColor,
-                                   rotationX: rotationX,
-                                   rotationY: rotationY,
-                                   rotationZ: rotationZ,
-                                   animationDuration: 0.5)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 180)
+                    Spacer().frame(height: 180)
                     
                     Text (workoutCount == 1 ? "WORKOUT" : "WORKOUTS")
                         .font(.custom("Futura Bold", fixedSize: 16))
@@ -64,27 +74,8 @@ struct HomeView: View {
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
                         .onTapGesture {
-                            animateRotation()
+                            triggerHeartbeat()
                         }
-                    
-                    Spacer().frame(height: 30)
-                    
-                    SimpleWeekRow(selectedDate: $selectedDate)
-                        .id(weekViewRefreshTrigger)  // Force refresh when trigger changes
-                    
-                    Spacer().frame(height: 30)
-                    
-                    /// Record Workout
-                    Button (action: {
-                        showWorkoutView.toggle()
-                    }) {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.title)
-                            Text("Record Workout")
-                        }
-                    }
-                    .buttonStyle(GrowingButtonStyle())
                     
                     Spacer().frame(height: 40)
                     
@@ -97,10 +88,29 @@ struct HomeView: View {
                     .frame(height: 180)
                     .onTapGesture { selectedTab = Tab.trophies }
                     .id(trophyBoxRefreshTrigger)  // Force refresh when trigger changes
+                    
+                    SimpleWeekRow(selectedDate: $selectedDate)
+                        .id(weekViewRefreshTrigger)  // Force refresh when trigger changes
+                    
+                    Spacer().frame(height: 30)
+                    
+                    /// Record Workout
+                    Button (action: {                    showWorkoutView.toggle()
+                    }) {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title)
+                            Text("Record Workout")
+                        }
+                    }
+                    .buttonStyle(GrowingButtonStyle())
+                    
+                    Spacer().frame(height: 40)
+             
                 }
                 .onTapGesture { selectedTab = Tab.calendar }
                 
-                Spacer().frame(height: 20)
+                Spacer()
                 
             }
             //     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -153,6 +163,49 @@ struct HomeView: View {
             rotationX = .pi * 2  // Two full rotations
             rotationY = .pi * 2  // Two full rotations
         }
+    }
+    
+    /// Note used but just in case
+    private func triggerHeartbeat() {
+        // Create a camera animation
+        if let sceneView = getSceneView() {
+            let intensity = 5.0
+            let cameraNode = sceneView.pointOfView
+            SCNTransaction.begin()
+            SCNTransaction.animationDuration = 0.2
+            
+            // Start from zero each time
+               //feedbackGenerator.impactOccurred(intensity: intensity)
+            
+            // default position x: 0, y: 10, z: 20
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                cameraNode?.position = SCNVector3(x: 0, y: 0, z: 19.5)
+                SCNTransaction.commit()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                cameraNode?.position = SCNVector3(x: 0, y: 0, z: 20)
+                SCNTransaction.commit()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                cameraNode?.position = SCNVector3(x: 0, y: 0, z: 19.5)
+                SCNTransaction.commit()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                cameraNode?.position = SCNVector3(x: 0, y: 0, z: 20)
+                SCNTransaction.commit()
+            }
+        }
+    }
+    
+    
+    private func getSceneView() -> SCNView? {
+        // Find the SCNView in the view hierarchy
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let sceneView = window.findView(ofType: SCNView.self) else {
+            return nil
+        }
+        return sceneView
     }
 }
 
