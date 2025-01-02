@@ -32,6 +32,9 @@ struct RecordWorkoutView: View {
     @State private var newTrophies: [TrophyWithDate] = []
     @State private var showTrophyView = false
     
+    // Dictionary to store button texts
+    @State private var buttonTexts: [Int32: String] = [:]
+    
     func triggerRipple(at position: CGPoint) {
         let adjustedPosition = CGPoint(
             x: position.x,
@@ -57,7 +60,7 @@ struct RecordWorkoutView: View {
                         rippleCounter += 1
                     }
 
-                Spacer().frame(height: 30)
+                Spacer().frame(height: 20)
 
                 
                 // First row (3 buttons)
@@ -142,7 +145,7 @@ struct RecordWorkoutView: View {
             }
             .offset(y: +150)
             
-            // Add trophy display at the top Z-order
+            /// Trophy display at the top Z-order
             if showTrophyView, let nextTrophy = newTrophies.first {
                 SingleTrophyView(
                     showTrophyDisplayView: $showTrophyView,
@@ -174,7 +177,7 @@ struct RecordWorkoutView: View {
         }) {
             Image(systemName: "xmark.circle")
                 .foregroundColor(.gray)
-                .imageScale(.large)
+                .font(.title2)
         }
         .padding(25)
     }
@@ -184,20 +187,25 @@ struct RecordWorkoutView: View {
         Button(action: { }) {
             HStack {
                 Image(systemName: WorkoutConfiguration.shared.getIcon(for: type))
-                    .imageScale(.large)
-                Text(WorkoutConfiguration.shared.getName(for: type))
+                    .font(.title2)
+                
+                Text(buttonTexts[type] ?? WorkoutConfiguration.shared.getName(for: type))
                     .lineLimit(1)
-//                    .minimumScaleFactor(0.5)
             }
-  //          .frame(width: 100)
         }
         .padding(5)
-        .buttonStyle(FillUpButtonStyle(onComplete: { position in
-            triggerRipple(at: position)
-            PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: type)
-            calculateNewAchievements()
-            NotificationCenter.default.post(name: .workoutAdded, object: nil)
-        }))
+        .buttonStyle(FillUpButtonStyle(
+            buttonText: Binding(
+                get: { buttonTexts[type] ?? WorkoutConfiguration.shared.getName(for: type) },
+                set: { buttonTexts[type] = $0 }
+            ),
+            onComplete: { position, textBinding in
+                triggerRipple(at: position)
+                PersistenceController.shared.recordWorkout(date: selectedDate, workoutType: type)
+                calculateNewAchievements()
+               textBinding.wrappedValue = "Recorded!"
+                NotificationCenter.default.post(name: .workoutAdded, object: nil)
+            }))
     }
     
     private func calculateNewAchievements() {

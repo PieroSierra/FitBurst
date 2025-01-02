@@ -38,6 +38,34 @@ enum WorkoutType: Int32 {
     }
 }
 
+struct BackgroundOption {
+    let displayName: String
+    let assetName: String
+}
+
+struct AppBackgrounds {
+    static let options: [BackgroundOption] = [
+        BackgroundOption(displayName: "Black Tiles", assetName: "BlackTiles"),
+        BackgroundOption(displayName: "Dark Forest", assetName: "DarkForest"),
+        BackgroundOption(displayName: "Night Dunes", assetName: "Dunes"),
+        BackgroundOption(displayName: "Gradient Waves", assetName: "GradientWaves"),
+        BackgroundOption(displayName: "Ocean Ripples", assetName: "Ocean"),
+        BackgroundOption(displayName: "Black & White", assetName: "BlackAndWhite"),
+        BackgroundOption(displayName: "Palm Frond", assetName: "Frond"),
+        BackgroundOption(displayName: "Sky lights", assetName: "Skylights"),
+        BackgroundOption(displayName: "Pink Palm", assetName: "PinkPalm"),
+        BackgroundOption(displayName: "El Capitan", assetName: "ElCapitan"),
+        BackgroundOption(displayName: "Mr. Rainier", assetName: "Rainier"),
+        BackgroundOption(displayName: "Mt. Fuji", assetName: "Fuji1"),
+        BackgroundOption(displayName: "Matterhorn", assetName: "Matterhorn"),
+        BackgroundOption(displayName: "Snowcap", assetName: "Snowcap"),
+        BackgroundOption(displayName: "Lion", assetName: "Lion"),
+        BackgroundOption(displayName: "Kettle Bell", assetName: "KettleBell"),
+        BackgroundOption(displayName: "Running Tracks", assetName: "RunningTracks"),
+        BackgroundOption(displayName: "Dark Crystals", assetName: "DarkCrystals")
+    ]
+}
+
 /// Class to handle reading/writing overrides from UserDefaults
 class WorkoutConfiguration: ObservableObject {
     static let shared = WorkoutConfiguration()
@@ -45,6 +73,7 @@ class WorkoutConfiguration: ObservableObject {
     @Published private var nameOverrides: [Int32: String] = [:]
     @Published private var iconOverrides: [Int32: String] = [:]
     @Published private var visibilityOverrides: [Int32: Bool] = [:]
+    @AppStorage("selectedBackground") private var selectedBackground : String  = "Dark Tiles"
     
     private let defaults = UserDefaults.standard
     
@@ -142,16 +171,19 @@ class WorkoutConfiguration: ObservableObject {
         defaults.removeObject(forKey: "workoutNameOverrides")
         defaults.removeObject(forKey: "workoutIconOverrides")
         defaults.removeObject(forKey: "workoutVisibilityOverrides")
+        selectedBackground = "Dark Tiles"
     }
 }
 
 struct SettingsView: View {
     @StateObject private var config = WorkoutConfiguration.shared
     @State private var context = PersistenceController.shared.container.viewContext
-     
+    
     @AppStorage("firstRunComplete") private var firstRunComplete = false
-
+    @AppStorage("selectedBackground") private var selectedBackground : String  = "Dark Tiles"
+    
     @State private var showIconPickerView = false
+    @State private var showBackgroundPickerView = false
     @State private var editingWorkoutType: Int32?
     @State private var showResetAlert = false
 #if DEBUG
@@ -162,7 +194,7 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack {
-            Image("GradientWaves").resizable().ignoresSafeArea()
+            BackgroundView()
             
             VStack {
                 Text("Settings")
@@ -170,43 +202,56 @@ struct SettingsView: View {
                     .padding(.bottom, 20)
                     .foregroundStyle(.white)
                 
-                Text("Customize up to six workout types")
-                    .foregroundStyle(.white)
-                
                 ScrollView {
-                    VStack(alignment: .center) {
-                        ForEach(0..<6) { index in
-                            WorkoutTypeRow(
-                                type: Int32(index),
-                                config: config,
-                                editingWorkoutType: $editingWorkoutType,
-                                showIconPickerView: $showIconPickerView
-                            )
-                            Spacer()
-                        }
+                    /// Workout Customizations
+                    VStack {
+                        Text("Customize up to six workout types")
+                            .foregroundStyle(.white)
+                            .padding(.top, 30)
                         
+                        
+                        VStack(alignment: .center) {
+                            ForEach(0..<6) { index in
+                                WorkoutTypeRow(
+                                    type: Int32(index),
+                                    config: config,
+                                    editingWorkoutType: $editingWorkoutType,
+                                    showIconPickerView: $showIconPickerView
+                                )
+                                Spacer()
+                            }
+                            
+                            
+                        }
+                        //.frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding()
+                        
+                        
+                        
+                    }.background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                    
+                    backgroundPicker
 #if DEBUG
-                        SettingsButtons(
-                            config: config,
-                            showResetAlert: $showResetAlert,showDeleteWorkoutsAlert: $showDeleteWorkoutsAlert,
-                            showDeleteAchievementsAlert: $showDeleteAchievementsAlert, showResetFirstRunAlert: $showResetFirstRunAlert)
+                    SettingsButtons(
+                        config: config,
+                        showResetAlert: $showResetAlert,showDeleteWorkoutsAlert: $showDeleteWorkoutsAlert,
+                        showDeleteAchievementsAlert: $showDeleteAchievementsAlert, showResetFirstRunAlert: $showResetFirstRunAlert)
 #else
-                        SettingsButtons(
-                            config: config,
-                            showResetAlert: $showResetAlert)
+                    SettingsButtons(
+                        config: config,
+                        showResetAlert: $showResetAlert)
 #endif
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(35)
                 }
             }
             
             if showIconPickerView, let type = editingWorkoutType {
-                IconPickerView(
+                IconPickerView (
                     showIconPickerView: $showIconPickerView,
                     workoutType: type,
                     textHint: WorkoutConfiguration.shared.getName(for: Int32(type))
                 )
+            } else if showBackgroundPickerView {
+                BackgroundPickerView (showBackgroundPickerView: $showBackgroundPickerView)
             }
         }
         .alert("Reset Settings", isPresented: $showResetAlert) {
@@ -243,6 +288,31 @@ struct SettingsView: View {
             Text("This will reset First Run.  Close app and relaunch to see changes.")
         }
 #endif
+    }
+    
+    private var backgroundPicker: some View {
+        HStack {
+            
+            Button(action: {
+                showBackgroundPickerView = true
+            }) {
+                HStack {
+                    Image(systemName: "paintbrush.fill")
+                        .font(.title2)
+                    Text("Select Background")
+                }
+            }
+            .buttonStyle(GrowingButtonStyle())
+            .padding(.top, 30)
+            
+            /*
+            Picker("Multi choice", selection: $selectedBackground) {
+                ForEach(AppBackgrounds.options, id: \.displayName) { option in
+                    Text(option.displayName)
+                        .foregroundColor(.white)
+                }
+            }*/
+        }
     }
 }
 
@@ -318,8 +388,8 @@ struct SettingsButtons: View {
                 }
                 .foregroundColor(.white)
                 .padding()
-                .background(Color.red.opacity(0.6))
-                .cornerRadius(10)
+                .background(Color.red.opacity(0.8))
+                .cornerRadius(30)
             }
             .padding(.top, 30)
             
@@ -327,33 +397,31 @@ struct SettingsButtons: View {
             Text ("Debug only controls:")
                 .foregroundColor(.white)
                 .padding(.top, 30)
-            
-            Button(action: { showDeleteWorkoutsAlert = true }) {
-                HStack {
-                    Image(systemName: "trash.fill")
-                        .font(.title2)
-                    Text("Delete all workouts")
+            HStack {
+                Button(action: { showDeleteWorkoutsAlert = true }) {
+                    HStack {
+                        Image(systemName: "trash.fill")
+                            .font(.title2)
+                        Text("Workouts")
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.red.opacity(0.8))
+                    .cornerRadius(30)
                 }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.red.opacity(0.6))
-                .cornerRadius(10)
-            }
-            .padding(.top, 30)
-            
-            Button(action: { showDeleteAchievementsAlert = true }) {
-                HStack {
-                    Image(systemName: "trash.fill")
-                        .font(.title2)
-                    Text("Delete all Trophies")
+                
+                Button(action: { showDeleteAchievementsAlert = true }) {
+                    HStack {
+                        Image(systemName: "trash.fill")
+                            .font(.title2)
+                        Text("Trophies")
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.red.opacity(0.8))
+                    .cornerRadius(30)
                 }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.red.opacity(0.6))
-                .cornerRadius(10)
             }
-            .padding(.top, 30)
-            
             Button(action: { showResetFirstRunAlert = true }) {
                 HStack {
                     Image(systemName: "arrow.counterclockwise.circle.fill")
@@ -362,10 +430,9 @@ struct SettingsButtons: View {
                 }
                 .foregroundColor(.white)
                 .padding()
-                .background(Color.red.opacity(0.6))
-                .cornerRadius(10)
+                .background(Color.red.opacity(0.8))
+                .cornerRadius(30)
             }
-            .padding(.top, 30)
 #endif
         }
     }

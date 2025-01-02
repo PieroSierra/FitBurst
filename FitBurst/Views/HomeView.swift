@@ -8,6 +8,27 @@
 import SwiftUI
 import SceneKit
 
+struct BackgroundView: View {
+    @AppStorage("selectedBackground") private var selectedBackground: String = "Black Tiles"
+    
+    private var currentAssetName: String {
+        AppBackgrounds.options.first { $0.displayName == selectedBackground }?.assetName ?? "BlackTiles"
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            Image(currentAssetName)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped()
+                .ignoresSafeArea()
+                .background(Color.black)
+        }
+        .ignoresSafeArea()
+    }
+}
+
 struct HomeView: View {
     @Binding var selectedTab: Tab
     
@@ -19,7 +40,7 @@ struct HomeView: View {
     /// track the selected date
     @State var selectedDate: Date = Date()
     
-    /// Add refresh triggers
+    /// refresh triggers
     @State private var calendarRefreshTrigger = UUID()
     @State private var weekViewRefreshTrigger = UUID()
     
@@ -32,20 +53,20 @@ struct HomeView: View {
     @State private var rotationY: CGFloat = 0
     @State private var rotationZ: CGFloat = 0
     
-    /// Add refresh trigger for TrophyBox
+    /// Refresh trigger for TrophyBox
     @State private var trophyBoxRefreshTrigger = UUID()
     
     var body: some View {
         ZStack {
             /// Background gradient
-            Image("GradientWaves").resizable().edgesIgnoringSafeArea(.all)
+            BackgroundView()
             
             /// 3d Workout count
             VStack() {
                 ThreeDTextView(text: "\(workoutCount)",
                                extrusionDepth: 4,
                                fontFace: "Futura Bold",
-                               fontSize: 13,
+                               fontSize: 12,
                                fontColor: .limeAccentColor,
                                cameraPosition: cameraPosition,
                                rotationX: rotationX,
@@ -172,7 +193,6 @@ struct HomeView: View {
     private func triggerHeartbeat() {
         // Create a camera animation
         if let sceneView = getSceneView() {
-            let intensity = 5.0
             let cameraNode = sceneView.pointOfView
             SCNTransaction.begin()
             SCNTransaction.animationDuration = 0.2

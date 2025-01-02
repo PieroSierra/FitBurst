@@ -141,9 +141,9 @@ extension PersistenceController {
             let existingCount = try context.count(for: existingCountRequest)
             let achievementExists = try context.count(for: achievementExistsRequest) > 0
             
-            // Only proceed if we haven't already recorded this achievement type today
+            /// Only proceed if we haven't already recorded this achievement type today
             if !achievementExists {
-                // Add minutes to the start of the achievement's day
+                /// Add minutes to the start of the achievement's day
                 let achievementDate = Calendar.current.date(byAdding: .minute, value: existingCount, to: startOfDay)!
                 
                 let newAchievement = Achievements(context: context)

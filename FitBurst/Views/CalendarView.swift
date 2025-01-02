@@ -25,7 +25,7 @@ struct CalendarView: View {
     
     var body: some View {
         ZStack {
-            backgroundView
+            BackgroundView()
             mainContent
         }
         .onAppear { showWorkoutView = false }
@@ -41,12 +41,6 @@ struct CalendarView: View {
         } message: {
             Text("Are you sure you want to delete this workout?")
         }
-    }
-    
-    private var backgroundView: some View {
-        Image("GradientWaves")
-            .resizable()
-            .ignoresSafeArea()
     }
     
     private var yearSelector: some View {
@@ -96,35 +90,42 @@ struct CalendarView: View {
     }
     
     private var workoutsList: some View {
-        VStack(alignment: .leading) {
+        let workouts = fetchWorkouts(for: selectedDate)
+        
+        return VStack(alignment: .leading, spacing: 8) {
             Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
                 .animation(.bouncy(), value: selectedDate)
                 .fontWeight(.bold)
             
-            let workouts = fetchWorkouts(for: selectedDate)
-            
-            ForEach(workouts, id: \Workouts.workoutID) { workout in
-                HStack {
-                    Image(systemName: config.getIcon(for: workout.workoutType))
-                        .foregroundColor(.limeAccentColor)
-                    
-                    let workoutName = config.getName(for: workout.workoutType)
-                    Text(workoutName)
-                    
-                    Spacer()
-                    Button(action: {
-                        workoutToDelete = workout
-                        showingDeleteConfirmation = true
-                    }) {
-                        Image(systemName: "trash.fill")
-                            .foregroundColor(.red)
+            if !workouts.isEmpty {
+                ScrollView {
+                    VStack(spacing: 7) {
+                        ForEach(workouts, id: \Workouts.workoutID) { workout in
+                            HStack {
+                                Image(systemName: config.getIcon(for: workout.workoutType))
+                                    .foregroundColor(.limeAccentColor)
+                                
+                                let workoutName = config.getName(for: workout.workoutType)
+                                Text(workoutName)
+                                
+                                Spacer()
+                                Button(action: {
+                                    workoutToDelete = workout
+                                    showingDeleteConfirmation = true
+                                }) {
+                                    Image(systemName: "trash.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                            .transition(.scale.combined(with: .opacity))
+                        }
                     }
+                    .animation(.bouncy(duration: 0.3), value: workouts)
                 }
-                .padding(.top, 7)
-                .transition(.scale.combined(with: .opacity))
+                .frame(maxHeight: 60) // Scrollable area max height
             }
-            .animation(.bouncy(duration: 0.3), value: workouts)
         }
+        .frame(minHeight: 50) // Minimum height when no workouts
         .padding()
         .foregroundColor(.white)
         .background(Color.clear)
@@ -148,9 +149,11 @@ struct CalendarView: View {
         VStack {
             yearSelector
             calendarGrid
+                .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
             
             HStack(alignment: .bottom) {
                 workoutsList
+                    .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
                 Spacer()
                 recordButton
             }
@@ -161,15 +164,18 @@ struct CalendarView: View {
         .overlay(workoutOverlay)
     }
     
-    @ViewBuilder
     private var workoutOverlay: some View {
-        if showWorkoutView {
-            RecordWorkoutView(
-                showWorkoutView: $showWorkoutView,
-                selectedDate: $selectedDate
-            )
-            .onDisappear {
-                refreshCalendar()
+        Group {
+            if showWorkoutView {
+                RecordWorkoutView(
+                    showWorkoutView: $showWorkoutView,
+                    selectedDate: $selectedDate
+                )
+                .onDisappear {
+                    refreshCalendar()
+                }
+            } else {
+                EmptyView()
             }
         }
     }
@@ -277,7 +283,7 @@ struct CalendarViewYear: View {
     var year: Int = Calendar.current.component(.year, from: Date())
     var refreshTrigger: Int
     
-    // Add this to track the current year for refresh purposes
+    // Track the current year for refresh purposes
     private let id: Int
     
     init(selectedDate: Binding<Date>, config: CalendarViewConfigurable = YearCalendarConfig(), year: Int, refreshTrigger: Int = 0) {
@@ -743,9 +749,7 @@ struct SimpleWeekRow: View {
 
 #Preview ("This Week Calendar") {
     ZStack {
-        Image("GradientWaves")
-            .resizable()
-            .ignoresSafeArea()
+        BackgroundView()
         SimpleWeekRow(selectedDate: .constant(Date()))
     }
 

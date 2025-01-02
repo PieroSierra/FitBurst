@@ -8,8 +8,7 @@ import YouTubePlayerKit
 import UIKit
 
 struct Video: Identifiable {
-    let id: String  // This will be your YouTube video ID
-    // Add other properties as needed
+    let id: String  // YouTube video ID
 }
 
 struct VideosView: View {
@@ -70,7 +69,7 @@ struct VideosView: View {
     var body: some View {
         ZStack {
             
-            Image("GradientWaves").resizable().ignoresSafeArea()
+            BackgroundView()
             
             VStack {
                 Text("Videos")

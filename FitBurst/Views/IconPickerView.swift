@@ -172,7 +172,7 @@ struct IconPickerView: View {
         }) {
             Image(systemName: "xmark.circle")
                 .foregroundColor(.gray)
-                .imageScale(.large)
+                .font(.title2)
         }
         .padding(25)
     }

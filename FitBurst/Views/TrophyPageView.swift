@@ -8,7 +8,6 @@ import SwiftUI
 import Model3DView
 import CoreData
 
-// Add this struct at the top level
 struct TrophyWithDate {
     let type: TrophyType
     let earnedDate: Date
@@ -21,7 +20,7 @@ struct TrophyPageView: View {
     
     var body: some View {
         ZStack {
-            Image("GradientWaves").resizable().ignoresSafeArea()
+            BackgroundView()
             
             VStack(spacing: 0) {
                 Text("Trophies")
@@ -60,7 +59,7 @@ struct TrophyBox: View {
     
     @State private var trophies: [TrophyWithDate] = []
     
-    // Add observation of CoreData changes
+    /// Observe CoreData changes
     @Environment(\.managedObjectContext) private var viewContext
     
     private func loadTrophies() {
@@ -169,7 +168,7 @@ struct TrophyBox: View {
                 }
             }
         }
-        // Add listener for achievement changes
+        /// Listen for achievement changes
         .onReceive(NotificationCenter.default.publisher(for: .workoutAdded)) { _ in
             loadTrophies() // Reload trophies when a workout is added
         }

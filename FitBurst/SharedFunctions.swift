@@ -101,6 +101,7 @@ struct GrowingButtonStyle: ButtonStyle {
         configuration.label
             .font(.headline)
             .fontWeight(.semibold)
+            .frame(minHeight: 30)
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
             .background(
                 Color.limeAccentColor.mix(with: .white, by: wasPressed ? 0.5 : 0.0)
@@ -139,7 +140,9 @@ struct ViewPositionKey: PreferenceKey {
 
 /// FillUpButton style (fills up when held, with haptic feedback)
 struct FillUpButtonStyle: ButtonStyle {
-    var onComplete: ((CGPoint) -> Void)? = nil
+    @Binding var buttonText:String
+    var onComplete: ((CGPoint, Binding<String>) -> Void)? = nil
+
     @State private var fillAmount: CGFloat = 0
     @State private var scale: CGFloat = 1.0
     @State private var isPressed: Bool = false
@@ -156,6 +159,7 @@ struct FillUpButtonStyle: ButtonStyle {
         configuration.label
             .font(.headline)
             .fontWeight(.semibold)
+            .frame(minHeight: 30)
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
             .background(
                 GeometryReader { geometry in
@@ -306,7 +310,7 @@ struct FillUpButtonStyle: ButtonStyle {
         let notificationGenerator = UINotificationFeedbackGenerator()
         notificationGenerator.notificationOccurred(.success)
         
-        onComplete?(buttonPosition)
+        onComplete?(buttonPosition, $buttonText)  // Pass the binding
         
         // Set final state
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -400,40 +404,37 @@ struct ThreeDTextView: UIViewRepresentable {
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView()
         scnView.scene = SCNScene()
-        
-        // Allows the user to pan/zoom/rotate the scene
         scnView.allowsCameraControl = true
-        
-        // Scene background color
         scnView.backgroundColor = .clear
         
-        // Add a camera node
+        // Add camera
         let cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
         cameraNode.position = cameraPosition
         scnView.scene?.rootNode.addChildNode(cameraNode)
         
-        // Add a simple omni light
+  /*      /// Add a simple omni light
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
         lightNode.light?.type = .omni
         lightNode.position = SCNVector3(x: 0, y: 10, z: 20)
         scnView.scene?.rootNode.addChildNode(lightNode)
-        
-        // Optionally, add an ambient light so the text isn’t fully in shadow
+        */
+        /*
+        /// Add an ambient light so the text isn’t fully in shadow
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light?.type = .ambient
         ambientLightNode.light?.color = UIColor.darkGray
         scnView.scene?.rootNode.addChildNode(ambientLightNode)
-        
+        */
         return scnView
     }
     
     func updateUIView(_ scnView: SCNView, context: Context) {
         guard let scene = scnView.scene else { return }
         
-        // Add HDRI environment but keep background clear
+        /// Add HDRI environment but keep background clear
         if let hdriURL = Bundle.main.url(forResource: "studio_small_03_1k", withExtension: "exr") {
             scene.background.contents = UIColor.clear  // Keep background transparent
             scene.lightingEnvironment.contents = hdriURL  // Keep HDRI for reflections
@@ -492,7 +493,7 @@ struct ThreeDTextView: UIViewRepresentable {
         // Run the animation
         textNode.runAction(rotateAction)
         
-        // Add the node to the scene
+        /// Add the node to the scene
         scene.rootNode.addChildNode(textNode)
     }
 }

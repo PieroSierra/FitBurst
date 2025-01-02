@@ -11,6 +11,7 @@ struct FirstRunView: View {
     @Binding var firstRunComplete: Bool
     @State private var selection : Int = 0
     @State private var showRipple: Int = 0
+    @State private var buttonText = "Press and hold"
     
     init(firstRunComplete: Binding<Bool>) {
         _firstRunComplete = firstRunComplete
@@ -21,7 +22,7 @@ struct FirstRunView: View {
     
     var body: some View {
         ZStack {
-            Image("GradientWaves").resizable().edgesIgnoringSafeArea(.all)
+            BackgroundView()
             
             VStack {
                 TabView (selection: $selection) {
@@ -38,6 +39,7 @@ struct FirstRunView: View {
     
     var screen0: some View {
         VStack (alignment: .center){
+           
             Image("LogoSqClear")
                 .resizable()
                 .frame(width: 150, height:  150)
@@ -61,6 +63,7 @@ struct FirstRunView: View {
     
     var screen1: some View {
         VStack (alignment: .center){
+            
             Text("How to record a workout")
                 .padding()
                 .font(.custom("Futura Bold", fixedSize: 40))
@@ -71,18 +74,23 @@ struct FirstRunView: View {
                 .font(.body)
                 .multilineTextAlignment(.center)
             
-            Button(action: {
-                
-            }) {
+            Spacer().frame(height:40)
+            
+            Button(action: { }) {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
-                        .imageScale(.large)
-                    Text("Press and hold")
+                        .font(.title)
+                    Text(buttonText)
                         .lineLimit(1)
                 }
             }
             .padding(5)
-            .buttonStyle(FillUpButtonStyle(onComplete: { _ in showRipple += 1 } ))
+            .buttonStyle(FillUpButtonStyle(
+                buttonText: $buttonText,
+                onComplete: { _, textBinding in
+                    showRipple += 1
+                    textBinding.wrappedValue = "Well done!"
+                } ))
             
         }
         .foregroundColor(.white)
@@ -97,16 +105,19 @@ struct FirstRunView: View {
     
     var screen2: some View {
         VStack (alignment: .center){
+            
             Text("Make FitBurst your own")
                 .padding()
                 .font(.custom("Futura Bold", fixedSize: 40))
                 .multilineTextAlignment(.center)
             
-            Text("You can customize up to 6 of your favorite workouts in **settings**.")
+            Text("You can customize up to six of your favorite workouts in **settings**.")
                 .padding()
                 .font(.body)
                 .multilineTextAlignment(.center)
+            
             Spacer().frame(height:40)
+            
             Button (action: {
                 firstRunComplete = true
             }) {
