@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		434607192D27067500A31D92 /* fitburst_privacy_policy.html in Resources */ = {isa = PBXBuildFile; fileRef = 434607182D27067500A31D92 /* fitburst_privacy_policy.html */; };
 		43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */ = {isa = PBXBuildFile; productRef = 43FBA29D2D0F27F2005CBFA3 /* Model3DView */; };
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
 		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		434607182D27067500A31D92 /* fitburst_privacy_policy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = fitburst_privacy_policy.html; sourceTree = "<group>"; };
 		4386609A2CF322B300CA5D62 /* FitBurst.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBurst.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -41,6 +43,7 @@
 		438660912CF322B300CA5D62 = {
 			isa = PBXGroup;
 			children = (
+				434607182D27067500A31D92 /* fitburst_privacy_policy.html */,
 				4386609C2CF322B300CA5D62 /* FitBurst */,
 				43FBA29C2D0F27F2005CBFA3 /* Frameworks */,
 				4386609B2CF322B300CA5D62 /* Products */,
@@ -134,6 +137,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				434607192D27067500A31D92 /* fitburst_privacy_policy.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
