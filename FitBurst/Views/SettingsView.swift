@@ -107,14 +107,18 @@ class WorkoutConfiguration: ObservableObject {
     }
     
     func isVisible(for type: Int32) -> Bool {
-        // First workout type (strength) is always visible
-        if type == 0 { return true }
-        return visibilityOverrides[type] ?? true  // Default to visible if not set
+        visibilityOverrides[type] ?? true  // Default to visible if not set
     }
     
     func setVisibility(_ visible: Bool, for type: Int32) {
-        // Don't allow changing visibility for type 0
-        if type == 0 { return }
+        // If trying to disable and this is the last visible type, prevent the action
+        if !visible {
+            let visibleCount = (0...5).filter { isVisible(for: Int32($0)) }.count
+            if visibleCount <= 1 {
+                return // Don't allow disabling the last visible type
+            }
+        }
+        
         visibilityOverrides[type] = visible
         saveOverrides()
     }
@@ -197,18 +201,18 @@ struct SettingsView: View {
             BackgroundView()
             
             VStack {
-                Text("Settings")
-                    .font(.custom("Futura Bold", fixedSize: 40))
-                    .padding(.bottom, 20)
-                    .foregroundStyle(.white)
-                
                 ScrollView {
+                    Text("Settings")
+                        .font(.custom("Futura Bold", fixedSize: 40))
+                        .padding(.bottom, 20)
+                        .foregroundStyle(.white)
+                    
                     /// Workout Customizations
                     VStack {
-                        Text("Customize up to six workout types")
+                        Text("Rename or customize icons for up to six of your favorite workout types, or disable them altogether.")
                             .foregroundStyle(.white)
                             .padding(.top, 30)
-                        
+                            .padding(.horizontal, 30)
                         
                         VStack(alignment: .center) {
                             ForEach(0..<6) { index in
@@ -218,17 +222,14 @@ struct SettingsView: View {
                                     editingWorkoutType: $editingWorkoutType,
                                     showIconPickerView: $showIconPickerView
                                 )
-                                Spacer()
                             }
-                            
-                            
                         }
-                        //.frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding()
-                        
-                        
-                        
-                    }.background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                        .padding(.bottom, 10)
+                    }
+                    .background(
+                        RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                    .padding()
                     
                     backgroundPicker
 #if DEBUG
@@ -292,7 +293,6 @@ struct SettingsView: View {
     
     private var backgroundPicker: some View {
         HStack {
-            
             Button(action: {
                 showBackgroundPickerView = true
             }) {
@@ -303,15 +303,15 @@ struct SettingsView: View {
                 }
             }
             .buttonStyle(GrowingButtonStyle())
-            .padding(.top, 30)
+            .padding(.top, 20)
             
             /*
-            Picker("Multi choice", selection: $selectedBackground) {
-                ForEach(AppBackgrounds.options, id: \.displayName) { option in
-                    Text(option.displayName)
-                        .foregroundColor(.white)
-                }
-            }*/
+             Picker("Multi choice", selection: $selectedBackground) {
+             ForEach(AppBackgrounds.options, id: \.displayName) { option in
+             Text(option.displayName)
+             .foregroundColor(.white)
+             }
+             }*/
         }
     }
 }
@@ -323,7 +323,11 @@ struct WorkoutTypeRow: View {
     @Binding var showIconPickerView: Bool
     
     var body: some View {
-        let isRowDisabled : Bool = WorkoutConfiguration.shared.isVisible(for: Int32(type)) ? false : true
+        let isLastVisible = (0...5)
+            .filter { WorkoutConfiguration.shared.isVisible(for: Int32($0)) }
+            .count == 1 && WorkoutConfiguration.shared.isVisible(for: type)
+        let isRowDisabled = !WorkoutConfiguration.shared.isVisible(for: Int32(type))
+        
         HStack {
             Group {
                 Button(action: {
@@ -333,7 +337,7 @@ struct WorkoutTypeRow: View {
                     Image(systemName: config.getIcon(for: type))
                         .font(.title2)
                         .frame(width: 40, height: 40)
-                        .background(isRowDisabled ? Color.gray : Color.white)
+                        .background(isRowDisabled ? Color.white.mix(with: Color.black, by: 0.3) : Color.white)
                         .foregroundStyle(Color.black)
                         .cornerRadius(10)
                 }
@@ -344,27 +348,21 @@ struct WorkoutTypeRow: View {
                             set: { config.setName($0, for: type) }
                           ))
                 .font(.custom("Futura", size: 15))
-                .frame(width: 150, height:40)
+                .frame(height:40)
                 .padding(.horizontal, 10)
-                .background(.black.opacity(0.3))
+                .background(isRowDisabled ? Color.white.mix(with: Color.black, by: 0.3) : Color.white)
                 .cornerRadius(10)
-                .foregroundColor(isRowDisabled ? Color.gray : Color.white)
+                .foregroundColor(isRowDisabled ? Color.black : Color.black)
             }.disabled(isRowDisabled)
             
-            if type == 0 {
-                Toggle("", isOn: .constant(true))
-                    .tint(Color.limeAccentColor.opacity(0.7))
-                    .disabled(true)
-                    .frame(width:60)
-            } else {
-                Toggle("", isOn: Binding(
-                    get: { config.isVisible(for: type) },
-                    set: { config.setVisibility($0, for: type) }
-                ))
-                .frame(width: 60)
-                .tint(Color.limeAccentColor.opacity(0.7))
-            }
-        }
+            Toggle("", isOn: Binding(
+                get: { config.isVisible(for: type) },
+                set: { config.setVisibility($0, for: type) }
+            ))
+            .frame(width: 40)
+            .tint(Color.limeAccentColor.opacity(0.7))
+            .disabled(isLastVisible) // Disable toggle if this is the last visible type
+        }.padding(.horizontal)
     }
 }
 
@@ -388,7 +386,7 @@ struct SettingsButtons: View {
                 }
                 .foregroundColor(.white)
                 .padding()
-                .background(Color.red.opacity(0.8))
+                .background(Color.red.mix(with:.black, by: 0.15))
                 .cornerRadius(30)
             }
             .padding(.top, 30)
@@ -406,7 +404,7 @@ struct SettingsButtons: View {
                     }
                     .foregroundColor(.white)
                     .padding()
-                    .background(Color.red.opacity(0.8))
+                    .background(Color.red.mix(with:.black, by: 0.15))
                     .cornerRadius(30)
                 }
                 
@@ -418,7 +416,7 @@ struct SettingsButtons: View {
                     }
                     .foregroundColor(.white)
                     .padding()
-                    .background(Color.red.opacity(0.8))
+                    .background(Color.red.mix(with:.black, by: 0.15))
                     .cornerRadius(30)
                 }
             }

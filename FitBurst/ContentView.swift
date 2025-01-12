@@ -54,7 +54,6 @@ struct ContentView: View {
                 HomeView(selectedTab: $selectedTab)
                     .tag(Tab.home)
                     .tabItem { Label("Home", systemImage: "house.fill") }
-                
                 CalendarView()
                     .tag(Tab.calendar)
                     .tabItem { Label("Calendar", systemImage: "calendar") }

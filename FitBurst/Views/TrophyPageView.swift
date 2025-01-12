@@ -11,6 +11,17 @@ import CoreData
 struct TrophyWithDate {
     let type: TrophyType
     let earnedDate: Date
+    let displayNameOverride: String?
+    
+    init(type: TrophyType, earnedDate: Date, displayNameOverride: String? = nil) {
+        self.type = type
+        self.earnedDate = earnedDate
+        self.displayNameOverride = displayNameOverride
+    }
+    
+    var displayName: String {
+        return displayNameOverride ?? type.displayName
+    }
 }
 
 struct TrophyPageView: View {
@@ -41,8 +52,7 @@ struct TrophyPageView: View {
             if showTrophyDisplayView, let trophy = selectedTrophy {
                 SingleTrophyView(
                     showTrophyDisplayView: $showTrophyDisplayView,
-                    trophyType: trophy.type,
-                    earnedDate: trophy.earnedDate
+                    trophy: trophy
                 )
             }
         }
@@ -68,7 +78,7 @@ struct TrophyBox: View {
             trophies = (0..<24).map { _ in
                 TrophyWithDate(
                     type: TrophyType.allCases.randomElement()!,
-                    earnedDate: Date().addingTimeInterval(-Double.random(in: 0...(86400 * 30))) // Random date within last 30 days
+                    earnedDate: Date().addingTimeInterval(-Double.random(in: 0...(86400 * 30)))
                 )
             }
         } else {
@@ -79,12 +89,40 @@ struct TrophyBox: View {
             
             do {
                 let achievements = try context.fetch(fetchRequest)
-                trophies = achievements.map { achievement in
-                    TrophyWithDate(
-                        type: TrophyType.allCases[Int(achievement.achievementType)],
-                        earnedDate: achievement.timestamp ?? Date()
-                    )
+                
+                // Group achievements by type
+                var groupedAchievements: [TrophyType: [Achievements]] = [:]
+                for achievement in achievements {
+                    let type = TrophyType.allCases[Int(achievement.achievementType)]
+                    groupedAchievements[type, default: []].append(achievement)
                 }
+                
+                // Process each group
+                trophies = groupedAchievements.compactMap { (type, typeAchievements) in
+                    // Get the most recent date for this achievement type
+                    guard let mostRecent = typeAchievements.first?.timestamp else { return nil }
+                    
+                    // For repeatable achievements, include count if more than 1
+                    let repeatableTypes: Set<TrophyType> = [.twoInADay, .threeInADay, .lotsInADay]
+                    if repeatableTypes.contains(type) && typeAchievements.count > 1 {
+                        // Create a custom trophy with count in name
+                        return TrophyWithDate(
+                            type: type,
+                            earnedDate: mostRecent,
+                            displayNameOverride: "\(type.displayName) (\(typeAchievements.count))"
+                        )
+                    } else {
+                        // Return regular trophy
+                        return TrophyWithDate(
+                            type: type,
+                            earnedDate: mostRecent
+                        )
+                    }
+                }
+                
+                // Sort by most recent first
+                trophies.sort { $0.earnedDate > $1.earnedDate }
+                
             } catch {
                 print("Failed to fetch achievements: \(error)")
                 trophies = []
@@ -100,8 +138,7 @@ struct TrophyBox: View {
         TrophyIconView(
             showTrophyDisplayView: $showTrophyDisplayView,
             selectedTrophy: $selectedTrophy,
-            trophyType: trophy.type,
-            earnedDate: trophy.earnedDate
+            trophy: trophy
         )
         .scaleEffect(appearingItems.contains(index) ? 1 : 0)
         .animation(.spring(response: 0.5, dampingFraction: 0.6), value: appearingItems.contains(index))

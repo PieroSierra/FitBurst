@@ -33,6 +33,7 @@ struct IconPickerView: View {
         "figure.squash",
         "surfboard.fill",
         "figure.walk.motion",
+        "figure.core.training",
         "figure.snowboarding",
         "figure.baseball",
         "figure.surfing",
@@ -150,7 +151,7 @@ struct IconPickerView: View {
                 }
             }
             .padding(30)
-            .frame(width:350, height:400)
+            .frame(width:UIScreen.main.bounds.width - 40, height:400)
             .overlay(dismissButton, alignment: .topTrailing)
             .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))

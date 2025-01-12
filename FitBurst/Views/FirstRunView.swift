@@ -56,7 +56,7 @@ struct FirstRunView: View {
         }
         .foregroundColor(.white)
         .padding(30)
-        .frame(width:350, height: 500)
+        .frame(width: UIScreen.main.bounds.width - 40, height: 500)
         .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
     }
@@ -95,7 +95,7 @@ struct FirstRunView: View {
         }
         .foregroundColor(.white)
         .padding(30)
-        .frame(width:350, height: 500)
+        .frame(width: UIScreen.main.bounds.width - 40, height: 500)
         .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
         .modifier(RippleEffect(at: CGPoint(
@@ -132,7 +132,7 @@ struct FirstRunView: View {
         }
         .foregroundColor(.white)
         .padding(30)
-        .frame(width:350, height: 500)
+        .frame(width: UIScreen.main.bounds.width - 40, height: 500)
         .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
     }

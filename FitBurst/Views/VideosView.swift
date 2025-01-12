@@ -14,7 +14,7 @@ struct Video: Identifiable {
 struct VideosView: View {
     init() {
         // Customize the Segmented Control appearance
-        UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(Color.limeAccentColor)
+        UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(Color.limeAccentColor.mix(with:.black, by:0.4))
         UISegmentedControl.appearance().setTitleTextAttributes([
             .foregroundColor: UIColor(Color.limeAccentColor)
         ], for: .selected)
@@ -77,22 +77,19 @@ struct VideosView: View {
                     .foregroundColor(.white)
                 
                 Picker("Select Category", selection: $selectedSegment) {
-                    Text("🏋🏿‍♀️").tag(0)
-                    Text("👟").tag(1)
-                    Text("⚽️").tag(2)
-                        .bold()
-                    Text("❤️").tag(3)
-                        .bold()
-                    Text("🧘🏻‍♂️").tag(4)
-                    Text("🥋").tag(5)
-                        .bold()
-                    
+                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: 0)).tag(0)
+                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: 1)).tag(1)
+                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: 2)).tag(2)
+                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: 3)).tag(3)
+                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: 4)).tag(4)
+                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: 5)).tag(5)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.leading, 15)
                 .padding(.trailing, 15)
                 .padding(.bottom, -7)
-                .accentColor(.limeAccentColor)
+               // .tint(.blue)
+                //.accentColor(.blue)
                 
                 ScrollView {
                     LazyVStack {

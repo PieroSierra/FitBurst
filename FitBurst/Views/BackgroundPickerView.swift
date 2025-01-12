@@ -32,13 +32,14 @@ struct BackgroundPickerView: View {
                         ForEach(AppBackgrounds.options, id: \.displayName) { option in
                             Button (action: {
                                 selectedBackground = option.displayName
+                                showBackgroundPickerView = false
                             })
                             {
                                 ZStack {
                                     Image(option.assetName)
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
-                                        .frame(width: 90)
+                                        .frame(width: UIScreen.main.bounds.width/4.5)
                                         .clipShape(RoundedRectangle(cornerRadius: 20))
                                         .shadow(color: .limeAccentColor, radius: 5)
                                     Text(option.displayName)
@@ -52,7 +53,7 @@ struct BackgroundPickerView: View {
                 }
             }
             .padding(20)
-            .frame(width:350, height:670)
+            .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.height - 200)
             .overlay(dismissButton, alignment: .topTrailing)
             .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))

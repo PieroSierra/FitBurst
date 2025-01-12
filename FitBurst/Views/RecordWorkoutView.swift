@@ -49,7 +49,6 @@ struct RecordWorkoutView: View {
             Color.black.opacity(0.4).ignoresSafeArea()
                 .modifier(RippleEffect(at: ripplePosition, trigger: rippleCounter, amplitude: -22, frequency: 15, decay: 4, speed: 600))
             
- 
             VStack {
                 Spacer().frame(height: 50)
 
@@ -95,7 +94,7 @@ struct RecordWorkoutView: View {
                 
                 Spacer().frame(height: 60)
             }
-            .frame(width:350,height:330)
+            .frame(width: UIScreen.main.bounds.width - 40,height:330)
             .padding(.bottom, 40)
             .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))
@@ -108,7 +107,7 @@ struct RecordWorkoutView: View {
             }
             .modifier(RippleEffect(
                 at: CGPoint(
-                    x: ripplePosition.x - (UIScreen.main.bounds.width - 350)/2,  // Center X in VStack
+                    x: ripplePosition.x - (UIScreen.main.bounds.width - (UIScreen.main.bounds.width - 40))/2,  // Center X in VStack
                     y: ripplePosition.y - (UIScreen.main.bounds.height - 330)/2+65  // Center Y in VStack
                 ),
                 trigger: rippleCounter,
@@ -146,25 +145,7 @@ struct RecordWorkoutView: View {
             .offset(y: +150)
             
             /// Trophy display at the top Z-order
-            if showTrophyView, let nextTrophy = newTrophies.first {
-                SingleTrophyView(
-                    showTrophyDisplayView: $showTrophyView,
-                    trophyType: nextTrophy.type,
-                    earnedDate: nextTrophy.earnedDate
-                )
-                .onChange(of: showTrophyView) { isShowing in
-                    if !isShowing {
-                        // Remove the displayed trophy
-                        newTrophies.removeFirst()
-                        // Show next trophy if available
-                        if !newTrophies.isEmpty {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                showTrophyView = true
-                            }
-                        }
-                    }
-                }
-            }
+            trophyOverlay
         }
         .onTapGesture {
             showWorkoutView = false
@@ -226,38 +207,46 @@ struct RecordWorkoutView: View {
                 )
             }
             
-            // Create a unique identifier for each achievement (type + date)
-            let existingIdentifiers = Set(existingRecords.map { 
-                "\($0.type)_\(Calendar.current.startOfDay(for: $0.date))"
-            })
-            let newIdentifiers = Set(result.achievements.map { 
-                "\($0.type)_\(Calendar.current.startOfDay(for: $0.date))"
-            })
+            // For one-time achievements, we only need to check if the type exists
+            let oneTimeTypes: Set<TrophyType> = [
+                .newbie, .fiveX, .tenX, .twentyFiveX, .fiftyX, .oneHundredX, .twoHundredX,
+                .firstPerfectWeek, .secondPerfectWeek, .thirdPerfectWeek, .fourthPerfectWeek,
+                .fifthPerfectWeek, .sixthPerfectWeek, .seventhPerfectWeek
+            ]
             
-            // Find truly new achievements
-            let newlyEarnedIdentifiers = newIdentifiers.subtracting(existingIdentifiers)
+            let existingTypes = Set(existingRecords.map { $0.type })
             
-            if !newlyEarnedIdentifiers.isEmpty {
-                // Create TrophyWithDate objects for new achievements
-                newTrophies = result.achievements
-                    .filter { achievement in
-                        let identifier = "\(achievement.type)_\(Calendar.current.startOfDay(for: achievement.date))"
-                        return newlyEarnedIdentifiers.contains(identifier)
-                    }
-                    .map { TrophyWithDate(type: $0.type, earnedDate: $0.date) }
-                
-                // Show the first trophy
-                if !newTrophies.isEmpty {
-                    showTrophyView = true
+            // Filter new achievements based on whether they're one-time or repeatable
+            let newAchievements = result.achievements.filter { achievement in
+                if oneTimeTypes.contains(achievement.type) {
+                    // For one-time achievements, only include if we've never earned it
+                    return !existingTypes.contains(achievement.type)
+                } else {
+                    // For repeatable achievements (like twoInADay), check both type and date
+                    let achievementKey = "\(achievement.type)_\(Calendar.current.startOfDay(for: achievement.date))"
+                    let existingKeys = Set(existingRecords.map { 
+                        "\($0.type)_\(Calendar.current.startOfDay(for: $0.date))"
+                    })
+                    return !existingKeys.contains(achievementKey)
                 }
             }
             
-            // Delete all existing achievements
+            // Set new trophies to display
+            newTrophies = newAchievements.map { 
+                TrophyWithDate(type: $0.type, earnedDate: $0.date)
+            }
+            
+            // Show the first trophy if we have any
+            if !newTrophies.isEmpty {
+                showTrophyView = true
+            }
+            
+            // Delete all existing achievements (as before)
             for achievement in existingAchievements {
                 context.delete(achievement)
             }
             
-            // Save the complete new set
+            // Save the complete new set (as before)
             for achievement in result.achievements {
                 let achievementIndex = TrophyType.allCases.firstIndex(of: achievement.type)!
                 PersistenceController.shared.recordAchievement(
@@ -269,6 +258,28 @@ struct RecordWorkoutView: View {
             NotificationCenter.default.post(name: .achievementsChanged, object: nil)
         } catch {
             print("Error managing achievements: \(error)")
+        }
+    }
+    
+    @ViewBuilder
+    private var trophyOverlay: some View {
+        if showTrophyView, let nextTrophy = newTrophies.first {
+            SingleTrophyView(
+                showTrophyDisplayView: $showTrophyView,
+                trophy: nextTrophy
+            )
+            .onChange(of: showTrophyView) { isShowing in
+                if !isShowing {
+                    // Remove the displayed trophy
+                    newTrophies.removeFirst()
+                    // Show next trophy if available
+                    if !newTrophies.isEmpty {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            showTrophyView = true
+                        }
+                    }
+                }
+            }
         }
     }
 }

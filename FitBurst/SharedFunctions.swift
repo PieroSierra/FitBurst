@@ -100,6 +100,7 @@ struct GrowingButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
+            .lineLimit(1)
             .fontWeight(.semibold)
             .frame(minHeight: 30)
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
@@ -159,6 +160,7 @@ struct FillUpButtonStyle: ButtonStyle {
         configuration.label
             .font(.headline)
             .fontWeight(.semibold)
+            .lineLimit(1)
             .frame(minHeight: 30)
             .padding(EdgeInsets(top: 15, leading: 20, bottom: 15, trailing: 20))
             .background(
@@ -376,9 +378,6 @@ func playSound(named soundName: String, fileExtension: String? = nil) {
         print("❌ Could not create audio player: \(error)")
     }
 }
-
-import SwiftUI
-import SceneKit
 
 struct ThreeDTextView: UIViewRepresentable {
     

@@ -45,28 +45,29 @@ struct CalendarView: View {
     
     private var yearSelector: some View {
         HStack {
-  
                 Button(action: {
                     selectedYear -= 1
                 }) {
                     Text(String(format: "%d", selectedYear-1))
                         .font(.custom("Futura Bold", fixedSize: 40))
-                        .foregroundStyle(Color.gray)
+                        .foregroundStyle(Color.white.opacity(0.5))
+                        .lineLimit(1)
                 }
                 
                 Text(String(format: "%d", selectedYear))
                     .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
+                    .lineLimit(1)
                 
                 Button(action: {
                     selectedYear += 1
                 }) {
                     Text(String(format: "%d", selectedYear+1))
                         .font(.custom("Futura Bold", fixedSize: 40))
-                        .foregroundStyle(Color.gray)
+                        .foregroundStyle(Color.white.opacity(0.5))
+                        .lineLimit(1)
                 }
-            
-        }
+        }.frame(width:800)
     }
     
     private var calendarGrid: some View {
@@ -146,22 +147,27 @@ struct CalendarView: View {
     }
     
     private var mainContent: some View {
+
         VStack {
-            yearSelector
-            calendarGrid
-                .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
-            
-            HStack(alignment: .bottom) {
-                workoutsList
+            yearSelector /// set in it's own VStack to clip horizontally if needed
+                    
+            VStack {
+                calendarGrid
+                    .padding(.top)
                     .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                
+                HStack(alignment: .bottom) {
+                    workoutsList
+                        .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                    Spacer()
+                    recordButton
+                }
+                
                 Spacer()
-                recordButton
             }
-            
-            Spacer()
+            .frame(width: UIScreen.main.bounds.width, height: .infinity)
+            .overlay(workoutOverlay)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .overlay(workoutOverlay)
     }
     
     private var workoutOverlay: some View {

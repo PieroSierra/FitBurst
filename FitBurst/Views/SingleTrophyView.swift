@@ -11,8 +11,7 @@ import SceneKit
 
 struct SingleTrophyView: View {
     @Binding var showTrophyDisplayView: Bool
-    let trophyType: TrophyType
-    let earnedDate: Date
+    let trophy: TrophyWithDate
     
     @State private var scale: CGFloat = 0.6
     @State private var modelScale: SIMD3<Float> = SIMD3<Float>(0, 0, 0)
@@ -26,6 +25,23 @@ struct SingleTrophyView: View {
 //    @State private var ripplePosition: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2)
     @State private var ripplePosition: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2)
     
+    private var isRepeatedAward: Bool {
+        trophy.displayNameOverride != nil
+    }
+    
+    private var awardCount: Int? {
+        guard let override = trophy.displayNameOverride,
+              let countStr = override.split(separator: "(").last?.dropLast(),
+              let count = Int(countStr) else {
+            return nil
+        }
+        return count
+    }
+    
+    private var baseName: String {
+        trophy.type.displayName
+    }
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
@@ -34,21 +50,37 @@ struct SingleTrophyView: View {
             VStack {
                 Spacer()
                 
-                Text("\(trophyType.displayName)")
+                Text(baseName)
                     .padding(.top, 10)
+                    .padding(.horizontal)
                     .foregroundColor(.white)
                     .font(.custom("Futura Bold", fixedSize: 24))
                 
+                if let count = awardCount {
+                    Text("Earned \(count) times")
+                        .foregroundColor(.white)
+                        .font(.custom("Futura", fixedSize: 16))
+                        .padding(.top, 5)
+                
                 Spacer().padding(.horizontal)
                 
-                Text("Earned on \(earnedDate.formatted(date: .long, time: .omitted))")
+                Text("Last earned on \(trophy.earnedDate.formatted(date: .long, time: .omitted))")
                     .padding(.top, 10)
                     .foregroundColor(.white)
                     .font(.custom("Futura", fixedSize: 12))
+                }
+                
+                else {
+                    Spacer().padding(.horizontal)
+                    Text("Earned on \(trophy.earnedDate.formatted(date: .long, time: .omitted))")
+                        .padding(.top, 10)
+                        .foregroundColor(.white)
+                        .font(.custom("Futura", fixedSize: 12))
+                }
                 
                 Spacer()
             }
-            .frame(width:350,height:450)
+            .frame(width: UIScreen.main.bounds.width - 40,height:450)
             .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))
             .overlay(dismissButton, alignment: .topTrailing)
@@ -56,7 +88,7 @@ struct SingleTrophyView: View {
             .modifier(RippleEffect(at:
                                     CGPoint(
                                         x: ripplePosition.x - (UIScreen.main.bounds.width - 350)/2,  // Center X in VStack
-                                        y: ripplePosition.y - (UIScreen.main.bounds.height - 350)/2  // Center Y in VStack
+                                        y: ripplePosition.y - (UIScreen.main.bounds.height - (UIScreen.main.bounds.width - 40))/2  // Center Y in VStack
                                     ),trigger: rippleCounter, amplitude: -22, frequency: 15, decay: 4, speed: 300))
             .onAppear {
                 scale = 0.6
@@ -83,7 +115,7 @@ struct SingleTrophyView: View {
                 
             }
             
-            Model3DView(named: trophyType.fileName)  // Use the passed trophy type
+            Model3DView(named: trophy.type.fileName)
                 .transform(
                     rotate: Euler(y: .degrees(rotationDegrees)),
                     scale: modelScale,
@@ -144,21 +176,23 @@ struct TrophyIconView: View {
     @State private var scale: CGFloat = 1.0
     @Binding var showTrophyDisplayView: Bool
     @Binding var selectedTrophy: TrophyWithDate?
-    let trophyType: TrophyType
-    let earnedDate: Date
+    let trophy: TrophyWithDate
     
     var body: some View {
         Button(action: {
-            selectedTrophy = TrophyWithDate(type: trophyType, earnedDate: earnedDate)
+            selectedTrophy = trophy
             showTrophyDisplayView = true
         }) {
             VStack {
-                ZStack{
-                    RoundedRectangle(cornerRadius: 10).frame(width:70, height:70).foregroundColor(.black).opacity(0.3)
-                    Model3DView(named: trophyType.fileName)
-                        .frame(width:70, height:70)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(width: 70, height: 70)
+                        .foregroundColor(.black)
+                        .opacity(0.3)
+                    Model3DView(named: trophy.type.fileName)
+                        .frame(width: 70, height: 70)
                 }
-                Text(trophyType.displayName)
+                Text(trophy.displayName)
                     .font(.custom("Futura", fixedSize: 14))
                     .foregroundStyle(Color.white)
                     .multilineTextAlignment(.center)
@@ -185,7 +219,14 @@ struct TrophyIconView: View {
 }
 
 #Preview {
-    SingleTrophyView(showTrophyDisplayView: .constant(true), trophyType: .thirdPerfectWeek, earnedDate: Date())
-        .environment(\.dynamicTypeSize, .medium)
-        .preferredColorScheme(.light)
+    SingleTrophyView(
+        showTrophyDisplayView: .constant(true),
+        trophy: TrophyWithDate(
+            type: .thirdPerfectWeek,
+            earnedDate: Date(),
+            displayNameOverride: nil
+        )
+    )
+    .environment(\.dynamicTypeSize, .medium)
+    .preferredColorScheme(.light)
 }

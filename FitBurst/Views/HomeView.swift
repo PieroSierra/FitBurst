@@ -10,22 +10,75 @@ import SceneKit
 
 struct BackgroundView: View {
     @AppStorage("selectedBackground") private var selectedBackground: String = "Black Tiles"
+    @State private var shouldRipple = false
+    @State private var previousAssetName: String = ""
+    @State private var isTransitioning = false
+    @State private var opacity: Double = 0
     
     private var currentAssetName: String {
         AppBackgrounds.options.first { $0.displayName == selectedBackground }?.assetName ?? "BlackTiles"
     }
-
+    
     var body: some View {
         GeometryReader { geometry in
-            Image(currentAssetName)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
-                .ignoresSafeArea()
-                .background(Color.black)
+            ZStack {
+                // Base black layer
+                Rectangle()
+                    .fill(Color.black)
+                    .frame(width: .infinity, height: .infinity)
+                
+                // Image layers group with ripple effect
+                ZStack {
+                    // Previous background
+                    Image(previousAssetName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                    
+                    // Current background (only during transition)
+                    if isTransitioning {
+                        Image(currentAssetName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .clipped()
+                            .opacity(opacity)
+                    }
+                }
+                .modifier(RippleEffect(at: CGPoint(
+                    x: UIScreen.main.bounds.width / 2,
+                    y: UIScreen.main.bounds.height / 2),
+                                       trigger: shouldRipple,
+                                       amplitude: -22, frequency: 15, decay: 4, speed: 600))
+            }
         }
         .ignoresSafeArea()
+        .onChange(of: selectedBackground) {
+            if currentAssetName != previousAssetName {
+                isTransitioning = true
+                shouldRipple.toggle()
+                opacity = 0
+                
+                // Animate opacity change
+                withAnimation(.easeInOut(duration: 1.5)) {
+                    opacity = 1
+                }
+                
+                // After transition completes, update previous asset and end transition
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    previousAssetName = currentAssetName
+                    isTransitioning = false
+                    opacity = 0
+                }
+            }
+        }
+        .onAppear {
+            // Initialize previous background only if it hasn't been set
+            if previousAssetName.isEmpty {
+                previousAssetName = currentAssetName
+            }
+        }
     }
 }
 
@@ -75,17 +128,17 @@ struct HomeView: View {
                                animationDuration: 0.5)
                 .frame(maxWidth: .infinity)
                 .frame(height: 300)
-                .background(Color.clear)
+                .onTapGesture { selectedTab = Tab.calendar }
                 Spacer()
             }
             
+            /// Main Content
             VStack {
                 Text("FitBurst")
                     .font(.custom("Futura Bold", fixedSize: 40))
                     .foregroundColor(.white)
                     .padding(.bottom, 0)
-
-            
+                
                 VStack (alignment: .center) {
                     Spacer().frame(height: 180)
                     
@@ -95,11 +148,13 @@ struct HomeView: View {
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
                         .onTapGesture {
-                            triggerHeartbeat()
+                            animateRotation()
                         }
-                    
-                    Spacer().frame(height: 40)
-                    
+                }
+                
+                /// Scrollview contains Trophies, Calendar and Record button
+                ScrollView {
+                    Spacer().frame(height: 20)
                     TrophyBox(
                         scrollHorizontally: true,
                         showTrophyDisplayView: $showTrophyDisplayView,
@@ -110,13 +165,13 @@ struct HomeView: View {
                     .frame(height: 180)
                     .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
                     .padding(.horizontal)
-                    .onTapGesture { selectedTab = Tab.trophies }
                     .id(trophyBoxRefreshTrigger)  // Force refresh when trigger changes
+                    .onTapGesture { selectedTab = Tab.trophies }
                     
                     SimpleWeekRow(selectedDate: $selectedDate)
                         .id(weekViewRefreshTrigger)  // Force refresh when trigger changes
                     
-                    Spacer().frame(height: 30)
+                    Spacer().frame(height: 20)
                     
                     /// Record Workout
                     Button (action: {                    showWorkoutView.toggle()
@@ -129,49 +184,50 @@ struct HomeView: View {
                     }
                     .buttonStyle(GrowingButtonStyle())
                     
-                    Spacer().frame(height: 40)
-             
+                    Spacer()
                 }
-                .onTapGesture { selectedTab = Tab.calendar }
-                
-                Spacer()
+               Spacer()
                 
             }
-            //     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            //.background(Color.greenBrandColor)
+            .frame(height:.infinity)
+
             if showWorkoutView {
                 RecordWorkoutView(
                     showWorkoutView: $showWorkoutView,
                     selectedDate: $selectedDate
                 )
-                    .onDisappear {
-                        // Refresh SimpleWeekRow when workout view disappears
-                        weekViewRefreshTrigger = UUID()
-                    }
+                .onDisappear {
+                    // Refresh SimpleWeekRow when workout view disappears
+                    weekViewRefreshTrigger = UUID()
+                }
             }
             
             if showTrophyDisplayView, let trophy = selectedTrophy {
                 SingleTrophyView(
                     showTrophyDisplayView: $showTrophyDisplayView,
-                    trophyType: trophy.type,
-                    earnedDate: trophy.earnedDate
+                    trophy: trophy
                 )
             }
             
-        }.onAppear {
+        }
+        .frame(height:.infinity)
+        .ignoresSafeArea(edges:.bottom)
+        .onAppear {
             showWorkoutView = false
             // Refresh SimpleWeekRow when view appears
             weekViewRefreshTrigger = UUID()
             // Update workout count when view appears
             animateRotation()
             workoutCount = PersistenceController.shared.countWorkouts()
-        }.onReceive(NotificationCenter.default.publisher(for: .workoutAdded)) { _ in
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .workoutAdded)) { _ in
             // Update workout count when notification is received
             animateRotation()  // Trigger animation when workout is added
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 workoutCount = PersistenceController.shared.countWorkouts()
             }
-        }.onReceive(NotificationCenter.default.publisher(for: .achievementsChanged)) { _ in
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .achievementsChanged)) { _ in
             // Force TrophyBox to refresh
             trophyBoxRefreshTrigger = UUID()
         }
@@ -184,8 +240,8 @@ struct HomeView: View {
         
         // Use a regular state update without SwiftUI animation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            rotationX = .pi * 2  // Two full rotations
-            rotationY = .pi * 2  // Two full rotations
+            rotationX += .pi * 2  // Two full rotations
+            rotationY += .pi * 2  // Two full rotations
         }
     }
     
@@ -198,7 +254,7 @@ struct HomeView: View {
             SCNTransaction.animationDuration = 0.2
             
             // Start from zero each time
-               //feedbackGenerator.impactOccurred(intensity: intensity)
+            //feedbackGenerator.impactOccurred(intensity: intensity)
             
             // default position x: 0, y: 10, z: 20
             DispatchQueue.main.asyncAfter(deadline: .now()) {
