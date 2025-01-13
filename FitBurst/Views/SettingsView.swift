@@ -304,14 +304,6 @@ struct SettingsView: View {
             }
             .buttonStyle(GrowingButtonStyle())
             .padding(.top, 20)
-            
-            /*
-             Picker("Multi choice", selection: $selectedBackground) {
-             ForEach(AppBackgrounds.options, id: \.displayName) { option in
-             Text(option.displayName)
-             .foregroundColor(.white)
-             }
-             }*/
         }
     }
 }

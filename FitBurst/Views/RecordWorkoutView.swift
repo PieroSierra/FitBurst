@@ -62,33 +62,36 @@ struct RecordWorkoutView: View {
                 Spacer().frame(height: 20)
 
                 
-                // First row (3 buttons)
+                // First row (buttons 0 and 3)
                 HStack(spacing: 10) {
-                    ForEach(0..<2) { index in
-                        if WorkoutConfiguration.shared.isVisible(for: Int32(index)) {
-                                workoutButton(for: Int32(index))
-                        }
+                    if WorkoutConfiguration.shared.isVisible(for: 0) {
+                        workoutButton(for: 0)
+                    }
+                    if WorkoutConfiguration.shared.isVisible(for: 5) {
+                        workoutButton(for: 5)
                     }
                 }
                 
                 Spacer().frame(height: 10)
                 
-                // Second row (3 buttons)
+                // Second row (buttons 1 and 4)
                 HStack(spacing: 10) {
-                    ForEach(2..<4) { index in
-                        if WorkoutConfiguration.shared.isVisible(for: Int32(index)) {
-                            workoutButton(for: Int32(index))
-                        }
+                    if WorkoutConfiguration.shared.isVisible(for: 1) {
+                        workoutButton(for: 1)
+                    }
+                    if WorkoutConfiguration.shared.isVisible(for: 4) {
+                        workoutButton(for: 4)
                     }
                 }
                 Spacer().frame(height: 10)
                 
-                // Second row (3 buttons)
+                // Third row (buttons 2 and 5)
                 HStack(spacing: 10) {
-                    ForEach(4..<6) { index in
-                        if WorkoutConfiguration.shared.isVisible(for: Int32(index)) {
-                            workoutButton(for: Int32(index))
-                        }
+                    if WorkoutConfiguration.shared.isVisible(for: 2) {
+                        workoutButton(for: 2)
+                    }
+                    if WorkoutConfiguration.shared.isVisible(for: 3) {
+                        workoutButton(for: 3)
                     }
                 }
                 

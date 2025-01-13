@@ -13,6 +13,8 @@ struct FirstRunView: View {
     @State private var showRipple: Int = 0
     @State private var buttonText = "Press and hold"
     
+    @AppStorage("selectedBackground") private var selectedBackground: String = "Black Tiles"
+    
     init(firstRunComplete: Binding<Bool>) {
         _firstRunComplete = firstRunComplete
         // Customize UIPageControl appearance
@@ -29,6 +31,7 @@ struct FirstRunView: View {
                     screen0.tag(0)
                     screen1.tag(1)
                     screen2.tag(2)
+                    screen3.tag(3)
                 }
                 .tabViewStyle(.page)
              //   .accentColor(.limeAccentColor)
@@ -105,6 +108,51 @@ struct FirstRunView: View {
     
     var screen2: some View {
         VStack (alignment: .center){
+            ScrollView{
+                Text("Set a mood")
+                    .padding()
+                    .font(.custom("Futura Bold", fixedSize: 40))
+                    .multilineTextAlignment(.center)
+
+                Text("Pick a background for your workouts:")
+                    .padding()
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                
+                Spacer()
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 20) {
+                    ForEach(AppBackgrounds.options, id: \.displayName) { option in
+                        Button (action: {
+                            showRipple += 1
+                            selectedBackground = option.displayName
+                        })
+                        {
+                            ZStack {
+                                Image(option.assetName)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: UIScreen.main.bounds.width/4.5)
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                    .shadow(color: .limeAccentColor, radius: 5)
+                                Text(option.displayName)
+                                    .foregroundColor(.white)
+                                    .padding(10)
+                            }.buttonStyle(GrowingButtonStyle())
+                        }
+                    }
+                }
+            }
+        }
+        .foregroundColor(.white)
+        .padding(30)
+        .frame(width: UIScreen.main.bounds.width - 40, height: 500)
+        .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+            .shadow(color: .limeAccentColor, radius: 10))
+    }
+    
+    
+    var screen3: some View {
+        VStack (alignment: .center){
             
             Text("Make FitBurst your own")
                 .padding()
@@ -117,6 +165,7 @@ struct FirstRunView: View {
                 .multilineTextAlignment(.center)
             
             Spacer().frame(height:40)
+            
             
             Button (action: {
                 firstRunComplete = true

@@ -170,6 +170,8 @@ struct HomeView: View {
                     
                     SimpleWeekRow(selectedDate: $selectedDate)
                         .id(weekViewRefreshTrigger)  // Force refresh when trigger changes
+                        .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                        .padding(.horizontal)
                     
                     Spacer().frame(height: 20)
                     
