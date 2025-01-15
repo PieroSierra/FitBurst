@@ -142,8 +142,7 @@ struct VideosView: View {
                                 }
                             }
                         } else {
-                            Text("Invalid segment index")
-                                .foregroundColor(.red)
+                           // error case
                         }
                     }
                 }
@@ -274,7 +273,7 @@ struct VideosView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 case .ready:
                     EmptyView()
-                case .error(let error):
+              case .error(let error):
                     Text("Error: \(error.localizedDescription)")
                         .foregroundColor(.red)
                 }

@@ -63,7 +63,7 @@ struct BackgroundPickerView: View {
                         startPoint: .bottom,
                         endPoint: .top
                     ))
-                    .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,70)
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,69)
                 , alignment:.top)
             .overlay(
                 Rectangle()

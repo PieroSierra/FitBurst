@@ -288,33 +288,80 @@ struct HomeView: View {
         return sceneView
     }
 }
-/*
-struct DebugWeekViewTest: View {
-    @State var date = Date()
-    var body: some View {
-        VStack {
-            Text("Weekly test").foregroundColor(.white)
-            
-            CalendarViewWeek(selectedDate: $date,
-                             showMonthHeader: false,
-                             showWeekdayHeader: true)
-            .frame(height: 120)
-        }
-        .background(Image("GradientWaves").resizable().ignoresSafeArea())
-    }
-}*/
 
 import CoreData
 struct SimpleWeekRow: View {
     @Binding var selectedDate: Date
+    // Add state for tracking which week is displayed
+    @State private var weekOffset: Int = 0
+    @State private var currentIndex: Int = 1  // Start in middle
     
     private let weekdays = ["M","T","W","T","F","S","S"]
     
     var body: some View {
+        TabView(selection: $currentIndex) {
+            WeekView(baseDate: offsetDate(-1), 
+                    selectedDate: $selectedDate,
+                    onDateSelected: handleDateSelection)
+                .tag(0)
+            WeekView(baseDate: offsetDate(0), 
+                    selectedDate: $selectedDate,
+                    onDateSelected: handleDateSelection)
+                .tag(1)
+            WeekView(baseDate: offsetDate(1), 
+                    selectedDate: $selectedDate,
+                    onDateSelected: handleDateSelection)
+                .tag(2)
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .frame(height: 100)
+        .onChange(of: currentIndex) { newIndex in
+            if newIndex == 0 || newIndex == 2 {
+                weekOffset += (newIndex == 0) ? -1 : 1
+                currentIndex = 1  // Reset immediately
+            }
+        }
+    }
+    
+    // New function to handle date selection
+    private func handleDateSelection(_ date: Date) {
+        withAnimation(.spring(response: 0.3)) {
+            selectedDate = date
+            // Reset week offset when selecting a date
+            weekOffset = 0
+            currentIndex = 1
+        }
+    }
+    
+    // Helper to calculate date for each week view
+    private func offsetDate(_ offset: Int) -> Date {
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .day, value: (weekOffset + offset) * 7, to: startOfWeek(for: selectedDate)) ?? selectedDate
+    }
+    
+    // StartOfWeek helper here
+    private func startOfWeek(for date: Date) -> Date {
+        var cal = Calendar.current
+        cal.firstWeekday = 2 // Monday
+        let weekday = cal.component(.weekday, from: date)
+        let daysFromMonday = (weekday - cal.firstWeekday + 7) % 7
+        return cal.date(byAdding: .day, value: -daysFromMonday, to: date) ?? date
+    }
+}
+
+private struct WeekView: View {
+    let baseDate: Date
+    @Binding var selectedDate: Date
+    let onDateSelected: (Date) -> Void
+    
+    private let weekdays = ["M","T","W","T","F","S","S"]
+    
+    var body: some View {
+        // Use baseDate instead of selectedDate for calculating the week's dates
         let cal = Calendar.current
-        let start = startOfWeek(for: selectedDate)
+        let start = baseDate 
         
-        HStack(spacing: 20) {
+        HStack {
             ForEach(0..<7, id: \.self) { i in
                 let day = cal.date(byAdding: .day, value: i, to: start)!
                 
@@ -322,7 +369,7 @@ struct SimpleWeekRow: View {
                     // Top label: "M, T, W, T, F, S, S"
                     Text(weekdays[i])
                         .font(.custom("Futura Bold", fixedSize: 15))
-                        .foregroundColor(.white)
+                        .foregroundColor(cal.isDateInToday(day) ? .limeAccentColor : .white)
                         .padding(.bottom, 4)
                     
                     // Bottom: either checkmark or day number
@@ -348,7 +395,7 @@ struct SimpleWeekRow: View {
                             Text("\(cal.component(.day, from: day))")
                                 .foregroundColor(.black)
                                 .frame(width: 31, height:31)
-                                .background(Circle().foregroundColor(.gray))
+                                .background(Circle().foregroundColor(.limeAccentColor))
                         } else {
                             Text("\(cal.component(.day, from: day))")
                                 .foregroundColor(.white)
@@ -360,26 +407,16 @@ struct SimpleWeekRow: View {
                 .font(.custom("Futura Bold", fixedSize: 15))
                 .frame(maxWidth: .infinity)
                 .onTapGesture {
-                    withAnimation(.spring(response: 0.3)) {
-                        selectedDate = day
-                    }
+                    onDateSelected(day)
                 }
             }
+            Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
     }
     
-    /// Computes the Monday of the selectedDate’s week, assuming Monday is firstWeekday = 2.
-    private func startOfWeek(for date: Date) -> Date {
-        var cal = Calendar.current
-        cal.firstWeekday = 2 // Monday
-        let weekday = cal.component(.weekday, from: date)
-        let daysFromMonday = (weekday - cal.firstWeekday + 7) % 7
-        return cal.date(byAdding: .day, value: -daysFromMonday, to: date) ?? date
-    }
-    
-    /// Stub: replace with Core Data check for workouts, e.g. fetchWorkouts(day).count > 0
+    // Include your existing hasWorkout helper here
     private func hasWorkout(on date: Date) -> Bool {
         let context = PersistenceController.shared.container.viewContext
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
