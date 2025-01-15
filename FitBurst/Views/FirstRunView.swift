@@ -145,8 +145,26 @@ struct FirstRunView: View {
         }
         .foregroundColor(.white)
         .padding(30)
+        .overlay(
+            Rectangle()
+                .fill(LinearGradient(
+                    gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
+                    startPoint: .bottom,
+                    endPoint: .top
+                ))
+                .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,30)
+            , alignment:.top)
+        .overlay(
+            Rectangle()
+                .fill(LinearGradient(
+                    gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
+                .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.bottom,30)
+            , alignment:.bottom)
         .frame(width: UIScreen.main.bounds.width - 40, height: 500)
-        .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+        .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
     }
     

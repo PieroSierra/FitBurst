@@ -82,6 +82,11 @@ class WorkoutConfiguration: ObservableObject {
         loadOverrides()
     }
     
+    func countWorkouts() -> Int {
+        let visibleCount = (0...5).filter { isVisible(for: Int32($0)) }.count
+        return visibleCount
+    }
+
     func getName(for type: Int32) -> String {
         nameOverrides[type] ?? WorkoutType(rawValue: type)?.defaultName ?? "Unknown"
     }

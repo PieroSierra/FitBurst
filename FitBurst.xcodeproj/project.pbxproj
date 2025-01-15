@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		434607192D27067500A31D92 /* fitburst_privacy_policy.html in Resources */ = {isa = PBXBuildFile; fileRef = 434607182D27067500A31D92 /* fitburst_privacy_policy.html */; };
+		434FAFEE2D37C77C0084DA01 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FAFED2D37C76D0084DA01 /* Secrets.swift */; };
 		43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */ = {isa = PBXBuildFile; productRef = 43FBA29D2D0F27F2005CBFA3 /* Model3DView */; };
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
 		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
@@ -15,6 +16,7 @@
 
 /* Begin PBXFileReference section */
 		434607182D27067500A31D92 /* fitburst_privacy_policy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = fitburst_privacy_policy.html; sourceTree = "<group>"; };
+		434FAFED2D37C76D0084DA01 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		4386609A2CF322B300CA5D62 /* FitBurst.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBurst.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -43,6 +45,7 @@
 		438660912CF322B300CA5D62 = {
 			isa = PBXGroup;
 			children = (
+				434FAFED2D37C76D0084DA01 /* Secrets.swift */,
 				434607182D27067500A31D92 /* fitburst_privacy_policy.html */,
 				4386609C2CF322B300CA5D62 /* FitBurst */,
 				43FBA29C2D0F27F2005CBFA3 /* Frameworks */,
@@ -148,6 +151,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				434FAFEE2D37C77C0084DA01 /* Secrets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,7 +283,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"FitBurst/Preview Content\"";
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				ENABLE_PREVIEWS = YES;
@@ -295,7 +299,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = pieroco.FitBurst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -310,7 +314,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"FitBurst/Preview Content\"";
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				ENABLE_PREVIEWS = YES;
@@ -326,7 +330,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = pieroco.FitBurst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

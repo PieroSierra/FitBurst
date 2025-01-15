@@ -17,6 +17,7 @@ struct BackgroundPickerView: View {
             Color.black.opacity(0.4).ignoresSafeArea()
             
             VStack(spacing: 20) {
+            
                 HStack {
                     Text("Choose your background")
                         .font(.headline)
@@ -27,7 +28,7 @@ struct BackgroundPickerView: View {
                 .padding(.leading, 4)
                 
                 ScrollView{
-                    Spacer()
+                    Spacer().frame(minHeight: 20)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 20) {
                         ForEach(AppBackgrounds.options, id: \.displayName) { option in
                             Button (action: {
@@ -55,9 +56,28 @@ struct BackgroundPickerView: View {
             .padding(20)
             .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.height - 200)
             .overlay(dismissButton, alignment: .topTrailing)
+            .overlay(
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1.0)]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    ))
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,70)
+                , alignment:.top)
+            .overlay(
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [Color.black.opacity(0.0),  Color.black.opacity(1.0)]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.bottom,20)
+                , alignment:.bottom)
             .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))
             .scaleEffect(scale)
+            
             .onAppear {
                 scale = 0.6
                 withAnimation(.bouncy) { scale = 1.15 }

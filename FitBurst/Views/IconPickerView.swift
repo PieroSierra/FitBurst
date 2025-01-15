@@ -22,6 +22,8 @@ struct IconPickerView: View {
         "figure.pickleball",
         "figure.racquetball",
         "soccerball",
+        "figure.flexibility",
+        "figure.mixed.cardio",
         "tennisball.fill",
         "american.football.fill",
         "figure.jumprope",
@@ -88,8 +90,17 @@ struct IconPickerView: View {
         "figure.indoor.soccer",
         "figure.indoor.cycle",
         "figure.badminton",
-        "figure.cooldown",
-        "figure.table.tennis"
+        "figure.socialdance",
+        "figure.water.fitness",
+        "figure.waterpolo",
+        "figure.skateboarding",
+        "figure.stairs",
+        "figure.taichi",
+        "figure.wrestling",
+        "figure.ice.skating",
+        "figure.softball",
+        "figure.table.tennis",
+        "figure.cooldown"
     ]
     
     init(showIconPickerView: Binding<Bool>, workoutType: Int32, textHint: String) {
@@ -124,6 +135,7 @@ struct IconPickerView: View {
                 }.padding(.leading, 4)
                 
                 ScrollView{
+                    Spacer().frame(minHeight:18)
                     SearchBar(searchText: $searchText)
                         .padding(.bottom, 9)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 20) {
@@ -149,10 +161,29 @@ struct IconPickerView: View {
                         }
                     }
                 }
+                .padding(.top, -18)
             }
             .padding(30)
             .frame(width:UIScreen.main.bounds.width - 40, height:400)
             .overlay(dismissButton, alignment: .topTrailing)
+            .overlay(
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1.0)]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    ))
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,50)
+                , alignment:.top)
+            .overlay(
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1.0)]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.bottom,28)
+                , alignment:.bottom)
             .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))
             .scaleEffect(scale)
