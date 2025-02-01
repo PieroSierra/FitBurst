@@ -2,7 +2,7 @@
 //  FirstRunView.swift
 //  FitBurst
 //
-//  Created by Olga Uskova-Sierra on 24/11/2024.
+//  Created by Nikola Sierra on 24/11/2024.
 //
 
 import SwiftUI
