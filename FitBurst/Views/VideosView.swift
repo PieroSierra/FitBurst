@@ -72,7 +72,7 @@ struct Video: Identifiable {
 struct VideosView: View {
     private let baseUrl = "https://www.googleapis.com/youtube/v3/search"
     private let apiKey = Secrets.youtubeApiKey
-    
+    private var appState = AppState.shared
     private let isPreview: Bool
     
     init(isPreview: Bool = false) {
@@ -99,6 +99,7 @@ struct VideosView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var videosReady = false
+
 
     var body: some View {
         ZStack {

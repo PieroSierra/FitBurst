@@ -38,34 +38,6 @@ enum WorkoutType: Int32 {
     }
 }
 
-struct BackgroundOption {
-    let displayName: String
-    let assetName: String
-}
-
-struct AppBackgrounds {
-    static let options: [BackgroundOption] = [
-        BackgroundOption(displayName: "Black Tiles", assetName: "BlackTiles"),
-        BackgroundOption(displayName: "Dark Forest", assetName: "DarkForest"),
-        BackgroundOption(displayName: "Night Dunes", assetName: "Dunes"),
-        BackgroundOption(displayName: "Gradient Waves", assetName: "GradientWaves"),
-        BackgroundOption(displayName: "Ocean Ripples", assetName: "Ocean"),
-        BackgroundOption(displayName: "Black & White", assetName: "BlackAndWhite"),
-        BackgroundOption(displayName: "Palm Frond", assetName: "Frond"),
-        BackgroundOption(displayName: "Sky lights", assetName: "Skylights"),
-        BackgroundOption(displayName: "Pink Palm", assetName: "PinkPalm"),
-        BackgroundOption(displayName: "El Capitan", assetName: "ElCapitan"),
-        BackgroundOption(displayName: "Mr. Rainier", assetName: "Rainier"),
-        BackgroundOption(displayName: "Mt. Fuji", assetName: "Fuji1"),
-        BackgroundOption(displayName: "Matterhorn", assetName: "Matterhorn"),
-        BackgroundOption(displayName: "Snowcap", assetName: "Snowcap"),
-        BackgroundOption(displayName: "Lion", assetName: "Lion"),
-        BackgroundOption(displayName: "Kettle Bell", assetName: "KettleBell"),
-        BackgroundOption(displayName: "Running Tracks", assetName: "RunningTracks"),
-        BackgroundOption(displayName: "Dark Crystals", assetName: "DarkCrystals")
-    ]
-}
-
 /// Class to handle reading/writing overrides from UserDefaults
 class WorkoutConfiguration: ObservableObject {
     static let shared = WorkoutConfiguration()
@@ -73,7 +45,6 @@ class WorkoutConfiguration: ObservableObject {
     @Published private var nameOverrides: [Int32: String] = [:]
     @Published private var iconOverrides: [Int32: String] = [:]
     @Published private var visibilityOverrides: [Int32: Bool] = [:]
-    @AppStorage("selectedBackground") private var selectedBackground : String  = "Dark Tiles"
     
     private let defaults = UserDefaults.standard
     
@@ -180,16 +151,18 @@ class WorkoutConfiguration: ObservableObject {
         defaults.removeObject(forKey: "workoutNameOverrides")
         defaults.removeObject(forKey: "workoutIconOverrides")
         defaults.removeObject(forKey: "workoutVisibilityOverrides")
-        selectedBackground = "Dark Tiles"
+        
+        // Reset background through AppState
+        AppState.shared.currentBackground = "BlackTiles"
     }
 }
 
 struct SettingsView: View {
     @StateObject private var config = WorkoutConfiguration.shared
     @State private var context = PersistenceController.shared.container.viewContext
+    @Bindable private var appState = AppState.shared
     
     @AppStorage("firstRunComplete") private var firstRunComplete = false
-    @AppStorage("selectedBackground") private var selectedBackground : String  = "Dark Tiles"
     
     @State private var showIconPickerView = false
     @State private var showBackgroundPickerView = false
@@ -232,8 +205,8 @@ struct SettingsView: View {
                         .padding()
                         .padding(.bottom, 10)
                     }
-                    .background(
-                        RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                    .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                
                     .padding()
                     
                     backgroundPicker
@@ -251,13 +224,13 @@ struct SettingsView: View {
             }
             
             if showIconPickerView, let type = editingWorkoutType {
-                IconPickerView (
+                IconPickerView(
                     showIconPickerView: $showIconPickerView,
                     workoutType: type,
                     textHint: WorkoutConfiguration.shared.getName(for: Int32(type))
                 )
             } else if showBackgroundPickerView {
-                BackgroundPickerView (showBackgroundPickerView: $showBackgroundPickerView)
+                BackgroundPickerView(showBackgroundPickerView: $showBackgroundPickerView)
             }
         }
         .alert("Reset Settings", isPresented: $showResetAlert) {

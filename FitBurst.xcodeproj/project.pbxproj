@@ -9,21 +9,96 @@
 /* Begin PBXBuildFile section */
 		434607192D27067500A31D92 /* fitburst_privacy_policy.html in Resources */ = {isa = PBXBuildFile; fileRef = 434607182D27067500A31D92 /* fitburst_privacy_policy.html */; };
 		434FAFEE2D37C77C0084DA01 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FAFED2D37C76D0084DA01 /* Secrets.swift */; };
+		439783A82D4E5B0B00E62804 /* RippleShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 439783932D4E5B0B00E62804 /* RippleShader.metal */; };
+		439783A92D4E5B0B00E62804 /* RippleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439783942D4E5B0B00E62804 /* RippleView.swift */; };
+		439783B22D4E5B0B00E62804 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4397839F2D4E5B0B00E62804 /* SharedFunctions.swift */; };
+		439783E02D4E88F800E62804 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 439783DF2D4E88F800E62804 /* WidgetKit.framework */; };
+		439783E22D4E88F800E62804 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 439783E12D4E88F800E62804 /* SwiftUI.framework */; };
+		439783EF2D4E88F900E62804 /* FitBurst WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 439783DE2D4E88F800E62804 /* FitBurst WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		439783FA2D4E8D7400E62804 /* SharedPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439783F82D4E8D7400E62804 /* SharedPersistence.swift */; };
+		439783FB2D4E8D7400E62804 /* SharedPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439783F82D4E8D7400E62804 /* SharedPersistence.swift */; };
+		4397840B2D4F768400E62804 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4397840A2D4F768400E62804 /* AppState.swift */; };
+		4397840C2D4F768400E62804 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4397840A2D4F768400E62804 /* AppState.swift */; };
+		4397840D2D4F8E3000E62804 /* RippleShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 439783932D4E5B0B00E62804 /* RippleShader.metal */; };
+		4397840E2D4F8E3900E62804 /* RippleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439783942D4E5B0B00E62804 /* RippleView.swift */; };
+		439784112D5169A200E62804 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4397839F2D4E5B0B00E62804 /* SharedFunctions.swift */; };
 		43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */ = {isa = PBXBuildFile; productRef = 43FBA29D2D0F27F2005CBFA3 /* Model3DView */; };
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
 		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		439783ED2D4E88F900E62804 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 438660922CF322B300CA5D62 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 439783DD2D4E88F800E62804;
+			remoteInfo = "FitBurst WidgetExtension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		439783F42D4E88F900E62804 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				439783EF2D4E88F900E62804 /* FitBurst WidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		434607182D27067500A31D92 /* fitburst_privacy_policy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = fitburst_privacy_policy.html; sourceTree = "<group>"; };
 		434FAFED2D37C76D0084DA01 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		4386609A2CF322B300CA5D62 /* FitBurst.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBurst.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		439783932D4E5B0B00E62804 /* RippleShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = RippleShader.metal; sourceTree = "<group>"; };
+		439783942D4E5B0B00E62804 /* RippleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RippleView.swift; sourceTree = "<group>"; };
+		4397839F2D4E5B0B00E62804 /* SharedFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFunctions.swift; sourceTree = "<group>"; };
+		439783DE2D4E88F800E62804 /* FitBurst WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FitBurst WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		439783DF2D4E88F800E62804 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		439783E12D4E88F800E62804 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		439783F62D4E89BF00E62804 /* FitBurst WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "FitBurst WidgetExtension.entitlements"; sourceTree = "<group>"; };
+		439783F82D4E8D7400E62804 /* SharedPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedPersistence.swift; sourceTree = "<group>"; };
+		4397840A2D4F768400E62804 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		439783F02D4E88F900E62804 /* Exceptions for "FitBurst Widget" folder in "FitBurst WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 439783DD2D4E88F800E62804 /* FitBurst WidgetExtension */;
+		};
+		439784012D4E8FFF00E62804 /* Exceptions for "FitBurst" folder in "FitBurst WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				FitBurst.xcdatamodeld,
+			);
+			target = 439783DD2D4E88F800E62804 /* FitBurst WidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4386609C2CF322B300CA5D62 /* FitBurst */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				439784012D4E8FFF00E62804 /* Exceptions for "FitBurst" folder in "FitBurst WidgetExtension" target */,
+			);
 			path = FitBurst;
+			sourceTree = "<group>";
+		};
+		439783E32D4E88F800E62804 /* FitBurst Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				439783F02D4E88F900E62804 /* Exceptions for "FitBurst Widget" folder in "FitBurst WidgetExtension" target */,
+			);
+			path = "FitBurst Widget";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -39,17 +114,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		439783DB2D4E88F800E62804 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				439783E22D4E88F800E62804 /* SwiftUI.framework in Frameworks */,
+				439783E02D4E88F800E62804 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		438660912CF322B300CA5D62 = {
 			isa = PBXGroup;
 			children = (
+				439783F62D4E89BF00E62804 /* FitBurst WidgetExtension.entitlements */,
 				434FAFED2D37C76D0084DA01 /* Secrets.swift */,
 				434607182D27067500A31D92 /* fitburst_privacy_policy.html */,
 				4386609C2CF322B300CA5D62 /* FitBurst */,
+				439783E32D4E88F800E62804 /* FitBurst Widget */,
 				43FBA29C2D0F27F2005CBFA3 /* Frameworks */,
 				4386609B2CF322B300CA5D62 /* Products */,
+				439783F92D4E8D7400E62804 /* Shared */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,13 +144,28 @@
 			isa = PBXGroup;
 			children = (
 				4386609A2CF322B300CA5D62 /* FitBurst.app */,
+				439783DE2D4E88F800E62804 /* FitBurst WidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		439783F92D4E8D7400E62804 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				4397840A2D4F768400E62804 /* AppState.swift */,
+				439783F82D4E8D7400E62804 /* SharedPersistence.swift */,
+				439783932D4E5B0B00E62804 /* RippleShader.metal */,
+				439783942D4E5B0B00E62804 /* RippleView.swift */,
+				4397839F2D4E5B0B00E62804 /* SharedFunctions.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		43FBA29C2D0F27F2005CBFA3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				439783DF2D4E88F800E62804 /* WidgetKit.framework */,
+				439783E12D4E88F800E62804 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -78,10 +180,12 @@
 				438660962CF322B300CA5D62 /* Sources */,
 				438660972CF322B300CA5D62 /* Frameworks */,
 				438660982CF322B300CA5D62 /* Resources */,
+				439783F42D4E88F900E62804 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				439783EE2D4E88F900E62804 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4386609C2CF322B300CA5D62 /* FitBurst */,
@@ -96,6 +200,28 @@
 			productReference = 4386609A2CF322B300CA5D62 /* FitBurst.app */;
 			productType = "com.apple.product-type.application";
 		};
+		439783DD2D4E88F800E62804 /* FitBurst WidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 439783F12D4E88F900E62804 /* Build configuration list for PBXNativeTarget "FitBurst WidgetExtension" */;
+			buildPhases = (
+				439783DA2D4E88F800E62804 /* Sources */,
+				439783DB2D4E88F800E62804 /* Frameworks */,
+				439783DC2D4E88F800E62804 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				439783E32D4E88F800E62804 /* FitBurst Widget */,
+			);
+			name = "FitBurst WidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "FitBurst WidgetExtension";
+			productReference = 439783DE2D4E88F800E62804 /* FitBurst WidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -103,11 +229,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					438660992CF322B300CA5D62 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					439783DD2D4E88F800E62804 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -131,6 +260,7 @@
 			projectRoot = "";
 			targets = (
 				438660992CF322B300CA5D62 /* FitBurst */,
+				439783DD2D4E88F800E62804 /* FitBurst WidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -144,6 +274,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		439783DC2D4E88F800E62804 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -151,11 +288,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				439783A82D4E5B0B00E62804 /* RippleShader.metal in Sources */,
+				439783A92D4E5B0B00E62804 /* RippleView.swift in Sources */,
+				439783FA2D4E8D7400E62804 /* SharedPersistence.swift in Sources */,
+				4397840B2D4F768400E62804 /* AppState.swift in Sources */,
+				439783B22D4E5B0B00E62804 /* SharedFunctions.swift in Sources */,
 				434FAFEE2D37C77C0084DA01 /* Secrets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		439783DA2D4E88F800E62804 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4397840E2D4F8E3900E62804 /* RippleView.swift in Sources */,
+				439783FB2D4E8D7400E62804 /* SharedPersistence.swift in Sources */,
+				4397840C2D4F768400E62804 /* AppState.swift in Sources */,
+				4397840D2D4F8E3000E62804 /* RippleShader.metal in Sources */,
+				439784112D5169A200E62804 /* SharedFunctions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		439783EE2D4E88F900E62804 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 439783DD2D4E88F800E62804 /* FitBurst WidgetExtension */;
+			targetProxy = 439783ED2D4E88F900E62804 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		438660AB2CF322B800CA5D62 /* Debug */ = {
@@ -282,8 +444,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FitBurst/FitBurst.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_ASSET_PATHS = "\"FitBurst/Preview Content\"";
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				ENABLE_PREVIEWS = YES;
@@ -299,7 +462,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = pieroco.FitBurst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -313,8 +476,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FitBurst/FitBurst.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_ASSET_PATHS = "\"FitBurst/Preview Content\"";
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				ENABLE_PREVIEWS = YES;
@@ -330,9 +494,67 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = pieroco.FitBurst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		439783F22D4E88F900E62804 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "FitBurst WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 13;
+				DEVELOPMENT_TEAM = HBMCF3J59V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FitBurst Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "FitBurst Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "pieroco.FitBurst.FitBurst-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		439783F32D4E88F900E62804 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "FitBurst WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 13;
+				DEVELOPMENT_TEAM = HBMCF3J59V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FitBurst Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "FitBurst Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "pieroco.FitBurst.FitBurst-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -356,6 +578,15 @@
 			buildConfigurations = (
 				438660AE2CF322B800CA5D62 /* Debug */,
 				438660AF2CF322B800CA5D62 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		439783F12D4E88F900E62804 /* Build configuration list for PBXNativeTarget "FitBurst WidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				439783F22D4E88F900E62804 /* Debug */,
+				439783F32D4E88F900E62804 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

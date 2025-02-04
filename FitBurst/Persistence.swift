@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import WidgetKit
 
 struct PersistenceController {
     static let shared = PersistenceController()
@@ -33,9 +34,20 @@ struct PersistenceController {
 
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "FitBurst")
+        
+        // Configure for App Group container
+        if let storeURL = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: "group.com.pieroco.FitBurst")?
+            .appendingPathComponent("FitBurst.sqlite") {
+            
+            let storeDescription = NSPersistentStoreDescription(url: storeURL)
+            container.persistentStoreDescriptions = [storeDescription]
+        }
+        
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
+        
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
@@ -62,7 +74,6 @@ extension PersistenceController {
         let context = container.viewContext
         let startOfDay = Calendar.current.startOfDay(for: date)
         
-        // Create new workout without checking for existing ones
         let newWorkout = Workouts(context: context)
         newWorkout.timestamp = startOfDay
         newWorkout.workoutID = UUID()
@@ -70,6 +81,17 @@ extension PersistenceController {
         
         do {
             try context.save()
+            // Force sync and widget update
+            container.viewContext.automaticallyMergesChangesFromParent = true
+            try container.viewContext.save()
+            
+            print("PersistenceController - Force reloading widget after workout save")
+            DispatchQueue.main.async {
+                WidgetCenter.shared.reloadAllTimelines()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+            }
         } catch {
             print("Failed to record workout: \(error.localizedDescription)")
         }
@@ -80,6 +102,17 @@ extension PersistenceController {
         context.delete(workout)
         do {
             try context.save()
+            // Force sync and widget update
+            container.viewContext.automaticallyMergesChangesFromParent = true
+            try context.save()
+            
+            print("PersistenceController - Force reloading widget after workout delete")
+            DispatchQueue.main.async {
+                WidgetCenter.shared.reloadAllTimelines()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+            }
         } catch {
             print("Failed to delete workout: \(error.localizedDescription)")
         }
@@ -105,6 +138,8 @@ extension PersistenceController {
         do {
             try context.execute(batchDeleteRequest)
             try context.save()
+            // Trigger widget update after successful delete all
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             print("Failed to delete all workouts: \(error.localizedDescription)")
         }

@@ -28,6 +28,7 @@ struct ContentView: View {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @AppStorage("firstRunComplete") private var firstRunComplete = false
     @State private var selectedTab: Tab = .home
+    private let appState = AppState.shared
     
     init() {
         let appearance = UITabBarAppearance()
@@ -48,8 +49,7 @@ struct ContentView: View {
     var body: some View {
         if !firstRunComplete {
             FirstRunView(firstRunComplete: $firstRunComplete)
-        }
-        else {
+        } else {
             TabView(selection: $selectedTab) {
                 HomeView(selectedTab: $selectedTab)
                     .tag(Tab.home)
@@ -68,6 +68,7 @@ struct ContentView: View {
                     .tabItem { Label("Settings", systemImage: "person.circle.fill") }
             }
             .tint(.limeAccentColor)
+            
         }
     }
 }
@@ -78,7 +79,8 @@ extension Notification.Name {
 
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView()
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
         .environment(\.dynamicTypeSize, .medium)
         .preferredColorScheme(.light)
 }

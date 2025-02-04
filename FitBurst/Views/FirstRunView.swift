@@ -9,11 +9,10 @@ import SwiftUI
 
 struct FirstRunView: View {
     @Binding var firstRunComplete: Bool
-    @State private var selection : Int = 0
+    @State private var selection: Int = 0
     @State private var showRipple: Int = 0
     @State private var buttonText = "Press and hold"
-    
-    @AppStorage("selectedBackground") private var selectedBackground: String = "Black Tiles"
+    @Bindable private var appState = AppState.shared // Keep Bindable as we change the background
     
     init(firstRunComplete: Binding<Bool>) {
         _firstRunComplete = firstRunComplete
@@ -26,17 +25,18 @@ struct FirstRunView: View {
         ZStack {
             BackgroundView()
             
-            VStack {
-                TabView (selection: $selection) {
-                    screen0.tag(0)
-                    screen1.tag(1)
-                    screen2.tag(2)
-                    screen3.tag(3)
-                }
-                .tabViewStyle(.page)
-             //   .accentColor(.limeAccentColor)
-                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .never))
+            TabView(selection: $selection) {
+                screen0
+                    .tag(0)
+                screen1
+                    .tag(1)
+                screen2
+                    .tag(2)
+                screen3
+                    .tag(3)
             }
+            .tabViewStyle(.page)
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
         }
     }
     
@@ -60,7 +60,7 @@ struct FirstRunView: View {
         .foregroundColor(.white)
         .padding(30)
         .frame(width: UIScreen.main.bounds.width - 40, height: 500)
-        .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+        .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
     }
     
@@ -99,7 +99,7 @@ struct FirstRunView: View {
         .foregroundColor(.white)
         .padding(30)
         .frame(width: UIScreen.main.bounds.width - 40, height: 500)
-        .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+        .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
         .modifier(RippleEffect(at: CGPoint(
             x: UIScreen.main.bounds.width / 2 - 30,
@@ -107,8 +107,9 @@ struct FirstRunView: View {
     }
     
     var screen2: some View {
-        VStack (alignment: .center){
-            ScrollView{
+        // Create base content
+        let content = VStack(alignment: .center) {
+            ScrollView {
                 Text("Set a mood")
                     .padding()
                     .font(.custom("Futura Bold", fixedSize: 40))
@@ -121,12 +122,11 @@ struct FirstRunView: View {
                 
                 Spacer()
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 20) {
-                    ForEach(AppBackgrounds.options, id: \.displayName) { option in
-                        Button (action: {
+                    ForEach(appState.backgroundOptions, id: \.displayName) { option in
+                        Button(action: {
                             showRipple += 1
-                            selectedBackground = option.displayName
-                        })
-                        {
+                            appState.currentBackground = option.displayName
+                        }) {
                             ZStack {
                                 Image(option.assetName)
                                     .resizable()
@@ -137,7 +137,8 @@ struct FirstRunView: View {
                                 Text(option.displayName)
                                     .foregroundColor(.white)
                                     .padding(10)
-                            }.buttonStyle(GrowingButtonStyle())
+                            }
+                            .buttonStyle(GrowingButtonStyle())
                         }
                     }
                 }
@@ -145,27 +146,46 @@ struct FirstRunView: View {
         }
         .foregroundColor(.white)
         .padding(30)
-        .overlay(
-            Rectangle()
-                .fill(LinearGradient(
-                    gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
-                    startPoint: .bottom,
-                    endPoint: .top
-                ))
-                .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,30)
-            , alignment:.top)
-        .overlay(
-            Rectangle()
-                .fill(LinearGradient(
-                    gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                ))
-                .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.bottom,30)
-            , alignment:.bottom)
-        .frame(width: UIScreen.main.bounds.width - 40, height: 500)
-        .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
-            .shadow(color: .limeAccentColor, radius: 10))
+        
+        // Apply overlays and background separately
+        return content
+            .overlay(
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    ))
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20)
+                    .padding(.top, 30)
+                , alignment: .top)
+            .overlay(
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    .frame(width: UIScreen.main.bounds.width-70, height: 20)
+                    .padding(.bottom, 30)
+                , alignment: .bottom)
+            .frame(width: UIScreen.main.bounds.width - 40, height: 500)
+            .background(
+                Color.black.opacity(1)
+                    .clipShape(RoundedRectangle(cornerRadius: 40))
+                    .shadow(color: .limeAccentColor, radius: 10)
+            )
+            .modifier(RippleEffect(
+                at: CGPoint(
+                    x: UIScreen.main.bounds.width / 2,
+                    y: UIScreen.main.bounds.height / 2
+                ),
+                trigger: showRipple,
+                amplitude: -22,
+                frequency: 15,
+                decay: 4,
+                speed: 600
+            ))
     }
     
     
@@ -207,7 +227,7 @@ struct FirstRunView: View {
 }
 
 #Preview {
-    FirstRunView(firstRunComplete: .constant(true))
+    FirstRunView(firstRunComplete: .constant(false))
         .environment(\.dynamicTypeSize, .medium)
         .preferredColorScheme(.light)
 }

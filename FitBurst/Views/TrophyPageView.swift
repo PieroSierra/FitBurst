@@ -28,6 +28,7 @@ struct TrophyPageView: View {
     let showDummyData: Bool
     @State private var showTrophyDisplayView: Bool = false
     @State private var selectedTrophy: TrophyWithDate? = nil
+    private let appState = AppState.shared  // Changed to private let since we only read from it
     
     var body: some View {
         ZStack {
@@ -213,11 +214,11 @@ struct TrophyBox: View {
     
 }
 
-
 #Preview("Real Data") {
     TrophyPageView(showDummyData: false)
         .environment(\.dynamicTypeSize, .medium)
         .preferredColorScheme(.light)
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
 
 #Preview("Sample Data") {

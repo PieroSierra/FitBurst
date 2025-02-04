@@ -10,14 +10,13 @@ struct BackgroundPickerView: View {
     @Binding var showBackgroundPickerView: Bool
     @Environment(\.dismiss) private var dismiss
     @State private var scale: CGFloat = 0.6
-    @AppStorage("selectedBackground") private var selectedBackground: String = "Black Tiles"
+    @Bindable private var appState = AppState.shared
 
     var body: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
             
             VStack(spacing: 20) {
-            
                 HStack {
                     Text("Choose your background")
                         .font(.headline)
@@ -27,15 +26,14 @@ struct BackgroundPickerView: View {
                 .padding(.top, 10)
                 .padding(.leading, 4)
                 
-                ScrollView{
+                ScrollView {
                     Spacer().frame(minHeight: 20)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 20) {
-                        ForEach(AppBackgrounds.options, id: \.displayName) { option in
-                            Button (action: {
-                                selectedBackground = option.displayName
+                        ForEach(appState.backgroundOptions, id: \.assetName) { option in
+                            Button(action: {
+                                appState.currentBackground = option.assetName
                                 showBackgroundPickerView = false
-                            })
-                            {
+                            }) {
                                 ZStack {
                                     Image(option.assetName)
                                         .resizable()
@@ -46,7 +44,8 @@ struct BackgroundPickerView: View {
                                     Text(option.displayName)
                                         .foregroundColor(.white)
                                         .padding(10)
-                                }.buttonStyle(GrowingButtonStyle())
+                                }
+                                .buttonStyle(GrowingButtonStyle())
                             }
                         }
                     }
@@ -77,7 +76,6 @@ struct BackgroundPickerView: View {
             .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))
             .scaleEffect(scale)
-            
             .onAppear {
                 scale = 0.6
                 withAnimation(.bouncy) { scale = 1.15 }
@@ -99,7 +97,6 @@ struct BackgroundPickerView: View {
         }
         .padding(25)
     }
-    
 }
 
 #Preview {

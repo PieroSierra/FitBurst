@@ -8,82 +8,10 @@
 import SwiftUI
 import SceneKit
 
-struct BackgroundView: View {
-    @AppStorage("selectedBackground") private var selectedBackground: String = "Black Tiles"
-    @State private var shouldRipple = false
-    @State private var previousAssetName: String = ""
-    @State private var isTransitioning = false
-    @State private var opacity: Double = 0
-    
-    private var currentAssetName: String {
-        AppBackgrounds.options.first { $0.displayName == selectedBackground }?.assetName ?? "BlackTiles"
-    }
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Base black layer
-                Rectangle()
-                    .fill(Color.black)
-                    .frame(width: .infinity, height: .infinity)
-                
-                // Image layers group with ripple effect
-                ZStack {
-                    // Previous background
-                    Image(previousAssetName)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
-                    
-                    // Current background (only during transition)
-                    if isTransitioning {
-                        Image(currentAssetName)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                            .clipped()
-                            .opacity(opacity)
-                    }
-                }
-                .modifier(RippleEffect(at: CGPoint(
-                    x: UIScreen.main.bounds.width / 2,
-                    y: UIScreen.main.bounds.height / 2),
-                                       trigger: shouldRipple,
-                                       amplitude: -22, frequency: 15, decay: 4, speed: 600))
-            }
-        }
-        .ignoresSafeArea()
-        .onChange(of: selectedBackground) {
-            if currentAssetName != previousAssetName {
-                isTransitioning = true
-                shouldRipple.toggle()
-                opacity = 0
-                
-                // Animate opacity change
-                withAnimation(.easeInOut(duration: 1.5)) {
-                    opacity = 1
-                }
-                
-                // After transition completes, update previous asset and end transition
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    previousAssetName = currentAssetName
-                    isTransitioning = false
-                    opacity = 0
-                }
-            }
-        }
-        .onAppear {
-            // Initialize previous background only if it hasn't been set
-            if previousAssetName.isEmpty {
-                previousAssetName = currentAssetName
-            }
-        }
-    }
-}
-
 struct HomeView: View {
     @Binding var selectedTab: Tab
+    @Bindable private var appState = AppState.shared
+
     
     /// View controls
     @State private var showWorkoutView: Bool = false
@@ -111,7 +39,6 @@ struct HomeView: View {
     
     var body: some View {
         ZStack {
-            /// Background gradient
             BackgroundView()
             
             /// 3d Workout count
@@ -438,7 +365,8 @@ private struct WeekView: View {
 }
 
 #Preview ("Full Content View") {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView()
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
         .environment(\.dynamicTypeSize, .medium)
         .preferredColorScheme(.light)
 }

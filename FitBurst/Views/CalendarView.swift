@@ -12,6 +12,7 @@ import CoreData
 
 /// Main Calendar View
 struct CalendarView: View {
+    @Bindable private var appState = AppState.shared
     @StateObject private var config = WorkoutConfiguration.shared
     @State var selectedDate: Date = Date()
     @State var scale: CGFloat = 1
@@ -475,7 +476,7 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         calendar.scope = scope
         calendar.clipsToBounds = false
         
-        // The key fix for the “only one day” glitch in week scope:
+        // The key fix for the "only one day" glitch in week scope:
         if scope == .week {
             calendar.placeholderType = .none
             calendar.adjustsBoundingRectWhenChangingMonths = true
@@ -654,10 +655,11 @@ extension CalendarViewRepresentable.Coordinator {
 
 
 
-#Preview ("12 month Calendar") {
+#Preview {
     CalendarView()
         .environment(\.dynamicTypeSize, .medium)
         .preferredColorScheme(.light)
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
 
 #Preview ("This Week Calendar") {
