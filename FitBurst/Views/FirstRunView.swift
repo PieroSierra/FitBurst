@@ -36,7 +36,7 @@ struct FirstRunView: View {
                     .tag(3)
             }
             .tabViewStyle(.page)
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .indexViewStyle(.page(backgroundDisplayMode: .never))
         }
     }
     
@@ -107,14 +107,13 @@ struct FirstRunView: View {
     }
     
     var screen2: some View {
-        // Create base content
-        let content = VStack(alignment: .center) {
-            ScrollView {
+        VStack (alignment: .center){
+            ScrollView{
                 Text("Set a mood")
                     .padding()
                     .font(.custom("Futura Bold", fixedSize: 40))
                     .multilineTextAlignment(.center)
-
+                
                 Text("Pick a background for your workouts:")
                     .padding()
                     .font(.body)
@@ -123,10 +122,11 @@ struct FirstRunView: View {
                 Spacer()
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 20) {
                     ForEach(appState.backgroundOptions, id: \.displayName) { option in
-                        Button(action: {
+                        Button (action: {
                             showRipple += 1
-                            appState.currentBackground = option.displayName
-                        }) {
+                            appState.currentBackground = option.assetName
+                        })
+                        {
                             ZStack {
                                 Image(option.assetName)
                                     .resizable()
@@ -137,8 +137,7 @@ struct FirstRunView: View {
                                 Text(option.displayName)
                                     .foregroundColor(.white)
                                     .padding(10)
-                            }
-                            .buttonStyle(GrowingButtonStyle())
+                            }.buttonStyle(GrowingButtonStyle())
                         }
                     }
                 }
@@ -146,48 +145,28 @@ struct FirstRunView: View {
         }
         .foregroundColor(.white)
         .padding(30)
-        
-        // Apply overlays and background separately
-        return content
-            .overlay(
-                Rectangle()
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    ))
-                    .frame(width: UIScreen.main.bounds.width-70, height: 20)
-                    .padding(.top, 30)
-                , alignment: .top)
-            .overlay(
-                Rectangle()
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
-                    .frame(width: UIScreen.main.bounds.width-70, height: 20)
-                    .padding(.bottom, 30)
-                , alignment: .bottom)
-            .frame(width: UIScreen.main.bounds.width - 40, height: 500)
-            .background(
-                Color.black.opacity(1)
-                    .clipShape(RoundedRectangle(cornerRadius: 40))
-                    .shadow(color: .limeAccentColor, radius: 10)
-            )
-            .modifier(RippleEffect(
-                at: CGPoint(
-                    x: UIScreen.main.bounds.width / 2,
-                    y: UIScreen.main.bounds.height / 2
-                ),
-                trigger: showRipple,
-                amplitude: -22,
-                frequency: 15,
-                decay: 4,
-                speed: 600
-            ))
+        .overlay(
+            Rectangle()
+                .fill(LinearGradient(
+                    gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
+                    startPoint: .bottom,
+                    endPoint: .top
+                ))
+                .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.top,30)
+            , alignment:.top)
+        .overlay(
+            Rectangle()
+                .fill(LinearGradient(
+                    gradient: Gradient(colors:[Color.black.opacity(0.0), Color.black.opacity(1)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
+                .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.bottom,30)
+            , alignment:.bottom)
+        .frame(width: UIScreen.main.bounds.width - 40, height: 500)
+        .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
+            .shadow(color: .limeAccentColor, radius: 10))
     }
-    
     
     var screen3: some View {
         VStack (alignment: .center){
@@ -220,7 +199,7 @@ struct FirstRunView: View {
         .foregroundColor(.white)
         .padding(30)
         .frame(width: UIScreen.main.bounds.width - 40, height: 500)
-        .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+        .background(Color.black.opacity(1).clipShape(RoundedRectangle(cornerRadius: 40))
             .shadow(color: .limeAccentColor, radius: 10))
     }
     

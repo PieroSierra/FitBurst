@@ -286,61 +286,73 @@ private struct WeekView: View {
     var body: some View {
         // Use baseDate instead of selectedDate for calculating the week's dates
         let cal = Calendar.current
-        let start = baseDate 
+        let start = baseDate
         
-        HStack {
-            ForEach(0..<7, id: \.self) { i in
-                let day = cal.date(byAdding: .day, value: i, to: start)!
-                
-                VStack(spacing: 4) {
-                    // Top label: "M, T, W, T, F, S, S"
-                    Text(weekdays[i])
-                        .font(.custom("Futura Bold", fixedSize: 15))
-                        .foregroundColor(cal.isDateInToday(day) ? .limeAccentColor : .white)
-                        .padding(.bottom, 4)
+        ZStack {
+            Rectangle()
+                .stroke(Color.white, lineWidth: 1)
+                .frame(width: 270, height: 0.5)
+                .offset(y:14)
+            
+            HStack {
+                ForEach(0..<7, id: \.self) { i in
+                    let day = cal.date(byAdding: .day, value: i, to: start)!
                     
-                    // Bottom: either checkmark or day number
-                    Group {
-                        if cal.isDate(day, inSameDayAs: selectedDate) {
-                            if hasWorkout(on: day) {
+                    VStack(spacing: 4) {
+                        // Top label: "M, T, W, T, F, S, S"
+                        Text(weekdays[i])
+                            .font(.custom("Futura Bold", fixedSize: 15))
+                            .foregroundColor(cal.isDateInToday(day) ? .limeAccentColor : .white)
+                            .padding(.bottom, 4)
+                        
+                        // Bottom: either checkmark or day number
+                        Group {
+                            if cal.isDate(day, inSameDayAs: selectedDate) {
+                                if hasWorkout(on: day) {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.black)
+                                        .frame(width: 31, height:31)
+                                        .background(Circle().foregroundColor(.white))
+                                } else {
+                                    Text("\(cal.component(.day, from: day))")
+                                        .foregroundColor(.black)
+                                        .frame(width: 31, height:31)
+                                        .background(Circle().foregroundColor(.white))
+                                }
+                            } else if hasWorkout(on: day) {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.black)
                                     .frame(width: 31, height:31)
-                                    .background(Circle().foregroundColor(.white))
-                            } else {
+                                    .background(Circle().foregroundColor(.limeAccentColor))
+                            } else if cal.isDateInToday(day) {
                                 Text("\(cal.component(.day, from: day))")
                                     .foregroundColor(.black)
                                     .frame(width: 31, height:31)
-                                    .background(Circle().foregroundColor(.white))
+                                    .background(Circle().foregroundColor(.limeAccentColor))
+                            } else {
+                                Text("\(cal.component(.day, from: day))")
+                                    .foregroundColor(.white)
+                                    .frame(width: 31, height:31)
+                                    .background(Circle()
+                                        .fill(Color.black.opacity(0.9))
+                                        .stroke(Color.white, lineWidth: 1)
+                                        .frame(width: 31, height: 31)
+                                    )
                             }
-                        } else if hasWorkout(on: day) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.black)
-                                .frame(width: 31, height:31)
-                                .background(Circle().foregroundColor(.limeAccentColor))
-                        } else if cal.isDateInToday(day) {
-                            Text("\(cal.component(.day, from: day))")
-                                .foregroundColor(.black)
-                                .frame(width: 31, height:31)
-                                .background(Circle().foregroundColor(.limeAccentColor))
-                        } else {
-                            Text("\(cal.component(.day, from: day))")
-                                .foregroundColor(.white)
-                                .frame(width: 31, height:31)
                         }
+                        .transition(.scale.combined(with: .opacity))
                     }
-                    .transition(.scale.combined(with: .opacity))
+                    .font(.custom("Futura Bold", fixedSize: 15))
+                    .frame(maxWidth: .infinity)
+                    .onTapGesture {
+                        onDateSelected(day)
+                    }
                 }
-                .font(.custom("Futura Bold", fixedSize: 15))
-                .frame(maxWidth: .infinity)
-                .onTapGesture {
-                    onDateSelected(day)
-                }
+                Spacer()
             }
-            Spacer()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
     }
     
     // Include your existing hasWorkout helper here
