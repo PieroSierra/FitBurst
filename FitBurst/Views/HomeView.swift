@@ -118,7 +118,7 @@ struct HomeView: View {
                Spacer()
                 
             }
-            .frame(height:.infinity)
+//            .frame(height:.infinity)
 
             if showWorkoutView {
                 RecordWorkoutView(
@@ -139,7 +139,7 @@ struct HomeView: View {
             }
             
         }
-        .frame(height:.infinity)
+      //  .frame(height:.infinity)
         .ignoresSafeArea(edges:.bottom)
         .onAppear {
             showWorkoutView = false
@@ -242,9 +242,9 @@ struct SimpleWeekRow: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .frame(height: 100)
-        .onChange(of: currentIndex) { newIndex in
-            if newIndex == 0 || newIndex == 2 {
-                weekOffset += (newIndex == 0) ? -1 : 1
+        .onChange(of: currentIndex) {
+            if currentIndex == 0 || currentIndex == 2 {
+                weekOffset += (currentIndex == 0) ? -1 : 1
                 currentIndex = 1  // Reset immediately
             }
         }
@@ -263,17 +263,9 @@ struct SimpleWeekRow: View {
     // Helper to calculate date for each week view
     private func offsetDate(_ offset: Int) -> Date {
         let calendar = Calendar.current
-        return calendar.date(byAdding: .day, value: (weekOffset + offset) * 7, to: startOfWeek(for: selectedDate)) ?? selectedDate
+        return calendar.date(byAdding: .day, value: (weekOffset + offset) * 7, to: calendar.startOfWeek(for: selectedDate)) ?? selectedDate
     }
     
-    // StartOfWeek helper here
-    private func startOfWeek(for date: Date) -> Date {
-        var cal = Calendar.current
-        cal.firstWeekday = 2 // Monday
-        let weekday = cal.component(.weekday, from: date)
-        let daysFromMonday = (weekday - cal.firstWeekday + 7) % 7
-        return cal.date(byAdding: .day, value: -daysFromMonday, to: date) ?? date
-    }
 }
 
 private struct WeekView: View {

@@ -76,7 +76,7 @@ struct VideosView: View {
     private let isPreview: Bool
     
     init(isPreview: Bool = false) {
-       // print("📺 VideosView init")  // Debug init
+        // print("📺 VideosView init")  // Debug init
         self.isPreview = isPreview
         self._workoutVideos = State(initialValue: Array(repeating: [], count: 6))
         
@@ -99,8 +99,8 @@ struct VideosView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var videosReady = false
-
-
+    
+    
     var body: some View {
         ZStack {
             BackgroundView()
@@ -143,7 +143,7 @@ struct VideosView: View {
                                 }
                             }
                         } else {
-                           // error case
+                            // error case
                         }
                     }
                 }
@@ -177,11 +177,11 @@ struct VideosView: View {
             }
             
             /*/ Add error alert
-            .alert("Error Loading Videos", isPresented: $showError) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(errorMessage)
-            }*/
+             .alert("Error Loading Videos", isPresented: $showError) {
+             Button("OK", role: .cancel) { }
+             } message: {
+             Text(errorMessage)
+             }*/
         }
     }
     
@@ -274,7 +274,7 @@ struct VideosView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 case .ready:
                     EmptyView()
-              case .error(let error):
+                case .error(let error):
                     Text("Error: \(error.localizedDescription)")
                         .foregroundColor(.red)
                 }

@@ -271,8 +271,8 @@ struct RecordWorkoutView: View {
                 showTrophyDisplayView: $showTrophyView,
                 trophy: nextTrophy
             )
-            .onChange(of: showTrophyView) { isShowing in
-                if !isShowing {
+            .onChange(of: showTrophyView) {
+                if !showTrophyView {
                     // Remove the displayed trophy
                     newTrophies.removeFirst()
                     // Show next trophy if available

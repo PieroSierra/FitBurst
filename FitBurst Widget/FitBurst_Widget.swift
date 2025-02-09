@@ -59,9 +59,18 @@ struct Provider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeekEntry>) -> ()) {
+        print("\n=== Widget Timeline Update ===")
         print("Widget Provider - GetTimeline called")
         let currentDate = Date()
+        print("Widget Provider - Current date: \(currentDate)")
+        
+        let weekStart = Calendar.current.startOfWeek(for: currentDate)
+        print("Widget Provider - Week start: \(weekStart)")
+        
         let workouts = persistence.getWorkoutsForWeek(startingFrom: currentDate)
+        print("Widget Provider - Workouts dictionary has \(workouts.count) entries")
+        print("Widget Provider - Days with workouts: \(workouts.filter { $0.value }.count)")
+        print("Widget Provider - Workout dates: \(workouts.keys.sorted().map { $0.description })")
         
         let entry = WeekEntry(
             date: currentDate,
@@ -69,9 +78,11 @@ struct Provider: TimelineProvider {
             backgroundAssetName: getCurrentBackground()
         )
         
-        // Update very frequently for testing
-        let nextUpdate = Date().addingTimeInterval(60) // Every minute
+        // Update every minute for testing
+        let nextUpdate = Date().addingTimeInterval(60)
         print("Widget Provider - Next update in 1 minute")
+        print("=== End Timeline Update ===\n")
+        
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
@@ -111,8 +122,8 @@ struct FitBurst_WidgetEntryView : View {
                 .frame(width: 108, height: 108)
             
             ForEach(0..<7) { index in
-                if let date = Calendar.current.date(byAdding: .day, value: index,
-                                                    to: Calendar.current.startOfDay(for: entry.date)),
+                let weekStart = Calendar.current.startOfWeek(for: entry.date)
+                if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
                    let hasWorkout = entry.workouts[date] {
                     
                     // Day letter
@@ -195,8 +206,8 @@ struct FitBurst_WidgetEntryView : View {
                 
                 HStack {
                     ForEach(0..<7) { index in
-                        if let date = Calendar.current.date(byAdding: .day, value: index,
-                                                            to: Calendar.current.startOfDay(for: entry.date)),
+                        let weekStart = Calendar.current.startOfWeek(for: entry.date)
+                        if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
                            let hasWorkout = entry.workouts[date] {
                             
                             VStack(spacing: 4) {
@@ -292,11 +303,12 @@ extension WeekEntry {
     static var sampleEntry: WeekEntry {
         let calendar = Calendar.current
         let today = Date()
+        let weekStart = calendar.startOfWeek(for: today)
         var sampleWorkouts: [Date: Bool] = [:]
         
         // Ensure we have all 7 days populated
         for dayOffset in 0..<7 {
-            if let date = calendar.date(byAdding: .day, value: dayOffset, to: calendar.startOfDay(for: today)) {
+            if let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) {
                 sampleWorkouts[date] = (dayOffset+1) % 5 == 0
             }
         }

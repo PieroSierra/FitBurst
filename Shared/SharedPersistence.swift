@@ -56,11 +56,13 @@ class SharedPersistence {
     
     func getWorkoutsForWeek(startingFrom date: Date) -> [Date: Bool] {
         let calendar = Calendar.current
-        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
+        let startOfWeek = calendar.startOfWeek(for: date)
         var results: [Date: Bool] = [:]
         
         // Create the date range for the week
         let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
+        
+        print("SharedPersistence - Getting workouts from \(startOfWeek) to \(endOfWeek)")
         
         // Fetch all workouts for the week in one go
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
@@ -72,6 +74,9 @@ class SharedPersistence {
         
         do {
             let workouts = try container.viewContext.fetch(fetchRequest)
+            print("SharedPersistence - Raw workouts fetched: \(workouts.count)")
+            print("SharedPersistence - Workout timestamps: \(workouts.map { $0.timestamp?.description ?? "nil" })")
+            
             let workoutDates = workouts.map { calendar.startOfDay(for: $0.timestamp!) }
             
             // Initialize all days of the week
@@ -79,11 +84,13 @@ class SharedPersistence {
                 let currentDate = calendar.date(byAdding: .day, value: dayOffset, to: startOfWeek)!
                 let startOfDay = calendar.startOfDay(for: currentDate)
                 results[startOfDay] = workoutDates.contains(startOfDay)
+                print("SharedPersistence - Day \(dayOffset): \(startOfDay) = \(results[startOfDay] ?? false)")
             }
             
-            print("SharedPersistence - Found \(workouts.count) workouts for week of \(startOfWeek)")
+            print("SharedPersistence - Final results count: \(results.count)")
+            print("SharedPersistence - Days with workouts: \(results.filter { $0.value }.count)")
         } catch {
-            print("Error fetching workouts: \(error)")
+            print("SharedPersistence - Error fetching workouts: \(error)")
         }
         
         return results
