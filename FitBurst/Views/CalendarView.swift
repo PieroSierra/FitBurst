@@ -542,10 +542,7 @@ struct CalendarViewRepresentable: UIViewRepresentable {
         
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
             let oldDate = parent.selectedDate
-            print(">>> didSelect in subcalendar for month \(Calendar.current.component(.month, from: calendar.currentPage))")
-            print("    oldDate = \(oldDate), newDate = \(date)")
-            print("oldDate in local time = \(oldDate.formatted(date: .numeric, time: .omitted))")
-
+       
             parent.selectedDate = date
             // Force calendar to refresh its appearance
             calendar.reloadData()

@@ -76,7 +76,6 @@ struct VideosView: View {
     private let isPreview: Bool
     
     init(isPreview: Bool = false) {
-        // print("📺 VideosView init")  // Debug init
         self.isPreview = isPreview
         self._workoutVideos = State(initialValue: Array(repeating: [], count: 6))
         
@@ -198,7 +197,6 @@ struct VideosView: View {
             
             let query = "\(name) workout technique".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
             let urlString = "\(baseUrl)?q=\(query)&type=video&videoDuration=short&videoDefinition=standard&safeSearch=strict&relevanceLanguage=en&order=rating&part=snippet&maxResults=4&key=\(apiKey)"
-            // print("📺 URL: \(urlString)")
             
             guard let url = URL(string: urlString) else {
                 print("❌ Invalid URL for type \(type)")
@@ -217,8 +215,7 @@ struct VideosView: View {
                 })
                 .decode(type: YouTubeSearchResponse.self, decoder: JSONDecoder())
                 .map { response in
-                    //print("📺 Received \(response.items.count) videos for type \(type)")
-                    return response.items.map { item in
+                     return response.items.map { item in
                         let videoId = item.id.videoId
                         //print("📺 Video ID: \(videoId), Title: \(item.snippet.title)")
                         return Video(id: videoId, title: item.snippet.title)
@@ -234,13 +231,11 @@ struct VideosView: View {
                 .receive(on: DispatchQueue.main)
                 .sink { videos in
                     if type < self.workoutVideos.count {
-                        //print("📺 Setting \(videos.count) videos for type \(type)")
                         self.workoutVideos[type] = videos
                         
                         // Check if all video types are loaded
                         let totalVideos = self.workoutVideos.reduce(0) { $0 + $1.count }
                         if totalVideos == visibleTypes.count * 4 { // Expecting 4 videos per type
-                            //print("📺 All videos loaded, marking as ready")
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 self.videosReady = true
                                 // Initialize animation for initial videos

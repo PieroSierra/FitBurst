@@ -13,15 +13,11 @@ import Darwin
 struct Provider: TimelineProvider {
     let persistence = SharedPersistence.shared
     private let groupDefaults = UserDefaults(suiteName: "group.com.pieroco.FitBurst")!
-    
-    init() {
-        print("Widget Provider - Initialized")
-    }
-    
+   
     private func getCurrentBackground() -> String {
         let background = groupDefaults.string(forKey: "widget.currentBackground") ?? "BlackTiles"
-        print("Widget Provider - Reading background: \(background)")
-        
+
+        /*
         // Test if image exists in widget bundle
         if let image = UIImage(named: background) {
             print("Widget Provider - Successfully loaded image for \(background) - size: \(image.size)")
@@ -33,12 +29,11 @@ struct Provider: TimelineProvider {
                 print("Widget Provider - Image exists in main bundle but not widget bundle!")
             }
         }
-        
+        */
         return background
     }
     
     func placeholder(in context: Context) -> WeekEntry {
-        print("Widget Provider - Placeholder called")
         return WeekEntry(
             date: Date(),
             workouts: [:],
@@ -47,30 +42,19 @@ struct Provider: TimelineProvider {
     }
     
     func getSnapshot(in context: Context, completion: @escaping (WeekEntry) -> ()) {
-        print("Widget Provider - GetSnapshot called")
         let workouts = persistence.getWorkoutsForWeek(startingFrom: Date())
         let entry = WeekEntry(
             date: Date(),
             workouts: workouts,
             backgroundAssetName: getCurrentBackground()
         )
-        print("Widget Provider - Snapshot workouts: \(workouts.count)")
         completion(entry)
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeekEntry>) -> ()) {
-        print("\n=== Widget Timeline Update ===")
-        print("Widget Provider - GetTimeline called")
         let currentDate = Date()
-        print("Widget Provider - Current date: \(currentDate)")
-        
         let weekStart = Calendar.current.startOfWeek(for: currentDate)
-        print("Widget Provider - Week start: \(weekStart)")
-        
         let workouts = persistence.getWorkoutsForWeek(startingFrom: currentDate)
-        print("Widget Provider - Workouts dictionary has \(workouts.count) entries")
-        print("Widget Provider - Days with workouts: \(workouts.filter { $0.value }.count)")
-        print("Widget Provider - Workout dates: \(workouts.keys.sorted().map { $0.description })")
         
         let entry = WeekEntry(
             date: currentDate,
@@ -80,8 +64,6 @@ struct Provider: TimelineProvider {
         
         // Update every minute for testing
         let nextUpdate = Date().addingTimeInterval(60)
-        print("Widget Provider - Next update in 1 minute")
-        print("=== End Timeline Update ===\n")
         
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
@@ -231,7 +213,6 @@ struct FitBurst_WidgetEntryView : View {
                                             .frame(width: 31, height: 31)
                                             .background(Circle().foregroundColor(.white))
                                     } else {
-                                        
                                         Text("\(Calendar.current.component(.day, from: date))")
                                             .foregroundColor(.white)
                                             .frame(width: 31, height: 31)
@@ -261,10 +242,6 @@ struct FitBurst_WidgetEntryView : View {
 
 struct FitBurst_Widget: Widget {
     let kind: String = "FitBurst_Widget"
-    
-    init() {
-        print("Widget - Initialized")
-    }
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in

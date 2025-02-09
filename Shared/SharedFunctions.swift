@@ -111,10 +111,9 @@ extension UIView {
 
 extension Calendar {
     func startOfWeek(for date: Date) -> Date {
-        var calendar = self
-        calendar.firstWeekday = 2 // Monday
-        let weekday = calendar.component(.weekday, from: date)
-        let daysFromMonday = (weekday - calendar.firstWeekday + 7) % 7
-        return calendar.date(byAdding: .day, value: -daysFromMonday, to: date) ?? date
+        let calendar = Calendar.current  // Use current calendar instead of self
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        components.weekday = 2 // Monday
+        return calendar.date(from: components) ?? date
     }
 }

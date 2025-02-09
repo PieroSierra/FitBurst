@@ -313,10 +313,6 @@ extension RecordWorkoutView {
                 let newTypes = Set(result.achievements.map { $0.type })
                 let newlyEarned = newTypes.subtracting(existingTypes)
                 
-                if !newlyEarned.isEmpty {
-                    print("New achievements earned: \(newlyEarned)")
-                }
-                
                 // Delete all existing achievements
                 for achievement in existingAchievements {
                     context.delete(achievement)

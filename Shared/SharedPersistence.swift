@@ -9,14 +9,12 @@ class SharedPersistence {
     init() {
         container = NSPersistentContainer(name: "FitBurst")
         
-        print("SharedPersistence init - Starting") // Debug
         
         // Configure for App Group container
         if let storeURL = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: "group.com.pieroco.FitBurst")?
             .appendingPathComponent("FitBurst.sqlite") {
             
-            print("SharedPersistence init - Got store URL:", storeURL) // Debug
             let storeDescription = NSPersistentStoreDescription(url: storeURL)
             container.persistentStoreDescriptions = [storeDescription]
         } else {
@@ -62,7 +60,6 @@ class SharedPersistence {
         // Create the date range for the week
         let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
         
-        print("SharedPersistence - Getting workouts from \(startOfWeek) to \(endOfWeek)")
         
         // Fetch all workouts for the week in one go
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
@@ -74,8 +71,6 @@ class SharedPersistence {
         
         do {
             let workouts = try container.viewContext.fetch(fetchRequest)
-            print("SharedPersistence - Raw workouts fetched: \(workouts.count)")
-            print("SharedPersistence - Workout timestamps: \(workouts.map { $0.timestamp?.description ?? "nil" })")
             
             let workoutDates = workouts.map { calendar.startOfDay(for: $0.timestamp!) }
             
@@ -87,8 +82,6 @@ class SharedPersistence {
                 print("SharedPersistence - Day \(dayOffset): \(startOfDay) = \(results[startOfDay] ?? false)")
             }
             
-            print("SharedPersistence - Final results count: \(results.count)")
-            print("SharedPersistence - Days with workouts: \(results.filter { $0.value }.count)")
         } catch {
             print("SharedPersistence - Error fetching workouts: \(error)")
         }

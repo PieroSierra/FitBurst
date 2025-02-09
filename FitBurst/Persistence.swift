@@ -85,7 +85,6 @@ extension PersistenceController {
             container.viewContext.automaticallyMergesChangesFromParent = true
             try container.viewContext.save()
             
-            print("PersistenceController - Force reloading widget after workout save")
             DispatchQueue.main.async {
                 WidgetCenter.shared.reloadAllTimelines()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -106,7 +105,6 @@ extension PersistenceController {
             container.viewContext.automaticallyMergesChangesFromParent = true
             try context.save()
             
-            print("PersistenceController - Force reloading widget after workout delete")
             DispatchQueue.main.async {
                 WidgetCenter.shared.reloadAllTimelines()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

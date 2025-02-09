@@ -15,11 +15,11 @@ class AppState {
     let backgroundOptions: [BackgroundOption] = [
         BackgroundOption(displayName: "Black Tiles", assetName: "BlackTiles"),
         BackgroundOption(displayName: "Dark Forest", assetName: "DarkForest"),
+        BackgroundOption(displayName: "Running Tracks", assetName: "RunningTracks"),
         BackgroundOption(displayName: "Night Dunes", assetName: "Dunes"),
         BackgroundOption(displayName: "Gradient Waves", assetName: "GradientWaves"),
         BackgroundOption(displayName: "Ocean Ripples", assetName: "Ocean"),
         BackgroundOption(displayName: "Black & White", assetName: "BlackAndWhite"),
-        BackgroundOption(displayName: "Running Tracks", assetName: "RunningTracks"),
         BackgroundOption(displayName: "Palm Frond", assetName: "Frond"),
         BackgroundOption(displayName: "Sky lights", assetName: "Skylights"),
         BackgroundOption(displayName: "Pink Palm", assetName: "PinkPalm"),
@@ -30,7 +30,6 @@ class AppState {
         BackgroundOption(displayName: "Snowcap", assetName: "Snowcap"),
         BackgroundOption(displayName: "Lion", assetName: "Lion"),
         BackgroundOption(displayName: "Kettle Bell", assetName: "KettleBell"),
-
         BackgroundOption(displayName: "Dark Crystals", assetName: "DarkCrystals")
     ]
     
@@ -40,12 +39,10 @@ class AppState {
     
     // Public interface
     var currentBackground: String {
-        get { 
-            print("AppState - Reading currentBackground: \(_currentBackground)")
+        get {             print("AppState - Reading currentBackground: \(_currentBackground)")
             return _currentBackground 
         }
         set {
-            print("AppState - Setting currentBackground from \(_currentBackground) to \(newValue)")
             _previousBackground = _currentBackground
             _currentBackground = newValue
             
@@ -75,10 +72,8 @@ class AppState {
     }
     
     private init() {
-        print("AppState - Initializing")
         self._currentBackground = groupDefaults.string(forKey: "currentBackground") ?? "BlackTiles"
         self._previousBackground = groupDefaults.string(forKey: "previousBackground") ?? "BlackTiles"
-        print("AppState - Initialized with background: \(_currentBackground)")
     }
 }
 
@@ -128,18 +123,11 @@ struct BackgroundView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)  // Added to ensure full size
         .edgesIgnoringSafeArea(.all)
         .onAppear {
-            print("BackgroundView - onAppear - Setting lastKnownBackground to: \(appState.currentBackground)")
             lastKnownBackground = appState.currentBackground
             displayedBackground = appState.currentBackground
         }
         .onChange(of: appState.currentBackground) { _, newValue in
-            print("BackgroundView - onChange triggered")
-            print("  currentBackground: \(appState.currentBackground)")
-            print("  lastKnownBackground: \(lastKnownBackground)")
-            print("  newValue: \(newValue)")
-            
             if lastKnownBackground != newValue {
-                print("BackgroundView - Starting transition from \(lastKnownBackground) to \(newValue)")
                 withAnimation {
                     isTransitioning = true
                     shouldRipple.toggle()

@@ -280,15 +280,12 @@ class AchievementCalculator {
             let count = dayWorkouts.count
             
             if count >= 2 {
-                print("Adding twoInADay achievement for \(date)")
                 achievements.append(AchievementRecord(type: .twoInADay, date: date))
             }
             if count >= 3 {
-                print("Adding threeInADay achievement for \(date)")
                 achievements.append(AchievementRecord(type: .threeInADay, date: date))
             }
             if count >= 4 {
-                print("Adding lotsInADay achievement for \(date)")
                 achievements.append(AchievementRecord(type: .lotsInADay, date: date))
             }
         }
