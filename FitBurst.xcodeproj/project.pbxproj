@@ -22,6 +22,7 @@
 		4397840D2D4F8E3000E62804 /* RippleShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 439783932D4E5B0B00E62804 /* RippleShader.metal */; };
 		4397840E2D4F8E3900E62804 /* RippleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439783942D4E5B0B00E62804 /* RippleView.swift */; };
 		439784112D5169A200E62804 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4397839F2D4E5B0B00E62804 /* SharedFunctions.swift */; };
+		43C6029B2D60A2F500F904A2 /* WidgetConfiguration.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43C602972D60A2F500F904A2 /* WidgetConfiguration.intentdefinition */; };
 		43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */ = {isa = PBXBuildFile; productRef = 43FBA29D2D0F27F2005CBFA3 /* Model3DView */; };
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
 		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
@@ -64,6 +65,7 @@
 		439783F62D4E89BF00E62804 /* FitBurst WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "FitBurst WidgetExtension.entitlements"; sourceTree = "<group>"; };
 		439783F82D4E8D7400E62804 /* SharedPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedPersistence.swift; sourceTree = "<group>"; };
 		4397840A2D4F768400E62804 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		43C602972D60A2F500F904A2 /* WidgetConfiguration.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = WidgetConfiguration.intentdefinition; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -82,12 +84,20 @@
 			);
 			target = 439783DD2D4E88F800E62804 /* FitBurst WidgetExtension */;
 		};
+		43C4D84A2D60944000EDD590 /* Exceptions for "FitBurst" folder in "FitBurst" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 438660992CF322B300CA5D62 /* FitBurst */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4386609C2CF322B300CA5D62 /* FitBurst */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				43C4D84A2D60944000EDD590 /* Exceptions for "FitBurst" folder in "FitBurst" target */,
 				439784012D4E8FFF00E62804 /* Exceptions for "FitBurst" folder in "FitBurst WidgetExtension" target */,
 			);
 			path = FitBurst;
@@ -137,6 +147,7 @@
 				43FBA29C2D0F27F2005CBFA3 /* Frameworks */,
 				4386609B2CF322B300CA5D62 /* Products */,
 				439783F92D4E8D7400E62804 /* Shared */,
+				43C602972D60A2F500F904A2 /* WidgetConfiguration.intentdefinition */,
 			);
 			sourceTree = "<group>";
 		};
@@ -301,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43C6029B2D60A2F500F904A2 /* WidgetConfiguration.intentdefinition in Sources */,
 				4397840E2D4F8E3900E62804 /* RippleView.swift in Sources */,
 				439783FB2D4E8D7400E62804 /* SharedPersistence.swift in Sources */,
 				4397840C2D4F768400E62804 /* AppState.swift in Sources */,
@@ -446,11 +458,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = FitBurst/FitBurst.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_ASSET_PATHS = "\"FitBurst/Preview Content\"";
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FitBurst/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FitBurst;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -462,7 +475,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = pieroco.FitBurst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -478,11 +491,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = FitBurst/FitBurst.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_ASSET_PATHS = "\"FitBurst/Preview Content\"";
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FitBurst/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FitBurst;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -494,7 +508,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = pieroco.FitBurst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -510,19 +524,20 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "FitBurst WidgetExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "FitBurst Widget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "FitBurst Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INTENTS_CODEGEN_LANGUAGE = Swift;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "pieroco.FitBurst.FitBurst-Widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -539,19 +554,20 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "FitBurst WidgetExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = HBMCF3J59V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "FitBurst Widget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "FitBurst Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INTENTS_CODEGEN_LANGUAGE = Swift;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "pieroco.FitBurst.FitBurst-Widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

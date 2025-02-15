@@ -9,61 +9,128 @@ import WidgetKit
 import SwiftUI
 import Foundation
 import Darwin
+import Intents
 
-struct Provider: TimelineProvider {
+struct Provider: IntentTimelineProvider {
+    // Specify the timeline entry type
+    typealias Entry = WeekEntry
+    // Specify the intent type
+    typealias Intent = ConfigureWidgetBackgroundIntent
+    
     let persistence = SharedPersistence.shared
     private let groupDefaults = UserDefaults(suiteName: "group.com.pieroco.FitBurst")!
-   
-    private func getCurrentBackground() -> String {
-        let background = groupDefaults.string(forKey: "widget.currentBackground") ?? "BlackTiles"
-
-        /*
-        // Test if image exists in widget bundle
-        if let image = UIImage(named: background) {
-            print("Widget Provider - Successfully loaded image for \(background) - size: \(image.size)")
-        } else {
-            print("Widget Provider - ⚠️ Failed to load image for \(background)")
-            
-            // Try loading from main bundle
-            if Bundle.main.path(forResource: background, ofType: nil) != nil {
-                print("Widget Provider - Image exists in main bundle but not widget bundle!")
-            }
+    
+    init() {
+        print("Widget Provider - Initialized")
+    }
+    
+    /// Returns the background asset name by checking the widget configuration.
+    /// If the background value is not 0 ("Same as app"), then the corresponding asset name is returned.
+    private func getCurrentBackground(configuration: ConfigureWidgetBackgroundIntent) -> String {
+        // Debug print
+        print("Widget background requested: \(configuration.background)")
+        
+        let assetName = switch configuration.background {
+        case .unknown, .appSync:   // Both unknown and appSync will sync with the app
+            groupDefaults.string(forKey: "widget.currentBackground") ?? "BlackTiles"
+        case .blackTiles:
+            "BlackTiles"
+        case .darkForest:
+            "DarkForest"
+        case .runningTracks:
+            "RunningTracks"
+        case .dunes:
+            "Dunes"
+        case .gradientWaves:
+            "GradientWaves"
+        case .oceanBg:
+            "Ocean"
+        case .blackAndWhite:
+            "BlackAndWhite"
+        case .frond:
+            "Frond"
+        case .skylights:
+            "Skylights"
+        case .pinkPalm:
+            "PinkPalm"
+        case .elCapitan:
+            "ElCapitan"
+        case .rainier:
+            "Rainier"
+        case .fuji:
+            "Fuji1"
+        case .matterhorn:
+            "Matterhorn"
+        case .snowcap:
+            "Snowcap"
+        case .lion:
+            "Lion"
+        case .kettleBell:
+            "KettleBell"
+        case .darkCrystals:
+            "DarkCrystals"
+        @unknown default:
+            "BlackTiles"
         }
-        */
-        return background
+        
+        // Verify the asset exists and can be loaded
+        if let _ = UIImage(named: assetName)?.preparingThumbnail(of: CGSize(width: 800, height: 800)) {
+            print("Successfully loaded and resized: \(assetName)")
+            return assetName
+        } else {
+            print("Failed to load/resize asset: \(assetName), falling back to BlackTiles")
+            return "BlackTiles"
+        }
     }
     
     func placeholder(in context: Context) -> WeekEntry {
+        print("Widget Provider - Placeholder called")
         return WeekEntry(
             date: Date(),
             workouts: [:],
-            backgroundAssetName: getCurrentBackground()
+            backgroundAssetName: groupDefaults.string(forKey: "widget.currentBackground") ?? "BlackTiles"
         )
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (WeekEntry) -> ()) {
+    func getSnapshot(for configuration: ConfigureWidgetBackgroundIntent, in context: Context, completion: @escaping (WeekEntry) -> ()) {
+        print("Widget Provider - GetSnapshot called")
         let workouts = persistence.getWorkoutsForWeek(startingFrom: Date())
+        let backgroundAssetName = getCurrentBackground(configuration: configuration)
         let entry = WeekEntry(
             date: Date(),
             workouts: workouts,
-            backgroundAssetName: getCurrentBackground()
+            backgroundAssetName: backgroundAssetName
         )
+        print("Widget Provider - Snapshot workouts: \(workouts.count)")
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<WeekEntry>) -> ()) {
+    func getTimeline(for configuration: ConfigureWidgetBackgroundIntent, in context: Context, completion: @escaping (Timeline<WeekEntry>) -> ()) {
+        print("\n=== Widget Timeline Update ===")
+        print("Widget Provider - GetTimeline called with configuration background: \(String(describing: configuration.background))")
         let currentDate = Date()
+        print("Widget Provider - Current date: \(currentDate)")
+        
         let weekStart = Calendar.current.startOfWeek(for: currentDate)
+        print("Widget Provider - Week start: \(weekStart)")
+        
         let workouts = persistence.getWorkoutsForWeek(startingFrom: currentDate)
+        print("Widget Provider - Workouts dictionary has \(workouts.count) entries")
+        print("Widget Provider - Days with workouts: \(workouts.filter { $0.value }.count)")
+        print("Widget Provider - Workout dates: \(workouts.keys.sorted().map { $0.description })")
+        
+        let backgroundAssetName = getCurrentBackground(configuration: configuration)
         
         let entry = WeekEntry(
             date: currentDate,
             workouts: workouts,
-            backgroundAssetName: getCurrentBackground()
+            backgroundAssetName: backgroundAssetName
         )
         
-        // Update every minute for testing
+        // For testing we update every minute
         let nextUpdate = Date().addingTimeInterval(60)
+        print("Widget Provider - Next update in 1 minute")
+        print("=== End Timeline Update ===\n")
         
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
@@ -98,56 +165,75 @@ struct FitBurst_WidgetEntryView : View {
     }
     
     var smallCalendarView: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.white, lineWidth: 1)
-                .frame(width: 108, height: 108)
-            
-            ForEach(0..<7) { index in
-                let weekStart = Calendar.current.startOfWeek(for: entry.date)
-                if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
-                   let hasWorkout = entry.workouts[date] {
+        GeometryReader { geometry in
+            ZStack {
+                // Custom arc using dynamic center point
+                Path { path in
+                    let center = CGPoint(
+                        x: geometry.size.width / 2,
+                        y: geometry.size.height / 2
+                    )
+                    let radius: CGFloat = ( min(geometry.size.width, geometry.size.height) / 2) - 9
                     
-                    // Day letter
-                    Text(weekdays[index])
-                        .font(.custom("Futura Bold", fixedSize: 12))
-                        .foregroundColor(Calendar.current.isDateInToday(date) ? .limeAccentColor : .white)
-                        .offset(getDayPosition(index: index))
+                    let startAngle = Angle(degrees: -90)
+                    let endAngle = Angle(degrees: 230)
                     
-                    // Workout indicator
-                    Group {
-                        if hasWorkout {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.black)
-                                .frame(width: 23, height: 23)
-                                .background(Circle().foregroundColor(.limeAccentColor))
-                        } else if Calendar.current.isDateInToday(date) {
-                            Text("\(Calendar.current.component(.day, from: date))")
-                                .foregroundColor(.black)
-                                .frame(width: 23, height: 23)
-                                .background(Circle().foregroundColor(.white))
-                        } else {
-                            Text("\(Calendar.current.component(.day, from: date))")
-                                .foregroundColor(.white)
-                                .frame(width: 23, height: 23)
-                                .background(                            Circle()
-                                    .fill(Color.black.opacity(0.9))
-                                    .stroke(Color.white, lineWidth: 1)
-                                    .frame(width: 23, height: 23)
-                                )
-                        }
-                    }
-                    .font(.custom("Futura Bold", fixedSize: 12))
-                    .offset(getWorkoutPosition(index: index))
+                    path.addArc(
+                        center: center,
+                        radius: radius,
+                        startAngle: startAngle,
+                        endAngle: endAngle,
+                        clockwise: false
+                    )
                 }
+                .stroke(Color.white, lineWidth: 1)
+                
+                ForEach(0..<7) { index in
+                    let weekStart = Calendar.current.startOfWeek(for: entry.date)
+                    if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
+                       let hasWorkout = entry.workouts[date] {
+                        
+                        // Day letter
+                        Text(weekdays[index])
+                            .font(.custom("Futura Bold", fixedSize: 12))
+                            .foregroundColor(Calendar.current.isDateInToday(date) ? .limeAccentColor : .white)
+                            .offset(getDayPosition(index: index))
+                        
+                        // Workout indicator
+                        Group {
+                            if hasWorkout {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.black)
+                                    .frame(width: 23, height: 23)
+                                    .background(Circle().foregroundColor(.limeAccentColor))
+                            } else if Calendar.current.isDateInToday(date) {
+                                Text("\(Calendar.current.component(.day, from: date))")
+                                    .foregroundColor(.black)
+                                    .frame(width: 23, height: 23)
+                                    .background(Circle().foregroundColor(.white))
+                            } else {
+                                Text("\(Calendar.current.component(.day, from: date))")
+                                    .foregroundColor(.white)
+                                    .frame(width: 23, height: 23)
+                                    .background(                            Circle()
+                                        .fill(Color.black.opacity(0.9))
+                                        .stroke(Color.white, lineWidth: 1)
+                                        .frame(width: 23, height: 23)
+                                    )
+                            }
+                        }
+                        .font(.custom("Futura Bold", fixedSize: 12))
+                        .offset(getWorkoutPosition(index: index))
+                    }
+                }
+                
+                Image("LogoSqClear100")
+                    .resizable()
+                    .frame(width: 25, height: 25)
+                
             }
-            
-            Image("LogoSqClear100")
-                .resizable()
-                .frame(width: 25, height: 25)
-            
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private func getDayPosition(index: Int) -> CGSize {
@@ -213,6 +299,7 @@ struct FitBurst_WidgetEntryView : View {
                                             .frame(width: 31, height: 31)
                                             .background(Circle().foregroundColor(.white))
                                     } else {
+                                        
                                         Text("\(Calendar.current.component(.day, from: date))")
                                             .foregroundColor(.white)
                                             .frame(width: 31, height: 31)
@@ -243,31 +330,36 @@ struct FitBurst_WidgetEntryView : View {
 struct FitBurst_Widget: Widget {
     let kind: String = "FitBurst_Widget"
     
+    init() {
+        print("Widget - Initialized")
+    }
+    
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(iOS 17.0, *) {
-                FitBurst_WidgetEntryView(entry: entry)
-                    .containerBackground(for: .widget) {
-                        ZStack {
-                            Group {
-                                if let image = UIImage(named: entry.backgroundAssetName)?
-                                    .preparingThumbnail(of: CGSize(width: 800, height: 800)) {
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                } else {
-                                    Image("BlackTiles")  // Fallback
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                }
+        IntentConfiguration(kind: kind, intent: ConfigureWidgetBackgroundIntent.self, provider: Provider()) { entry in
+            FitBurst_WidgetEntryView(entry: entry)
+                .containerBackground(for: .widget) {
+                    ZStack {
+                        // Debug print
+                        let _ = print("Loading background: \(entry.backgroundAssetName)")
+                        
+                        if let image = UIImage(named: entry.backgroundAssetName)?
+                            .preparingThumbnail(of: CGSize(width: 800, height: 800)) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } else {
+                            // Debug fallback
+                            let _ = print("Failed to load image: \(entry.backgroundAssetName)")
+                            if let fallbackImage = UIImage(named: "BlackTiles")?
+                                .preparingThumbnail(of: CGSize(width: 800, height: 800)) {
+                                Image(uiImage: fallbackImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
                             }
-                            Color.black.opacity(0.4)
                         }
+                        Color.black.opacity(0.4)
                     }
-            } else {
-                FitBurst_WidgetEntryView(entry: entry)
-                    .padding(0)
-            }
+                }
         }
         .configurationDisplayName("FitBurst Calendar")
         .description("See your workout calendar at a glance.")
