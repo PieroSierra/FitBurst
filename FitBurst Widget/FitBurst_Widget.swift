@@ -173,7 +173,7 @@ struct FitBurst_WidgetEntryView : View {
                         x: geometry.size.width / 2,
                         y: geometry.size.height / 2
                     )
-                    let radius: CGFloat = ( min(geometry.size.width, geometry.size.height) / 2) - 9
+                    let radius: CGFloat =  min(geometry.size.width, geometry.size.height) / 2.4
                     
                     let startAngle = Angle(degrees: -90)
                     let endAngle = Angle(degrees: 230)
@@ -357,7 +357,7 @@ struct FitBurst_Widget: Widget {
                                     .aspectRatio(contentMode: .fill)
                             }
                         }
-                        Color.black.opacity(0.4)
+                        Color.black.opacity(0.2)
                     }
                 }
         }
