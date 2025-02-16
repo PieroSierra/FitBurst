@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "39B8F301-60FD-4964-A30A-3D66B26D7E30"
+            uuid = "B7C6B021-BA58-4FB7-B846-B271A7D6DD74"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "FitBurst/Views/HomeView.swift"
+            filePath = "FitBurst Widget/FitBurst_Widget.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "43"
-            endingLineNumber = "43"
-            landmarkName = "body"
+            startingLineNumber = "300"
+            endingLineNumber = "300"
+            landmarkName = "mediumCalendarView"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>

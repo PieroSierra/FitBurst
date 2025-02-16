@@ -164,29 +164,64 @@ struct FitBurst_WidgetEntryView : View {
         }
     }
     
+    /// Returns an array of sequential workout day pairs (indices)
+    private func getSequentialWorkoutPairs() -> [(Int, Int)] {
+        var pairs: [(Int, Int)] = []
+        let weekStart = Calendar.current.startOfWeek(for: entry.date)
+        
+        // Check consecutive days
+        for i in 0..<6 {
+            guard let date1 = Calendar.current.date(byAdding: .day, value: i, to: weekStart),
+                  let date2 = Calendar.current.date(byAdding: .day, value: i+1, to: weekStart),
+                  let hasWorkout1 = entry.workouts[date1],
+                  let hasWorkout2 = entry.workouts[date2] else {
+                continue
+            }
+            
+            if hasWorkout1 && hasWorkout2 {
+                pairs.append((i, i+1))
+            }
+        }
+        return pairs
+    }
+    
     var smallCalendarView: some View {
         GeometryReader { geometry in
             ZStack {
-                // Custom arc using dynamic center point
+                // Base white arc
                 Path { path in
-                    let center = CGPoint(
-                        x: geometry.size.width / 2,
-                        y: geometry.size.height / 2
-                    )
-                    let radius: CGFloat =  min(geometry.size.width, geometry.size.height) / 2.4
-                    
-                    let startAngle = Angle(degrees: -90)
-                    let endAngle = Angle(degrees: 230)
-                    
+                    let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    let radius: CGFloat = min(geometry.size.width, geometry.size.height) / 2.4
                     path.addArc(
                         center: center,
                         radius: radius,
-                        startAngle: startAngle,
-                        endAngle: endAngle,
+                        startAngle: .degrees(-90),
+                        endAngle: .degrees(230),
                         clockwise: false
                     )
                 }
                 .stroke(Color.white, lineWidth: 1)
+                
+                // Colored segments for sequential workouts
+                ForEach(getSequentialWorkoutPairs(), id: \.0) { pair in
+                    Path { path in
+                        let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                        let radius: CGFloat = min(geometry.size.width, geometry.size.height) / 2.4
+                        
+                        let degreesPerDay = 360.0 / 7.0
+                        let startAngle = Angle(degrees: -90 + (Double(pair.0) * degreesPerDay))
+                        let endAngle = Angle(degrees: -90 + (Double(pair.1) * degreesPerDay))
+                        
+                        path.addArc(
+                            center: center,
+                            radius: radius,
+                            startAngle: startAngle,
+                            endAngle: endAngle,
+                            clockwise: false
+                        )
+                    }
+                    .stroke(Color.limeAccentColor, lineWidth: 4)
+                }
                 
                 ForEach(0..<7) { index in
                     let weekStart = Calendar.current.startOfWeek(for: entry.date)
@@ -261,69 +296,88 @@ struct FitBurst_WidgetEntryView : View {
     }
     
     var mediumCalendarView: some View {
-        VStack(spacing: 4) {
-            Text("FitBurst")
-                .font(.custom("Futura Bold", fixedSize: 15))
-                .foregroundColor(.white)
-            
-            ZStack {
-                Rectangle()
-                    .stroke(Color.white, lineWidth: 1)
-                    .frame(width: 270, height: 0.5)
-                    .offset(y:14)
+        GeometryReader { geometry in
+            VStack(spacing: 4) {
+                Text("FitBurst")
+                    .font(.custom("Futura Bold", fixedSize: 15))
+                    .foregroundColor(.white)
                 
-                HStack {
-                    ForEach(0..<7) { index in
-                        let weekStart = Calendar.current.startOfWeek(for: entry.date)
-                        if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
-                           let hasWorkout = entry.workouts[date] {
-                            
-                            VStack(spacing: 4) {
-                                // Top label: "M, T, W, T, F, S, S"
-                                Text(weekdays[index])
-                                    .font(.custom("Futura Bold", fixedSize: 15))
-                                    .foregroundColor(Calendar.current.isDateInToday(date) ? .limeAccentColor : .white)
-                                    .padding(.bottom, 4)
-                                
-                                // Bottom: either checkmark or day number
-                                
-                                Group {
-                                    if hasWorkout {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.black)
-                                            .frame(width: 31, height: 31)
-                                            .background(Circle().foregroundColor(.limeAccentColor))
-                                    } else if Calendar.current.isDateInToday(date) {
-                                        Text("\(Calendar.current.component(.day, from: date))")
-                                            .foregroundColor(.black)
-                                            .frame(width: 31, height: 31)
-                                            .background(Circle().foregroundColor(.white))
-                                    } else {
-                                        
-                                        Text("\(Calendar.current.component(.day, from: date))")
-                                            .foregroundColor(.white)
-                                            .frame(width: 31, height: 31)
-                                            .background(Circle()
-                                                .fill(Color.black.opacity(0.9))
-                                                .stroke(Color.white, lineWidth: 1)
-                                                .frame(width: 31, height: 31)
-                                            )
-                                    }
-                                }
-                                .transition(.scale.combined(with: .opacity))
-                                
-                            }
-                            .font(.custom("Futura Bold", fixedSize: 15))
-                            .frame(maxWidth: .infinity)
-                        }
+                ZStack {
+                    // Base white line
+                    Path { path in
+                        let yPosition = geometry.size.height * 0.51 // Position at 51% of height
+                        path.move(to: CGPoint(x: 20, y: yPosition))
+                        path.addLine(to: CGPoint(x: 274, y: yPosition))
                     }
-                    Spacer()
+                    .stroke(Color.white, lineWidth: 1)
+                    
+                    // Colored segments for sequential workouts
+                    ForEach(getSequentialWorkoutPairs(), id: \.0) { pair in
+                        let yPosition = geometry.size.height * 0.51 // Position at 51% of height
+                        let segmentWidth = 254 / 6.0 // Total width divided by number of days
+                        let startX = 20 + (CGFloat(pair.0) * segmentWidth)
+                        let endX = startX + segmentWidth
+                        
+                        Path { path in
+                            path.move(to: CGPoint(x: startX, y: yPosition))
+                            path.addLine(to: CGPoint(x: endX, y: yPosition))
+                        }
+                        .stroke(Color.limeAccentColor, lineWidth: 4)
+                    }
+                    
+                    HStack {
+                        ForEach(0..<7) { index in
+                            let weekStart = Calendar.current.startOfWeek(for: entry.date)
+                            if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
+                               let hasWorkout = entry.workouts[date] {
+                                
+                                VStack(spacing: 4) {
+                                    // Top label: "M, T, W, T, F, S, S"
+                                    Text(weekdays[index])
+                                        .font(.custom("Futura Bold", fixedSize: 15))
+                                        .foregroundColor(Calendar.current.isDateInToday(date) ? .limeAccentColor : .white)
+                                        .padding(.bottom, 4)
+                                    
+                                    // Bottom: either checkmark or day number
+                                    
+                                    Group {
+                                        if hasWorkout {
+                                            Image(systemName: "checkmark")
+                                                .foregroundColor(.black)
+                                                .frame(width: 31, height: 31)
+                                                .background(Circle().foregroundColor(.limeAccentColor))
+                                        } else if Calendar.current.isDateInToday(date) {
+                                            Text("\(Calendar.current.component(.day, from: date))")
+                                                .foregroundColor(.black)
+                                                .frame(width: 31, height: 31)
+                                                .background(Circle().foregroundColor(.white))
+                                        } else {
+                                            
+                                            Text("\(Calendar.current.component(.day, from: date))")
+                                                .foregroundColor(.white)
+                                                .frame(width: 31, height: 31)
+                                                .background(Circle()
+                                                    .fill(Color.black.opacity(0.9))
+                                                    .stroke(Color.white, lineWidth: 1)
+                                                    .frame(width: 31, height: 31)
+                                                )
+                                        }
+                                    }
+                                    .transition(.scale.combined(with: .opacity))
+                                    
+                                }
+                                .font(.custom("Futura Bold", fixedSize: 15))
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 8)
                 }
-                .padding(.horizontal, 5)
-                .padding(.vertical, 8)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -378,7 +432,7 @@ extension WeekEntry {
         // Ensure we have all 7 days populated
         for dayOffset in 0..<7 {
             if let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) {
-                sampleWorkouts[date] = (dayOffset+1) % 5 == 0
+                sampleWorkouts[date] = dayOffset >= 2
             }
         }
         

@@ -227,15 +227,15 @@ struct SimpleWeekRow: View {
     
     var body: some View {
         TabView(selection: $currentIndex) {
-            WeekView(baseDate: offsetDate(-1), 
+            WeekView(baseDate: offsetDate(-1),
                     selectedDate: $selectedDate,
                     onDateSelected: handleDateSelection)
                 .tag(0)
-            WeekView(baseDate: offsetDate(0), 
+            WeekView(baseDate: offsetDate(0),
                     selectedDate: $selectedDate,
                     onDateSelected: handleDateSelection)
                 .tag(1)
-            WeekView(baseDate: offsetDate(1), 
+            WeekView(baseDate: offsetDate(1),
                     selectedDate: $selectedDate,
                     onDateSelected: handleDateSelection)
                 .tag(2)
@@ -275,16 +275,48 @@ private struct WeekView: View {
     
     private let weekdays = ["M","T","W","T","F","S","S"]
     
-    var body: some View {
-        // Use baseDate instead of selectedDate for calculating the week's dates
+    /// Returns an array of sequential workout day pairs (indices) within the current week
+    private func getSequentialWorkoutPairs() -> [(Int, Int)] {
+        var pairs: [(Int, Int)] = []
         let cal = Calendar.current
-        let start = baseDate
+        let weekStart = cal.startOfWeek(for: baseDate)
+        
+        // Check consecutive days within the week
+        for i in 0..<6 {
+            let date1 = cal.date(byAdding: .day, value: i, to: weekStart)!
+            let date2 = cal.date(byAdding: .day, value: i+1, to: weekStart)!
+            
+            if hasWorkout(on: date1) && hasWorkout(on: date2) {
+                pairs.append((i, i+1))
+            }
+        }
+        return pairs
+    }
+    
+    var body: some View {
+        let cal = Calendar.current
+        let start = cal.startOfWeek(for: baseDate)
         
         ZStack {
-            Rectangle()
-                .stroke(Color.white, lineWidth: 1)
-                .frame(width: 270, height: 0.5)
-                .offset(y:14)
+            // Base white line using Path - now extends to outer edges
+            Path { path in
+                path.move(to: CGPoint(x: 34, y: 63))
+                path.addLine(to: CGPoint(x: 328, y: 63))
+            }
+            .stroke(Color.white, lineWidth: 1)
+            
+            // Colored segments for sequential workouts
+            ForEach(getSequentialWorkoutPairs(), id: \.0) { pair in
+                let segmentWidth = 294 / 6.0 // Total width divided by number of days
+                let startX = 34 + (CGFloat(pair.0) * segmentWidth)
+                let endX = startX + segmentWidth
+                
+                Path { path in
+                    path.move(to: CGPoint(x: startX, y: 63))
+                    path.addLine(to: CGPoint(x: endX, y: 63))
+                }
+                .stroke(Color.limeAccentColor, lineWidth: 4)
+            }
             
             HStack {
                 ForEach(0..<7, id: \.self) { i in
