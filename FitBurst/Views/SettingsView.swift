@@ -7,36 +7,8 @@
 
 import SwiftUI
 
-enum WorkoutType: Int32 {
-    case strength = 0
-    case run = 1
-    case teamSport = 2
-    case cardio = 3
-    case yoga = 4
-    case martialArts = 5
-    
-    var defaultName: String {
-        switch self {
-        case .strength: return "Strength"
-        case .run: return "Run"
-        case .teamSport: return "Team Sport"
-        case .cardio: return "Cardio"
-        case .yoga: return "Yoga"
-        case .martialArts: return "Martial Arts"
-        }
-    }
-    
-    var defaultIcon: String {
-        switch self {
-        case .strength: return "dumbbell.fill"
-        case .run: return "figure.run"
-        case .teamSport: return "soccerball"
-        case .cardio: return "figure.run.treadmill"
-        case .yoga: return "figure.yoga"
-        case .martialArts: return "figure.martial.arts"
-        }
-    }
-}
+// Import the shared WorkoutType enum
+import WidgetKit
 
 /// Class to handle reading/writing overrides from UserDefaults
 class WorkoutConfiguration: ObservableObject {
@@ -47,6 +19,7 @@ class WorkoutConfiguration: ObservableObject {
     @Published private var visibilityOverrides: [Int32: Bool] = [:]
     
     private let defaults = UserDefaults.standard
+    private let groupDefaults = UserDefaults(suiteName: "group.com.pieroco.FitBurst")!
     
     private init() {
         // Load saved overrides
@@ -136,10 +109,17 @@ class WorkoutConfiguration: ObservableObject {
         defaults.set(namesDict, forKey: "workoutNameOverrides")
         defaults.set(iconsDict, forKey: "workoutIconOverrides")
         
+        // Also save to group UserDefaults for widget access
+        groupDefaults.set(namesDict, forKey: "workoutNameOverrides")
+        groupDefaults.set(iconsDict, forKey: "workoutIconOverrides")
+        
         let visibilityDict = visibilityOverrides.reduce(into: [:]) { result, pair in
             result[String(pair.key)] = pair.value
         }
         defaults.set(visibilityDict, forKey: "workoutVisibilityOverrides")
+        
+        // Trigger widget update
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     func resetToDefaults() {
@@ -151,6 +131,10 @@ class WorkoutConfiguration: ObservableObject {
         defaults.removeObject(forKey: "workoutNameOverrides")
         defaults.removeObject(forKey: "workoutIconOverrides")
         defaults.removeObject(forKey: "workoutVisibilityOverrides")
+        
+        // Clear group UserDefaults for widget
+        groupDefaults.removeObject(forKey: "workoutNameOverrides")
+        groupDefaults.removeObject(forKey: "workoutIconOverrides")
         
         // Reset background through AppState
         AppState.shared.currentBackground = "BlackTiles"
@@ -203,10 +187,9 @@ struct SettingsView: View {
                             }
                         }
                         .padding()
-                        .padding(.bottom, 10)
+                        .padding(.bottom, 20)
                     }
                     .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
-                
                     .padding()
                     
                     backgroundPicker
@@ -281,7 +264,7 @@ struct SettingsView: View {
                 }
             }
             .buttonStyle(GrowingButtonStyle())
-            .padding(.top, 20)
+            .padding(.top, 10)
         }
     }
 }

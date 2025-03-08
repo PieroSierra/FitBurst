@@ -7,11 +7,12 @@
 
 import SwiftUI
 import SceneKit
+import WidgetKit
 
 struct HomeView: View {
     @Binding var selectedTab: Tab
     @Bindable private var appState = AppState.shared
-
+    
     
     /// View controls
     @State private var showWorkoutView: Bool = false
@@ -113,13 +114,12 @@ struct HomeView: View {
                     }
                     .buttonStyle(GrowingButtonStyle())
                     
-                    Spacer()
+                    Spacer().frame(height: 200)
                 }
-               Spacer()
+                Spacer()
                 
             }
-//            .frame(height:.infinity)
-
+            
             if showWorkoutView {
                 RecordWorkoutView(
                     showWorkoutView: $showWorkoutView,
@@ -139,7 +139,7 @@ struct HomeView: View {
             }
             
         }
-      //  .frame(height:.infinity)
+        //  .frame(height:.infinity)
         .ignoresSafeArea(edges:.bottom)
         .onAppear {
             showWorkoutView = false
@@ -148,12 +148,16 @@ struct HomeView: View {
             // Update workout count when view appears
             animateRotation()
             workoutCount = PersistenceController.shared.countWorkouts()
+            // Refresh widgets to sync with app
+            WidgetCenter.shared.reloadAllTimelines()
         }
         .onReceive(NotificationCenter.default.publisher(for: .workoutAdded)) { _ in
             // Update workout count when notification is received
             animateRotation()  // Trigger animation when workout is added
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 workoutCount = PersistenceController.shared.countWorkouts()
+                // Refresh widgets when workouts change
+                WidgetCenter.shared.reloadAllTimelines()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .achievementsChanged)) { _ in
@@ -228,20 +232,20 @@ struct SimpleWeekRow: View {
     var body: some View {
         TabView(selection: $currentIndex) {
             WeekView(baseDate: offsetDate(-1),
-                    selectedDate: $selectedDate,
-                    onDateSelected: handleDateSelection)
-                .tag(0)
+                     selectedDate: $selectedDate,
+                     onDateSelected: handleDateSelection)
+            .tag(0)
             WeekView(baseDate: offsetDate(0),
-                    selectedDate: $selectedDate,
-                    onDateSelected: handleDateSelection)
-                .tag(1)
+                     selectedDate: $selectedDate,
+                     onDateSelected: handleDateSelection)
+            .tag(1)
             WeekView(baseDate: offsetDate(1),
-                    selectedDate: $selectedDate,
-                    onDateSelected: handleDateSelection)
-                .tag(2)
+                     selectedDate: $selectedDate,
+                     onDateSelected: handleDateSelection)
+            .tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .frame(height: 100)
+        .frame(height: 120)
         .onChange(of: currentIndex) {
             if currentIndex == 0 || currentIndex == 2 {
                 weekOffset += (currentIndex == 0) ? -1 : 1
@@ -286,7 +290,7 @@ private struct WeekView: View {
             let date1 = cal.date(byAdding: .day, value: i, to: weekStart)!
             let date2 = cal.date(byAdding: .day, value: i+1, to: weekStart)!
             
-            if hasWorkout(on: date1) && hasWorkout(on: date2) {
+            if !getWorkouts(for: date1).isEmpty && !getWorkouts(for: date2).isEmpty {
                 pairs.append((i, i+1))
             }
         }
@@ -300,8 +304,8 @@ private struct WeekView: View {
         ZStack {
             // Base white line using Path - now extends to outer edges
             Path { path in
-                path.move(to: CGPoint(x: 34, y: 63))
-                path.addLine(to: CGPoint(x: 328, y: 63))
+                path.move(to: CGPoint(x: 34, y: 66))
+                path.addLine(to: CGPoint(x: 328, y: 66))
             }
             .stroke(Color.white, lineWidth: 1)
             
@@ -312,8 +316,8 @@ private struct WeekView: View {
                 let endX = startX + segmentWidth
                 
                 Path { path in
-                    path.move(to: CGPoint(x: startX, y: 63))
-                    path.addLine(to: CGPoint(x: endX, y: 63))
+                    path.move(to: CGPoint(x: startX, y: 66))
+                    path.addLine(to: CGPoint(x: endX, y: 66))
                 }
                 .stroke(Color.limeAccentColor, lineWidth: 4)
             }
@@ -321,6 +325,7 @@ private struct WeekView: View {
             HStack {
                 ForEach(0..<7, id: \.self) { i in
                     let day = cal.date(byAdding: .day, value: i, to: start)!
+                    let workouts = getWorkouts(for: day)
                     
                     VStack(spacing: 4) {
                         // Top label: "M, T, W, T, F, S, S"
@@ -329,34 +334,38 @@ private struct WeekView: View {
                             .foregroundColor(cal.isDateInToday(day) ? .limeAccentColor : .white)
                             .padding(.bottom, 4)
                         
-                        // Bottom: either checkmark or day number
-                        Group {
+                        // Main day circle (workout icon or day number)
+                        ZStack(alignment: .center) {
                             if cal.isDate(day, inSameDayAs: selectedDate) {
-                                if hasWorkout(on: day) {
-                                    Image(systemName: "checkmark")
+                                if !workouts.isEmpty {
+                                    // First workout icon in white circle
+                                    let firstWorkout = workouts[0]
+                                    Image(systemName: WorkoutConfiguration.shared.getIcon(for: firstWorkout.workoutType))
                                         .foregroundColor(.black)
-                                        .frame(width: 31, height:31)
+                                        .frame(width: 31, height: 31)
                                         .background(Circle().foregroundColor(.white))
                                 } else {
                                     Text("\(cal.component(.day, from: day))")
                                         .foregroundColor(.black)
-                                        .frame(width: 31, height:31)
+                                        .frame(width: 31, height: 31)
                                         .background(Circle().foregroundColor(.white))
                                 }
-                            } else if hasWorkout(on: day) {
-                                Image(systemName: "checkmark")
+                            } else if !workouts.isEmpty {
+                                // First workout icon in green circle
+                                let firstWorkout = workouts[0]
+                                Image(systemName: WorkoutConfiguration.shared.getIcon(for: firstWorkout.workoutType))
                                     .foregroundColor(.black)
-                                    .frame(width: 31, height:31)
+                                    .frame(width: 31, height: 31)
                                     .background(Circle().foregroundColor(.limeAccentColor))
                             } else if cal.isDateInToday(day) {
                                 Text("\(cal.component(.day, from: day))")
                                     .foregroundColor(.black)
-                                    .frame(width: 31, height:31)
+                                    .frame(width: 31, height: 31)
                                     .background(Circle().foregroundColor(.limeAccentColor))
                             } else {
                                 Text("\(cal.component(.day, from: day))")
                                     .foregroundColor(.white)
-                                    .frame(width: 31, height:31)
+                                    .frame(width: 31, height: 31)
                                     .background(Circle()
                                         .fill(Color.black.opacity(0.9))
                                         .stroke(Color.white, lineWidth: 1)
@@ -365,6 +374,17 @@ private struct WeekView: View {
                             }
                         }
                         .transition(.scale.combined(with: .opacity))
+                        
+                        // Additional workouts indicator
+                        if workouts.count > 1 {
+                            Text("+\(workouts.count - 1)")
+                                .font(.custom("Futura", fixedSize: 10))
+                                .foregroundColor(.white)
+                                .padding(.top, 2)
+                        } else {
+                            // Empty spacer to maintain consistent height
+                            Spacer().frame(height: 12)
+                        }
                     }
                     .font(.custom("Futura Bold", fixedSize: 15))
                     .frame(maxWidth: .infinity)
@@ -379,24 +399,23 @@ private struct WeekView: View {
         }
     }
     
-    // Include your existing hasWorkout helper here
-    private func hasWorkout(on date: Date) -> Bool {
+    // Update the hasWorkout helper to return an array of workouts instead of a boolean
+    private func getWorkouts(for date: Date) -> [Workouts] {
         let context = PersistenceController.shared.container.viewContext
         let fetchRequest: NSFetchRequest<Workouts> = Workouts.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "timestamp == %@", Calendar.current.startOfDay(for: date) as NSDate)
         
         do {
-            let count = try context.count(for: fetchRequest)
-            if count > 0 {
-                return true
-            }
-            else {
-                return false
-            }
+            return try context.fetch(fetchRequest)
         } catch {
             print("Error fetching workouts for date \(date): \(error.localizedDescription)")
+            return []
         }
-        return false
+    }
+    
+    // Keep this for backward compatibility with existing code
+    private func hasWorkout(on date: Date) -> Bool {
+        return !getWorkouts(for: date).isEmpty
     }
 }
 

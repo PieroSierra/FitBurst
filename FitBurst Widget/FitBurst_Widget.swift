@@ -21,14 +21,16 @@ struct Provider: IntentTimelineProvider {
     private let groupDefaults = UserDefaults(suiteName: "group.com.pieroco.FitBurst")!
     
     init() {
-        print("Widget Provider - Initialized")
+        // print("Widget Provider - Initialized")
+        // Register to get notified when workouts change
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     /// Returns the background asset name by checking the widget configuration.
     /// If the background value is not 0 ("Same as app"), then the corresponding asset name is returned.
     private func getCurrentBackground(configuration: ConfigureWidgetBackgroundIntent) -> String {
         // Debug print
-        print("Widget background requested: \(configuration.background)")
+        // print("Widget background requested: \(configuration.background)")
         
         let assetName = switch configuration.background {
         case .unknown, .appSync:   // Both unknown and appSync will sync with the app
@@ -75,7 +77,7 @@ struct Provider: IntentTimelineProvider {
         
         // Verify the asset exists and can be loaded
         if let _ = UIImage(named: assetName)?.preparingThumbnail(of: CGSize(width: 800, height: 800)) {
-            print("Successfully loaded and resized: \(assetName)")
+            //print("Successfully loaded and resized: \(assetName)")
             return assetName
         } else {
             print("Failed to load/resize asset: \(assetName), falling back to BlackTiles")
@@ -84,7 +86,7 @@ struct Provider: IntentTimelineProvider {
     }
     
     func placeholder(in context: Context) -> WeekEntry {
-        print("Widget Provider - Placeholder called")
+        //print("Widget Provider - Placeholder called")
         return WeekEntry(
             date: Date(),
             workouts: [:],
@@ -93,7 +95,7 @@ struct Provider: IntentTimelineProvider {
     }
     
     func getSnapshot(for configuration: ConfigureWidgetBackgroundIntent, in context: Context, completion: @escaping (WeekEntry) -> ()) {
-        print("Widget Provider - GetSnapshot called")
+        //print("Widget Provider - GetSnapshot called")
         let workouts = persistence.getWorkoutsForWeek(startingFrom: Date())
         let backgroundAssetName = getCurrentBackground(configuration: configuration)
         let entry = WeekEntry(
@@ -101,23 +103,26 @@ struct Provider: IntentTimelineProvider {
             workouts: workouts,
             backgroundAssetName: backgroundAssetName
         )
-        print("Widget Provider - Snapshot workouts: \(workouts.count)")
+        //print("Widget Provider - Snapshot workouts: \(workouts.count)")
         completion(entry)
     }
     
     func getTimeline(for configuration: ConfigureWidgetBackgroundIntent, in context: Context, completion: @escaping (Timeline<WeekEntry>) -> ()) {
-        print("\n=== Widget Timeline Update ===")
-        print("Widget Provider - GetTimeline called with configuration background: \(String(describing: configuration.background))")
+        
+        // Ensure we're using the current date
         let currentDate = Date()
-        print("Widget Provider - Current date: \(currentDate)")
         
-        let weekStart = Calendar.current.startOfWeek(for: currentDate)
-        print("Widget Provider - Week start: \(weekStart)")
+        // Force refresh from persistent store before fetching data
+        try? persistence.container.viewContext.refreshAllObjects()
         
+        // Get workouts for the current week
         let workouts = persistence.getWorkoutsForWeek(startingFrom: currentDate)
-        print("Widget Provider - Workouts dictionary has \(workouts.count) entries")
-        print("Widget Provider - Days with workouts: \(workouts.filter { $0.value }.count)")
-        print("Widget Provider - Workout dates: \(workouts.keys.sorted().map { $0.description })")
+        
+        // Count days with workouts
+        let daysWithWorkouts = workouts.filter { !$0.value.isEmpty }.count
+        
+        // Log dates with workouts
+        let workoutDates = workouts.filter { !$0.value.isEmpty }.keys.sorted()
         
         let backgroundAssetName = getCurrentBackground(configuration: configuration)
         
@@ -127,23 +132,17 @@ struct Provider: IntentTimelineProvider {
             backgroundAssetName: backgroundAssetName
         )
         
-        // For testing we update every minute
-        let nextUpdate = Date().addingTimeInterval(60)
-        print("Widget Provider - Next update in 1 minute")
-        print("=== End Timeline Update ===\n")
+        // Update more frequently to ensure fresh data
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: currentDate) ?? Date().addingTimeInterval(900)
         
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
-    
-    //    func relevances() async -> WidgetRelevances<Void> {
-    //        // Generate a list containing the contexts this widget is relevant in.
-    //    }
 }
 
 struct WeekEntry: TimelineEntry {
     let date: Date
-    let workouts: [Date: Bool]
+    let workouts: [Date: [Workouts]]
     let backgroundAssetName: String  // Simplified to just store the assetName
 }
 
@@ -173,16 +172,32 @@ struct FitBurst_WidgetEntryView : View {
         for i in 0..<6 {
             guard let date1 = Calendar.current.date(byAdding: .day, value: i, to: weekStart),
                   let date2 = Calendar.current.date(byAdding: .day, value: i+1, to: weekStart),
-                  let hasWorkout1 = entry.workouts[date1],
-                  let hasWorkout2 = entry.workouts[date2] else {
+                  let workouts1 = entry.workouts[date1],
+                  let workouts2 = entry.workouts[date2] else {
                 continue
             }
             
-            if hasWorkout1 && hasWorkout2 {
+            if !workouts1.isEmpty && !workouts2.isEmpty {
                 pairs.append((i, i+1))
             }
         }
         return pairs
+    }
+    
+    // Helper to get workout icon for a date
+    private func getWorkoutIcon(for date: Date) -> String {
+        guard let workouts = entry.workouts[Calendar.current.startOfDay(for: date)], !workouts.isEmpty else {
+            print("Widget - No workouts found for date: \(date)")
+            return "questionmark.circle" // Fallback icon
+        }
+        
+        // Debug: Print workout type and icon
+        let workout = workouts[0]
+        let workoutType = workout.workoutType
+        let icon = SharedPersistence.shared.getWorkoutIcon(for: workoutType)
+        
+        // Return the icon for the first workout using SharedPersistence
+        return icon
     }
     
     var smallCalendarView: some View {
@@ -226,7 +241,7 @@ struct FitBurst_WidgetEntryView : View {
                 ForEach(0..<7) { index in
                     let weekStart = Calendar.current.startOfWeek(for: entry.date)
                     if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
-                       let hasWorkout = entry.workouts[date] {
+                       let workouts = entry.workouts[date] {
                         
                         // Day letter
                         Text(weekdays[index])
@@ -236,8 +251,9 @@ struct FitBurst_WidgetEntryView : View {
                         
                         // Workout indicator
                         Group {
-                            if hasWorkout {
-                                Image(systemName: "checkmark")
+                            if !workouts.isEmpty {
+                                // Show the first workout's icon
+                                Image(systemName: getWorkoutIcon(for: date))
                                     .foregroundColor(.black)
                                     .frame(width: 23, height: 23)
                                     .background(Circle().foregroundColor(.limeAccentColor))
@@ -250,7 +266,7 @@ struct FitBurst_WidgetEntryView : View {
                                 Text("\(Calendar.current.component(.day, from: date))")
                                     .foregroundColor(.white)
                                     .frame(width: 23, height: 23)
-                                    .background(                            Circle()
+                                    .background(Circle()
                                         .fill(Color.black.opacity(0.9))
                                         .stroke(Color.white, lineWidth: 1)
                                         .frame(width: 23, height: 23)
@@ -305,7 +321,7 @@ struct FitBurst_WidgetEntryView : View {
                 ZStack {
                     // Base white line
                     Path { path in
-                        let yPosition = geometry.size.height * 0.51 // Position at 51% of height
+                        let yPosition = geometry.size.height * 0.45 // Position at 51% of height
                         path.move(to: CGPoint(x: 20, y: yPosition))
                         path.addLine(to: CGPoint(x: 274, y: yPosition))
                     }
@@ -313,7 +329,7 @@ struct FitBurst_WidgetEntryView : View {
                     
                     // Colored segments for sequential workouts
                     ForEach(getSequentialWorkoutPairs(), id: \.0) { pair in
-                        let yPosition = geometry.size.height * 0.51 // Position at 51% of height
+                        let yPosition = geometry.size.height * 0.45 // Position at 51% of height
                         let segmentWidth = 254 / 6.0 // Total width divided by number of days
                         let startX = 20 + (CGFloat(pair.0) * segmentWidth)
                         let endX = startX + segmentWidth
@@ -329,7 +345,7 @@ struct FitBurst_WidgetEntryView : View {
                         ForEach(0..<7) { index in
                             let weekStart = Calendar.current.startOfWeek(for: entry.date)
                             if let date = Calendar.current.date(byAdding: .day, value: index, to: weekStart),
-                               let hasWorkout = entry.workouts[date] {
+                               let workouts = entry.workouts[date] {
                                 
                                 VStack(spacing: 4) {
                                     // Top label: "M, T, W, T, F, S, S"
@@ -338,11 +354,11 @@ struct FitBurst_WidgetEntryView : View {
                                         .foregroundColor(Calendar.current.isDateInToday(date) ? .limeAccentColor : .white)
                                         .padding(.bottom, 4)
                                     
-                                    // Bottom: either checkmark or day number
-                                    
-                                    Group {
-                                        if hasWorkout {
-                                            Image(systemName: "checkmark")
+                                    // Main day circle (workout icon or day number)
+                                    ZStack(alignment: .center) {
+                                        if !workouts.isEmpty {
+                                            // First workout icon in green circle
+                                            Image(systemName: getWorkoutIcon(for: date))
                                                 .foregroundColor(.black)
                                                 .frame(width: 31, height: 31)
                                                 .background(Circle().foregroundColor(.limeAccentColor))
@@ -352,7 +368,6 @@ struct FitBurst_WidgetEntryView : View {
                                                 .frame(width: 31, height: 31)
                                                 .background(Circle().foregroundColor(.white))
                                         } else {
-                                            
                                             Text("\(Calendar.current.component(.day, from: date))")
                                                 .foregroundColor(.white)
                                                 .frame(width: 31, height: 31)
@@ -365,6 +380,16 @@ struct FitBurst_WidgetEntryView : View {
                                     }
                                     .transition(.scale.combined(with: .opacity))
                                     
+                                    // Additional workouts indicator
+                                    if workouts.count > 1 {
+                                        Text("+\(workouts.count - 1)")
+                                            .font(.custom("Futura", fixedSize: 10))
+                                            .foregroundColor(.white)
+                                            .padding(.top, 2)
+                                    } else {
+                                        // Empty spacer to maintain consistent height
+                                        Spacer().frame(height: 12)
+                                    }
                                 }
                                 .font(.custom("Futura Bold", fixedSize: 15))
                                 .frame(maxWidth: .infinity)
@@ -393,17 +418,12 @@ struct FitBurst_Widget: Widget {
             FitBurst_WidgetEntryView(entry: entry)
                 .containerBackground(for: .widget) {
                     ZStack {
-                        // Debug print
-                        let _ = print("Loading background: \(entry.backgroundAssetName)")
-                        
                         if let image = UIImage(named: entry.backgroundAssetName)?
                             .preparingThumbnail(of: CGSize(width: 800, height: 800)) {
                             Image(uiImage: image)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                         } else {
-                            // Debug fallback
-                            let _ = print("Failed to load image: \(entry.backgroundAssetName)")
                             if let fallbackImage = UIImage(named: "BlackTiles")?
                                 .preparingThumbnail(of: CGSize(width: 800, height: 800)) {
                                 Image(uiImage: fallbackImage)
@@ -427,12 +447,40 @@ extension WeekEntry {
         let calendar = Calendar.current
         let today = Date()
         let weekStart = calendar.startOfWeek(for: today)
-        var sampleWorkouts: [Date: Bool] = [:]
+        var sampleWorkouts: [Date: [Workouts]] = [:]
         
-        // Ensure we have all 7 days populated
+        // Create mock Workouts objects with different types
+        let context = SharedPersistence.shared.container.viewContext
+        
+        // Create different workout types for different days
         for dayOffset in 0..<7 {
             if let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) {
-                sampleWorkouts[date] = dayOffset >= 2
+                if dayOffset >= 2 {
+                    // Create a workout with a type based on the day
+                    let mockWorkout = Workouts(context: context)
+                    mockWorkout.workoutID = UUID()
+                    mockWorkout.timestamp = date
+                    
+                    // Assign different workout types based on the day
+                    // This ensures we see different icons in the preview
+                    mockWorkout.workoutType = Int32(dayOffset % 6) // Use modulo to cycle through workout types
+                    
+                    if dayOffset == 3 {
+                        // Day with multiple workouts
+                        let secondWorkout = Workouts(context: context)
+                        secondWorkout.workoutID = UUID()
+                        secondWorkout.timestamp = date
+                        secondWorkout.workoutType = (Int32(dayOffset % 6) + 1) % 6 // Different type from the first workout
+                        
+                        sampleWorkouts[date] = [mockWorkout, secondWorkout]
+                    } else {
+                        // Day with single workout
+                        sampleWorkouts[date] = [mockWorkout]
+                    }
+                } else {
+                    // Day with no workouts
+                    sampleWorkouts[date] = []
+                }
             }
         }
         

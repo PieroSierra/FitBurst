@@ -175,6 +175,23 @@ struct VideosView: View {
                 .foregroundColor(.white)
             }
             
+            // Loading spinner overlay
+            if !videosReady && !showError {
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(2.0)
+                    
+                    Text("Loading videos...")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                        .padding(.top, 20)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.5))
+                .edgesIgnoringSafeArea(.all)
+            }
+            
             /*/ Add error alert
              .alert("Error Loading Videos", isPresented: $showError) {
              Button("OK", role: .cancel) { }

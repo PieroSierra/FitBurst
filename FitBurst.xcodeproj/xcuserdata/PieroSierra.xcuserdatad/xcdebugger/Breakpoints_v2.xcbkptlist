@@ -14,9 +14,9 @@
             filePath = "FitBurst Widget/FitBurst_Widget.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "300"
-            endingLineNumber = "300"
-            landmarkName = "mediumCalendarView"
+            startingLineNumber = "276"
+            endingLineNumber = "276"
+            landmarkName = "smallCalendarView"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
