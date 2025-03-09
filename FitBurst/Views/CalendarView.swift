@@ -95,12 +95,14 @@ struct CalendarView: View {
         let workouts = fetchWorkouts(for: selectedDate)
         
         return VStack(alignment: .leading, spacing: 8) {
-            Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
-                .animation(.bouncy(), value: selectedDate)
-                .fontWeight(.bold)
-            
-            if !workouts.isEmpty {
-                ScrollView {
+            ScrollView {
+                HStack {
+                    Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                        .animation(.bouncy(), value: selectedDate)
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+                if !workouts.isEmpty {
                     VStack(spacing: 7) {
                         ForEach(workouts, id: \Workouts.workoutID) { workout in
                             HStack {
@@ -124,8 +126,8 @@ struct CalendarView: View {
                     }
                     .animation(.bouncy(duration: 0.3), value: workouts)
                 }
-                .frame(maxHeight: 60) // Scrollable area max height
             }
+            .frame(maxHeight: 60) // Scrollable area max height
         }
         .frame(minHeight: 50) // Minimum height when no workouts
         .padding()
