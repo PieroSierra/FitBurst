@@ -184,7 +184,7 @@ struct IconPickerView: View {
                     ))
                     .frame(width: UIScreen.main.bounds.width-70, height: 20).padding(.bottom,28)
                 , alignment:.bottom)
-            .background(Color.black.opacity(0.9).clipShape(RoundedRectangle(cornerRadius: 40))
+            .background(Color.black.clipShape(RoundedRectangle(cornerRadius: 40))
                 .shadow(color: .limeAccentColor, radius: 10))
             .scaleEffect(scale)
             .onAppear {

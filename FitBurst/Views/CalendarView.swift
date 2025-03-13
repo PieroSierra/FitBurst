@@ -157,12 +157,12 @@ struct CalendarView: View {
             VStack {
                 calendarGrid
                     .padding(.top)
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
+                    .background(Color.black.opacity(0.4))
                 
                 HStack(alignment: .bottom) {
+                    Spacer().frame(width: 15)
                     workoutsList
                         .background(RoundedRectangle(cornerRadius: 20).foregroundColor(Color.black.opacity(0.4)))
-                    Spacer()
                     recordButton
                 }
                 
