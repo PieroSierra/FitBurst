@@ -24,6 +24,7 @@
 		439784112D5169A200E62804 /* SharedFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4397839F2D4E5B0B00E62804 /* SharedFunctions.swift */; };
 		43C6029B2D60A2F500F904A2 /* WidgetConfiguration.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43C602972D60A2F500F904A2 /* WidgetConfiguration.intentdefinition */; };
 		43F1929D2EE3152D00FC42BC /* Readme.md in Resources */ = {isa = PBXBuildFile; fileRef = 43F1929C2EE3151D00FC42BC /* Readme.md */; };
+		43F1929F2EE3164D00FC42BC /* 1.webp in Resources */ = {isa = PBXBuildFile; fileRef = 43F1929E2EE3164D00FC42BC /* 1.webp */; };
 		43FBA29E2D0F27F2005CBFA3 /* Model3DView in Frameworks */ = {isa = PBXBuildFile; productRef = 43FBA29D2D0F27F2005CBFA3 /* Model3DView */; };
 		C49FC37B2CF6328A00F4006B /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC37A2CF6328A00F4006B /* YouTubePlayerKit */; };
 		C49FC39D2CF638FF00F4006B /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = C49FC39C2CF638FF00F4006B /* FSCalendar */; };
@@ -68,6 +69,7 @@
 		4397840A2D4F768400E62804 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		43C602972D60A2F500F904A2 /* WidgetConfiguration.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = WidgetConfiguration.intentdefinition; sourceTree = "<group>"; };
 		43F1929C2EE3151D00FC42BC /* Readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
+		43F1929E2EE3164D00FC42BC /* 1.webp */ = {isa = PBXFileReference; lastKnownFileType = file; path = 1.webp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -151,6 +153,7 @@
 				439783F92D4E8D7400E62804 /* Shared */,
 				43C602972D60A2F500F904A2 /* WidgetConfiguration.intentdefinition */,
 				43F1929C2EE3151D00FC42BC /* Readme.md */,
+				43F1929E2EE3164D00FC42BC /* 1.webp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -285,6 +288,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				434607192D27067500A31D92 /* fitburst_privacy_policy.html in Resources */,
+				43F1929F2EE3164D00FC42BC /* 1.webp in Resources */,
 				43F1929D2EE3152D00FC42BC /* Readme.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
