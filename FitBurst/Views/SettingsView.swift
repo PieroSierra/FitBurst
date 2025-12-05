@@ -313,7 +313,7 @@ struct WorkoutTypeRow: View {
                 set: { config.setVisibility($0, for: type) }
             ))
             .frame(width: 40)
-            .tint(Color.limeAccentColor.opacity(0.7))
+            .tint(Color.limeAccentColor.mix(with: Color.black, by: 0.15))
             .disabled(isLastVisible) // Disable toggle if this is the last visible type
         }.padding(.horizontal)
     }

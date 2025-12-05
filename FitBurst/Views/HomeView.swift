@@ -244,7 +244,7 @@ struct SimpleWeekRow: View {
                      onDateSelected: handleDateSelection)
             .tag(2)
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
+        .tabViewStyle(.page(indexDisplayv))
         .frame(height: 120)
         .onChange(of: currentIndex) {
             if currentIndex == 0 || currentIndex == 2 {
@@ -304,8 +304,8 @@ private struct WeekView: View {
         ZStack {
             // Base white line using Path - now extends to outer edges
             Path { path in
-                path.move(to: CGPoint(x: 34, y: 66))
-                path.addLine(to: CGPoint(x: 328, y: 66))
+                path.move(to: CGPoint(x: 34, y: 65.5))
+                path.addLine(to: CGPoint(x: 328, y: 65.5))
             }
             .stroke(Color.white, lineWidth: 1)
             
@@ -316,10 +316,10 @@ private struct WeekView: View {
                 let endX = startX + segmentWidth
                 
                 Path { path in
-                    path.move(to: CGPoint(x: startX, y: 66))
-                    path.addLine(to: CGPoint(x: endX, y: 66))
+                    path.move(to: CGPoint(x: startX, y: 65.5))
+                    path.addLine(to: CGPoint(x: endX, y: 65.5))
                 }
-                .stroke(Color.limeAccentColor, lineWidth: 4)
+                .stroke(Color.limeAccentColor, lineWidth: 5)
             }
             
             HStack {
