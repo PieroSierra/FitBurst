@@ -1,0 +1,568 @@
+/* FitBurst marketing page. Layout and type scale follow the Poppit page on
+   hoagiecorps.com; colour follows the app: black, white type, lime accent. */
+
+:root {
+  --fb-black: #000000;
+  --fb-face: #121212;
+  --fb-ink: #f5f5f7;
+  --fb-muted: #a1a1a6;
+  --fb-lime: #a4fa53;
+  --fb-lime-deep: #5fd11b;
+  --fb-pad: clamp(20px, 5vw, 72px);
+  --fb-section-y: clamp(56px, 9vw, 110px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 64px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--fb-black);
+  color: var(--fb-ink);
+  overflow-x: hidden;
+}
+
+.fb {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  overflow-x: clip;
+  font-family: Futura, var(--font-jost), "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fb a {
+  color: inherit;
+  text-decoration: none;
+}
+.fb a:focus-visible {
+  outline: 2px solid var(--fb-lime);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.fb img,
+.fb video {
+  display: block;
+  max-width: none;
+}
+
+/* ---------- type ---------- */
+
+/* Avenir Next Condensed ships on Apple platforms; Barlow Semi Condensed is the
+   loaded fallback everywhere else. */
+.fb-cond {
+  font-family: "Avenir Next Condensed", var(--font-barlow), sans-serif;
+  font-weight: 500;
+}
+
+.fb-h1,
+.fb-h2,
+.fb-title,
+.fb-wordmark {
+  font-weight: 700;
+}
+
+.fb-h1 {
+  margin: clamp(12px, 2vw, 20px) auto 0;
+  font-size: clamp(54px, 8vw, 104px);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  max-width: 11em;
+  text-wrap: balance;
+}
+
+.fb-h2 {
+  margin: 0;
+  font-size: clamp(40px, 5.2vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.fb-h2--big {
+  font-size: clamp(46px, 6.4vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.fb-lead {
+  margin: clamp(16px, 2.4vw, 26px) 0 0;
+  font-size: clamp(20px, 2.3vw, 26px);
+  line-height: 1.4;
+  color: var(--fb-muted);
+  max-width: 30em;
+}
+.fb-lead--hero {
+  margin: clamp(16px, 2.6vw, 28px) auto 0;
+  font-size: clamp(21px, 2.6vw, 30px);
+  line-height: 1.35;
+  max-width: 26em;
+}
+
+.fb-body {
+  margin: 8px 0 0;
+  font-size: clamp(18px, 1.9vw, 22px);
+  line-height: 1.45;
+  color: var(--fb-muted);
+}
+
+.fb-title {
+  margin: clamp(4px, 1vw, 10px) 0 0;
+  font-size: clamp(24px, 2.4vw, 27px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- header ---------- */
+
+.fb-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px var(--fb-pad);
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.fb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.fb-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+.fb-wordmark {
+  font-size: clamp(18px, 2.2vw, 21px);
+  letter-spacing: -0.01em;
+}
+.fb-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2.2vw, 30px);
+  font-size: 17px;
+  color: var(--fb-muted);
+}
+.fb-nav a:hover {
+  color: var(--fb-ink);
+}
+
+/* ---------- calls to action ---------- */
+
+/* Same pill as the app's Record Workout button: lime, black type. */
+.fb a.fb-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #000000;
+  background: var(--fb-lime);
+  border-radius: 999px;
+  font-weight: 700;
+  transition: box-shadow 0.2s ease;
+}
+.fb a.fb-cta:hover {
+  box-shadow: 0 0 28px rgba(164, 250, 83, 0.45);
+}
+.fb-cta--nav {
+  flex: none;
+  font-size: 15px;
+  padding: 9px 18px;
+  white-space: nowrap;
+}
+.fb-cta--hero {
+  font-size: clamp(16px, 2vw, 19px);
+  padding: 14px clamp(22px, 3.2vw, 30px);
+}
+.fb-apple {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex: none;
+}
+.fb a.fb-link {
+  font-size: clamp(18px, 2vw, 21px);
+  color: var(--fb-lime);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- hero ---------- */
+
+.fb-hero {
+  padding: clamp(48px, 8vw, 88px) var(--fb-pad) clamp(40px, 7vw, 96px);
+  text-align: center;
+}
+.fb-eyebrow {
+  margin: 0;
+  font-size: clamp(15px, 1.8vw, 18px);
+  font-weight: 600;
+  color: var(--fb-lime);
+}
+.fb-hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: clamp(24px, 4vw, 38px);
+}
+.fb-hero-note {
+  margin: 0;
+  font-size: clamp(15px, 1.9vw, 19px);
+  color: var(--fb-muted);
+}
+
+.fb-fan {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+  padding-top: clamp(40px, 9vw, 112px);
+  padding-bottom: clamp(24px, 2vw, 32px);
+  margin-top: 4px;
+  /* 0 = closed deck, 1 = fully fanned. Scrubbed on scroll by HeroFan. */
+  --open: 0;
+}
+/* A lime glow that brightens as the fan opens. */
+.fb-fan::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: min(900px, 120vw);
+  aspect-ratio: 1.6;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(164, 250, 83, 0.22), transparent);
+  opacity: var(--open);
+  pointer-events: none;
+}
+.fb-fan-phone {
+  position: relative;
+  flex: none;
+  aspect-ratio: 465 / 1011;
+  --cx: 0px;
+  --rot: 0deg;
+  --ty: 0px;
+  transform: translateX(calc(var(--cx) * (1 - var(--open))))
+    translateY(calc(var(--ty) * var(--open)))
+    rotate(calc(var(--rot) * var(--open)));
+  will-change: transform;
+}
+.fb-fan-phone > .fb-shot,
+.fb-fan-phone > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9% / 4.1%;
+}
+.fb-fan-video {
+  opacity: 0;
+}
+.fb-fan-video.is-playing {
+  opacity: 1;
+}
+.fb-fan-phone > .fb-frame {
+  position: absolute;
+  left: -66.02%;
+  top: -16.81%;
+  width: 232.26%;
+  height: 133.53%;
+  pointer-events: none;
+}
+.fb-fan-outer {
+  width: clamp(100px, 17vw, 185px);
+  z-index: 1;
+}
+.fb-fan-inner {
+  width: clamp(120px, 21vw, 225px);
+  z-index: 2;
+}
+.fb-fan-centre {
+  width: clamp(168px, 26vw, 270px);
+  z-index: 3;
+}
+
+/* ---------- framed phone screenshots ---------- */
+
+/* The frame is Poppit's lilac iPhone, greyed to graphite for a black page. */
+.fb-frame {
+  filter: grayscale(1) brightness(0.8);
+}
+
+.fb-phone {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1080 / 1350;
+}
+.fb-phone > .fb-shot {
+  position: absolute;
+  left: 28.43%;
+  top: 12.59%;
+  width: 43.06%;
+  height: 74.89%;
+  object-fit: cover;
+  border-radius: 6%;
+}
+.fb-phone > .fb-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- sections ---------- */
+
+.fb-section {
+  padding: var(--fb-section-y) var(--fb-pad);
+}
+.fb-section--face {
+  background: var(--fb-face);
+}
+
+.fb-split {
+  display: grid;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+}
+.fb-split--top {
+  align-items: start;
+}
+.fb-single {
+  max-width: 460px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.fb-caption {
+  max-width: 66%;
+  margin-inline: auto;
+}
+
+/* ---------- tracking: two phones that slide apart on scroll ---------- */
+
+.fb-pair {
+  position: relative;
+  --p: 0;
+}
+.fb-pair-back {
+  width: 78%;
+  margin-left: auto;
+  transform: translateX(calc(-14% * (1 - var(--p)))) rotate(calc(8deg * var(--p)));
+  will-change: transform;
+}
+.fb-pair-front {
+  position: absolute;
+  left: 0;
+  top: 8%;
+  width: 78%;
+  transform: translateX(calc(14% * (1 - var(--p)))) rotate(calc(-6deg * var(--p)));
+  will-change: transform;
+}
+
+/* ---------- customize: settings phone + wallpaper strip ---------- */
+
+.fb-settings {
+  max-width: 420px;
+  width: 100%;
+  margin-inline: auto;
+}
+/* The strip slides from right to left as the section scrolls through. */
+.fb-strip {
+  --p: 0;
+  margin: clamp(24px, 4vw, 48px) calc(var(--fb-pad) * -1) 0;
+  display: flex;
+  justify-content: center;
+}
+.fb-strip-track {
+  display: flex;
+  gap: 0;
+  width: max-content;
+  transform: translateX(calc((0.5 - var(--p)) * 24vw));
+  will-change: transform;
+}
+.fb-strip-item {
+  /* The framed phone fills about half its box, so a negative margin of half
+     the box leaves a small gap between neighbouring phones. */
+  --w: clamp(260px, 32vw, 400px);
+  width: var(--w);
+  flex: none;
+  margin-right: calc(var(--w) * -0.48);
+}
+
+/* ---------- trophies ---------- */
+
+.fb-section--trophies {
+  position: relative;
+  text-align: center;
+  background: radial-gradient(
+    ellipse 70% 45% at 50% 42%,
+    rgba(164, 250, 83, 0.16),
+    transparent 70%
+  );
+}
+.fb-trophies-head .fb-lead {
+  margin-inline: auto;
+  max-width: 26em;
+}
+.fb-orbit-slot {
+  height: clamp(280px, 46vw, 560px);
+  margin: clamp(8px, 2vw, 24px) calc(var(--fb-pad) * -1) 0;
+}
+.fb-orbit {
+  width: 100%;
+  height: 100%;
+}
+.fb-orbit canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.fb-grid--trophies {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(20px, 3vw, 32px);
+  max-width: 900px;
+  margin: clamp(8px, 2vw, 24px) auto 0;
+  text-align: left;
+}
+
+/* ---------- about ---------- */
+
+.fb-about {
+  text-align: center;
+}
+.fb-about .fb-lead {
+  margin-inline: auto;
+  max-width: 26em;
+}
+.fb-about-logo {
+  width: clamp(88px, 12vw, 128px);
+  height: auto;
+  margin: 0 auto clamp(16px, 3vw, 28px);
+  filter: drop-shadow(0 0 30px rgba(164, 250, 83, 0.35));
+}
+.fb-about-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: clamp(24px, 4vw, 36px);
+}
+
+/* ---------- footer ---------- */
+
+.fb-foot {
+  padding: clamp(24px, 4vw, 32px) var(--fb-pad);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: clamp(14px, 1.5vw, 17px);
+  color: var(--fb-muted);
+}
+.fb-foot-links {
+  display: flex;
+  gap: clamp(16px, 2.5vw, 26px);
+  flex-wrap: wrap;
+}
+.fb-foot a:hover {
+  color: var(--fb-ink);
+}
+
+/* ---------- privacy page ---------- */
+
+.fb-doc {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: var(--fb-section-y) var(--fb-pad);
+}
+.fb-doc h1 {
+  font-size: clamp(40px, 5.2vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 0 0 24px;
+}
+.fb-doc h2 {
+  font-size: clamp(24px, 2.4vw, 28px);
+  margin: 40px 0 0;
+}
+.fb-doc p,
+.fb-doc li {
+  font-size: clamp(18px, 1.9vw, 21px);
+  line-height: 1.5;
+  color: var(--fb-muted);
+}
+.fb-doc strong {
+  color: var(--fb-ink);
+}
+.fb-doc a {
+  color: var(--fb-lime);
+  text-decoration: underline;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  .fb-fan-outer {
+    display: none;
+  }
+}
+@media (max-width: 860px) {
+  .fb-nav {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .fb-split {
+    grid-template-columns: 1fr;
+  }
+  /* Text first when stacked, even where the desktop layout puts the phone first. */
+  .fb-split--flip > :first-child {
+    order: 2;
+  }
+  .fb-strip-track {
+    transform: translateX(calc((0.5 - var(--p)) * 110vw));
+  }
+  .fb-strip-item {
+    --w: 80vw;
+  }
+}
+@media (max-width: 640px) {
+  .fb-fan-inner {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .fb-grid--trophies {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .fb-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
