@@ -2,8 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { fontVars } from "./fonts";
 import "./fitburst.css";
 
+// Vercel sets VERCEL_PROJECT_PRODUCTION_URL to the production domain (the
+// custom domain once one is added, otherwise fit-burst.vercel.app), so link
+// previews always point at a domain that serves the image.
+const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3100";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fitburst.app"),
+  metadataBase: new URL(SITE_URL),
   title: "FitBurst: workout tracker for iPhone",
   description:
     "Track your workouts in style. Customize your workouts and wallpaper, earn trophies for perfect streaks, and stay motivated with widgets. Free on the App Store.",
@@ -20,7 +27,7 @@ export const metadata: Metadata = {
     title: "FitBurst: track your workouts in style",
     description:
       "A workout tracker with bold design, 3D trophies for perfect streaks, and a wallpaper you pick. Free on the App Store.",
-    url: "https://fitburst.app",
+    url: "/",
     images: [
       {
         url: "/og-image.jpg",
