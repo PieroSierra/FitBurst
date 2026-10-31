@@ -2,7 +2,7 @@ import Image from "next/image";
 import HeroFan from "./HeroFan";
 import ScrollReveal from "./ScrollReveal";
 import AwardsOrbitLazy from "./AwardsOrbitLazy";
-import { APP_STORE_URL, CONTACT_EMAIL } from "./appStore";
+import { APP_STORE_URL } from "./appStore";
 
 const NAV = [
   ["Tracking", "#tracking"],
@@ -27,7 +27,6 @@ const WALLPAPERS = [
 ];
 
 const external = { target: "_blank", rel: "noopener noreferrer" };
-const contactHref = `mailto:${CONTACT_EMAIL}?subject=FitBurst`;
 
 function Phone({ src, alt, video }: { src: string; alt: string; video?: string }) {
   return (
@@ -233,28 +232,17 @@ export default function Home() {
           </div>
         </section>
 
-        {/* About */}
+        {/* Download */}
         <section className="fb-section fb-about">
           <Image src="/logo-clear.png" alt="" width={512} height={512} className="fb-about-logo" />
-          <h2 className="fb-h2">Made by a dad and his son.</h2>
-          <p className="fb-cond fb-lead">
-            We built FitBurst together to learn how apps are made, and to make working
-            out a bit more fun. Questions or ideas? We&rsquo;d love to hear them.
-          </p>
-          <div className="fb-about-actions">
-            <StoreButton className="fb-cta--hero" />
-            <a className="fb-cond fb-link" href={contactHref}>
-              Email us
-            </a>
-          </div>
+          <StoreButton className="fb-cta--hero" />
         </section>
       </main>
 
       <footer className="fb-cond fb-foot">
-        <span>© {new Date().getFullYear()} Piero Sierra</span>
+        <span>© {new Date().getFullYear()} Nikola Sierra</span>
         <span className="fb-foot-links">
           <a href="/privacy">Privacy</a>
-          <a href={contactHref}>Contact</a>
           <a href={APP_STORE_URL} {...external}>
             App Store
           </a>
