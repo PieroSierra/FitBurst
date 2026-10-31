@@ -1,2 +1,4 @@
 Secrets.swift
 UserInterfaceState.xcuserstate
+.vercel
+.env*

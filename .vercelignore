@@ -1,0 +1,5 @@
+# Only the marketing site in website/ deploys to Vercel.
+/*
+!/website
+/website/node_modules
+/website/.next
